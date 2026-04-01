@@ -123,5 +123,3 @@ Siehe [.env.example](.env.example) für alle verfügbaren Variablen:
 - **E-Mail:** [Nodemailer](https://nodemailer.com/)
 - **Cron-Jobs:** [node-cron](https://github.com/node-cron/node-cron)
 - **State Management:** [TanStack React Query](https://tanstack.com/query)
-
-https://youtu.be/vLsduESsxHA?si=Bz5RNU5mn9VbuQ-i
