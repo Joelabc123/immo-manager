@@ -6,58 +6,139 @@ Immobilien Management System — gebaut mit Next.js, tRPC, Drizzle ORM, PostgreS
 
 - [Node.js](https://nodejs.org/) >= 22
 - [pnpm](https://pnpm.io/) >= 10
-- [Docker](https://www.docker.com/) (für PostgreSQL)
+- [Docker](https://www.docker.com/) (fuer PostgreSQL)
 
-## Installation
+## Schnellstart
 
 ```bash
-# Projekt klonen
+# 1. Projekt klonen
 git clone https://github.com/Joelabc123/immo-manager.git
 cd immo-manager
 
-# Automatisches Setup (installiert Dependencies, startet DB, generiert Migrationen)
-make setup
+# 2. Umgebungsvariablen setzen
+cp .env.example .env
 
-# Oder manuell:
-cp .env.example .env        # Umgebungsvariablen anpassen
-make install                 # Dependencies installieren
-make up                      # PostgreSQL starten
-make db-generate             # Migrationen generieren
-make db-push                 # Schema auf DB anwenden
-```
+# 3. Dependencies installieren
+pnpm install
 
-## Entwicklung
+# 4. PostgreSQL starten (Docker)
+docker compose -f docker-compose.dev.yml up -d
 
-```bash
-make dev          # Startet PostgreSQL + Next.js Dev-Server (mit Hot-Reload)
+# 5. Datenbank-Schema anwenden
+pnpm --filter @repo/shared db:push
+
+# 6. Demodaten laden
+pnpm --filter @repo/shared db:seed
+
+# 7. Dev-Server starten
+pnpm --filter @repo/nextjs dev
 ```
 
 Die Applikation ist dann erreichbar unter: [http://localhost:3000](http://localhost:3000)
 
+## Demo-Login
+
+| Feld     | Wert                       |
+| -------- | -------------------------- |
+| E-Mail   | `demo@immo-manager.de`     |
+| Passwort | `demo1234`                 |
+
+Der Demo-User "Max Mustermann" wird mit dem Seed erstellt und enthaelt:
+- 4 Immobilien (Berlin, Muenchen, Hamburg, Frankfurt)
+- 4 Kredite bei verschiedenen Banken
+- 8 Mieteinheiten
+- 7 Mieter mit Kontaktdaten
+- 5 wiederkehrende Ausgaben
+- 21 Mietzahlungen (letzte 3 Monate)
+
+## Windows-Hinweis
+
+Das `Makefile` nutzt `/bin/zsh` und funktioniert nur auf Linux/macOS. Unter Windows die Befehle direkt mit `pnpm` ausfuehren:
+
+```powershell
+# Statt "make dev":
+docker compose -f docker-compose.dev.yml up -d
+pnpm --filter @repo/nextjs dev
+
+# Statt "make type-check":
+pnpm -r type-check
+
+# Statt "make lint":
+pnpm -r lint
+
+# Statt "make build":
+pnpm --filter @repo/nextjs build
+
+# Statt "make db-push":
+pnpm --filter @repo/shared db:push
+
+# Statt "make db-seed":
+pnpm --filter @repo/shared db:seed
+
+# Statt "make db-studio":
+pnpm --filter @repo/shared db:studio
+```
+
+## Datenbank zuruecksetzen
+
+Um die Datenbank komplett zurueckzusetzen und neu zu seeden:
+
+```bash
+# Container stoppen und Volume loeschen
+docker compose -f docker-compose.dev.yml down -v
+
+# Neu starten
+docker compose -f docker-compose.dev.yml up -d
+
+# Schema anwenden + seeden
+pnpm --filter @repo/shared db:push
+pnpm --filter @repo/shared db:seed
+```
+
 ## Projektstruktur
 
 ```
-src/
-├── app/                    # Next.js App Router
-│   ├── api/trpc/[trpc]/    # tRPC API Handler
-│   ├── providers.tsx       # React Query + tRPC Provider
-│   ├── layout.tsx          # Root Layout
-│   └── page.tsx            # Startseite
-├── components/ui/          # UI-Komponenten (shadcn)
-├── db/                     # Datenbank (Drizzle ORM)
-│   ├── schema/             # Tabellen-Definitionen
-│   └── migrations/         # Generierte Migrationen
-├── lib/
-│   ├── trpc.ts             # tRPC Client Hooks
-│   └── utils.ts            # Hilfsfunktionen
-└── server/
-    ├── trpc.ts             # tRPC Initialisierung & Procedure Builder
-    ├── routers/            # tRPC Router
-    │   └── _app.ts         # Root Router
-    ├── cron/               # Cron-Job Infrastruktur
-    │   └── index.ts        # Job-Registry & Scheduler
-    └── mail/               # E-Mail Infrastruktur
-        └── index.ts        # Nodemailer Transporter & Hilfsfunktionen
+immo-manager/
+├── apps/
+│   ├── nextjs/                 # Next.js 16 Frontend + API
+│   │   ├── src/
+│   │   │   ├── app/            # App Router (Pages)
+│   │   │   │   ├── (app)/      # Authentifizierte Seiten
+│   │   │   │   ├── (auth)/     # Login / Register
+│   │   │   │   └── api/        # tRPC + Upload API Routes
+│   │   │   ├── components/     # React-Komponenten
+│   │   │   │   ├── ui/         # shadcn/ui Basis-Komponenten
+│   │   │   │   ├── properties/ # Immobilien-Komponenten
+│   │   │   │   ├── tenants/    # Mieter-Komponenten
+│   │   │   │   ├── dashboard/  # Dashboard-Widgets
+│   │   │   │   ├── analysis/   # Analyse-Tools
+│   │   │   │   ├── documents/  # Dokumentenverwaltung
+│   │   │   │   ├── mail/       # E-Mail Client
+│   │   │   │   ├── settings/   # Einstellungen
+│   │   │   │   └── audit/      # Audit-Trail
+│   │   │   ├── server/         # Server-seitiger Code
+│   │   │   │   ├── routers/    # tRPC Router (21 Dateien)
+│   │   │   │   ├── services/   # Business-Logik
+│   │   │   │   ├── auth/       # Authentifizierung
+│   │   │   │   ├── cron/       # Cron-Jobs
+│   │   │   │   └── mail/       # Nodemailer Konfiguration
+│   │   │   ├── lib/            # Client Utilities
+│   │   │   └── i18n/           # Internationalisierung (DE/EN)
+│   │   └── messages/           # Uebersetzungsdateien
+│   └── websocket/              # WebSocket-Server
+├── packages/
+│   └── shared/                 # Geteilte Logik
+│       └── src/
+│           ├── db/             # Drizzle ORM Schema + Migrationen
+│           │   └── schema/     # 24 Tabellen-Definitionen
+│           ├── calculations/   # Finanzberechnungen
+│           ├── types/          # Geteilte TypeScript-Typen
+│           ├── validation/     # Zod-Schemas
+│           └── utils/          # Hilfsfunktionen
+├── docker-compose.dev.yml      # Dev-Infrastruktur (PostgreSQL)
+├── docker-compose.yml          # Produktions-Stack
+├── Dockerfile                  # Multi-Stage Build
+└── Makefile                    # Entwicklungs-Befehle (Linux/macOS)
 ```
 
 ## Make-Befehle
@@ -76,8 +157,9 @@ src/
 | `make db-generate`  | Drizzle Migrationen generieren                   |
 | `make db-push`      | Schema direkt auf DB anwenden (nur Dev)          |
 | `make db-migrate`   | Ausstehende Migrationen ausführen                |
-| `make db-studio`    | Drizzle Studio öffnen (Datenbank-GUI)            |
-| `make db-reset`     | Datenbank zurücksetzen (löscht alle Daten!)      |
+| `make db-studio`    | Drizzle Studio oeffnen (Datenbank-GUI)            |
+| `make db-reset`     | Datenbank zuruecksetzen (loescht alle Daten!)      |
+| `make db-seed`      | Datenbank mit Demodaten befuellen                  |
 | **Code-Qualität**   |                                                  |
 | `make type-check`   | TypeScript Type Checking                         |
 | `make lint`         | ESLint ausführen                                 |
