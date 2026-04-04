@@ -1,0 +1,20 @@
+{
+  "name": "@repo/websocket",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@repo/shared": "workspace:*",
+    "cookie": "^1.1.1",
+    "drizzle-orm": "^0.45.2",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/cookie": "^1.0.0",
+    "@types/ws": "^8.18.1",
+    "typescript": "^5"
+  }
+}
