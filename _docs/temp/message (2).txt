@@ -1,0 +1,146 @@
+# Data Table
+
+**Component:** `DataTable`
+**Files:**
+
+- `apps/web/src/components/data-table/data-table.tsx`
+- `apps/web/src/components/data-table/data-table-skeleton.tsx`
+- `apps/web/src/hooks/use-data-table-state.ts`
+
+## Description
+
+The DataTable is a fully-featured, server-side paginated, sortable, and filterable table component. It is used across the platform for listing courses, tasks, collections, users, submissions, and more.
+
+## Props
+
+```typescript
+interface DataTableProps<TData> {
+  columns: DataTableColumn<TData>[];
+  data: TData[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  isLoading: boolean;
+  isFetching: boolean;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  searchPlaceholder?: string;
+  sortColumn: string | null;
+  sortOrder: "asc" | "desc" | null;
+  onSortChange: (column: string, order: "asc" | "desc") => void;
+  getRowId: (row: TData) => string;
+  // Optional features
+  filters?: DataTableFilter[];
+  filterLayout?: "horizontal" | "vertical";
+  onRowClick?: (row: TData) => void;
+  selectable?: boolean;
+  onSelectionChange?: (selectedIds: string[]) => void;
+  bulkActions?: BulkAction[];
+  expandableContent?: (row: TData) => ReactNode;
+  emptyMessage?: string;
+  toolbar?: ReactNode;
+}
+```
+
+## Column Definition
+
+```typescript
+interface DataTableColumn<TData> {
+  id: string;
+  header: string;
+  accessorKey?: keyof TData; // Simple field access
+  accessorFn?: (row: TData) => ReactNode; // Custom rendering
+  sortable?: boolean;
+  className?: string;
+}
+```
+
+## Visual Structure
+
+```
++--------------------------------------------------+
+| Toolbar                                          |
+| [Search: ________]  [Filter1 v] [Filter2 v]     |
+| [Bulk Actions]  (shown when rows selected)       |
++--------------------------------------------------+
+| Column 1 [v]  | Column 2   | Column 3 [v] | ... |
+|----------------|------------|--------------|-----|
+| Value 1        | Value 2    | Value 3      | ... |
+| Value 1        | Value 2    | Value 3      | ... |
+| Value 1        | Value 2    | Value 3      | ... |
++--------------------------------------------------+
+| Showing 1-25 of 150  | [< Prev] [1] [Next >]   |
+| Page size: [25 v]     |                          |
++--------------------------------------------------+
+```
+
+## Filter System
+
+### Single-Select Filter
+
+```typescript
+interface SingleSelectFilter {
+  type: "single";
+  id: string;
+  label: string;
+  options: { value: string; label: string }[];
+  value: string | null;
+  onChange: (value: string | null) => void;
+}
+```
+
+### Multi-Select Filter
+
+```typescript
+interface MultiSelectFilter {
+  type: "multi";
+  id: string;
+  label: string;
+  options: { value: string; label: string }[];
+  values: string[];
+  onChange: (values: string[]) => void;
+  operator: "AND" | "OR";
+  onOperatorChange: (op: "AND" | "OR") => void;
+}
+```
+
+Active filters show badge indicators on filter buttons.
+
+## Skeleton
+
+```tsx
+<DataTableSkeleton
+  columnCount={6} // Number of columns to show
+  rowCount={10} // Number of skeleton rows
+  hasSearch // Show search input skeleton
+  hasFilters // Show filter skeletons
+/>
+```
+
+## URL Sync (useDataTableState)
+
+The `useDataTableState` hook synchronizes table state with URL query parameters:
+
+| Param       | URL Key      | Default |
+| ----------- | ------------ | ------- |
+| Page        | `page`       | 1       |
+| Page size   | `pageSize`   | 25      |
+| Search      | `search`     | ""      |
+| Sort column | `sortColumn` | null    |
+| Sort order  | `sortOrder`  | null    |
+
+Search is debounced (300ms) via `debouncedSearch`.
+
+## Dark/Light Mode
+
+- Table container: `bg-background border-border rounded-md`
+- Header row: `bg-muted/50`
+- Body rows: `bg-background`, hover: `hover:bg-muted/50`
+- Selected rows: `bg-primary/10`
+- Sort icons: `text-muted-foreground`
+- Pagination: Buttons with standard button theming
+- Empty state: `text-muted-foreground`
+- Skeleton: `bg-muted animate-pulse`

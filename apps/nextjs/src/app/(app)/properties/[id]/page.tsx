@@ -28,7 +28,6 @@ import { EditPropertyDialog } from "@/components/properties/edit-property-dialog
 import { DeletePropertyDialog } from "@/components/properties/delete-property-dialog";
 import { DuplicatePropertyDialog } from "@/components/properties/duplicate-property-dialog";
 import { ShareLinkDialog } from "@/components/properties/share-link-dialog";
-import { ThumbnailUpload } from "@/components/properties/thumbnail-upload";
 import { LoansSection } from "@/components/properties/loans-section";
 import { ExpensesSection } from "@/components/properties/expenses-section";
 import { UnitsSection } from "@/components/properties/units-section";
@@ -157,25 +156,7 @@ export default function PropertyDetailPage({
       </div>
 
       {/* Hero Section */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Thumbnail */}
-        <Card>
-          <CardContent>
-            <ThumbnailUpload
-              propertyId={id}
-              currentPath={property.thumbnailPath}
-              onUploadComplete={() => {
-                updateMutation.mutate({
-                  id,
-                  data: { ...({} as Record<string, never>) },
-                });
-                // Update thumbnail path directly
-                utils.properties.getById.invalidate({ id });
-              }}
-            />
-          </CardContent>
-        </Card>
-
+      <div className="grid gap-6">
         {/* Key Info */}
         <Card>
           <CardHeader>
@@ -184,7 +165,7 @@ export default function PropertyDetailPage({
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                {t("status")}
+                {t("statusLabel")}
               </span>
               <Badge variant="secondary">
                 {t(`status.${property.status}`)}

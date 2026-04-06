@@ -127,6 +127,7 @@ export function PortfolioAllocationChart() {
           data={chartData}
           centerLabel={t("properties")}
           centerValue={propertyCount.toString()}
+          showLegend={false}
           formatTooltip={(value) =>
             viewMode === "value" ? formatCurrency(value) : value.toString()
           }

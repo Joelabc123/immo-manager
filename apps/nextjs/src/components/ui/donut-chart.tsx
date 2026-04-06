@@ -7,6 +7,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   Legend,
+  Label,
 } from "recharts";
 
 interface DonutChartDataPoint {
@@ -56,6 +57,38 @@ export function DonutChart({
           {data.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.color} />
           ))}
+          {centerValue && centerLabel && (
+            <Label
+              content={({ viewBox }) => {
+                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  return (
+                    <text
+                      x={viewBox.cx}
+                      y={viewBox.cy}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      <tspan
+                        x={viewBox.cx}
+                        dy="-0.4em"
+                        className="fill-foreground text-2xl font-bold"
+                      >
+                        {centerValue}
+                      </tspan>
+                      <tspan
+                        x={viewBox.cx}
+                        dy="1.4em"
+                        className="fill-muted-foreground text-xs"
+                      >
+                        {centerLabel}
+                      </tspan>
+                    </text>
+                  );
+                }
+                return null;
+              }}
+            />
+          )}
         </Pie>
         <Tooltip
           contentStyle={{
@@ -75,28 +108,6 @@ export function DonutChart({
             align="right"
             verticalAlign="middle"
           />
-        )}
-        {centerLabel && centerValue && (
-          <text
-            x="50%"
-            y="48%"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            className="fill-foreground text-2xl font-bold"
-          >
-            {centerValue}
-          </text>
-        )}
-        {centerLabel && (
-          <text
-            x="50%"
-            y="56%"
-            textAnchor="middle"
-            dominantBaseline="middle"
-            className="fill-muted-foreground text-xs"
-          >
-            {centerLabel}
-          </text>
         )}
       </PieChart>
     </ResponsiveContainer>

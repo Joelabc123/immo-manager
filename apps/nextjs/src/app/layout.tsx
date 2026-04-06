@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { TRPCProvider } from "./providers";
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const montserratHeading = Montserrat({subsets:['latin'],variable:'--font-montserrat'});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,7 +48,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, montserratHeading.variable)}
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider messages={messages}>

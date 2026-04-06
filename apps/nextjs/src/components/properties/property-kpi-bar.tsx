@@ -1,10 +1,24 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Building2, Home, TrendingUp, DollarSign } from "lucide-react";
+import {
+  Building2,
+  Home,
+  TrendingUp,
+  DollarSign,
+  Euro,
+  SwissFranc,
+  type LucideIcon,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrency } from "@/lib/hooks/use-currency";
+
+const CURRENCY_ICONS: Record<string, LucideIcon> = {
+  EUR: Euro,
+  USD: DollarSign,
+  CHF: SwissFranc,
+};
 
 interface PropertyKpiBarProps {
   totalProperties: number;
@@ -22,7 +36,9 @@ export function PropertyKpiBar({
   isLoading,
 }: PropertyKpiBarProps) {
   const t = useTranslations("properties.kpi");
-  const { formatCurrency } = useCurrency();
+  const { currency, formatCurrency } = useCurrency();
+
+  const PurchasePriceIcon = CURRENCY_ICONS[currency] ?? DollarSign;
 
   if (isLoading) {
     return (
@@ -58,7 +74,7 @@ export function PropertyKpiBar({
     {
       label: t("purchasePrice"),
       value: formatCurrency(totalPurchasePrice),
-      icon: DollarSign,
+      icon: PurchasePriceIcon,
     },
   ];
 

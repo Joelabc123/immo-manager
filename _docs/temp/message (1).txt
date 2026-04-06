@@ -1,0 +1,341 @@
+/**
+ * useDataTableState Hook
+ * University of Mannheim E-Learning Platform
+ *
+ * Manages DataTable state with optional URL synchronization.
+ */
+
+"use client";
+
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+
+import {
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_URL_PARAM_KEYS,
+  type DataTableUrlParamKeys,
+} from "./types";
+
+interface UseDataTableStateOptions {
+  /** Sync state with URL search parameters */
+  syncWithUrl?: boolean;
+  /** Default page size */
+  defaultPageSize?: number;
+  /** Default sort column */
+  defaultSortColumn?: string;
+  /** Default sort order */
+  defaultSortOrder?: "asc" | "desc";
+  /** Custom URL parameter key names */
+  urlParamKeys?: Partial<DataTableUrlParamKeys>;
+}
+
+export interface DataTableState {
+  page: number;
+  pageSize: number;
+  search: string;
+  /** Debounced search value (300ms delay). Use this for tRPC queries instead of `search`. */
+  debouncedSearch: string;
+  sortColumn: string | undefined;
+  sortOrder: "asc" | "desc";
+  filters: Record<string, string | undefined>;
+  /** Multi-select filter values (arrays of selected IDs) */
+  multiFilters: Record<string, string[]>;
+  /** Filter mode for multi-select filters (AND/OR) */
+  filterModes: Record<string, "and" | "or">;
+  selectedIds: string[];
+}
+
+export interface DataTableStateActions {
+  setPage: (page: number) => void;
+  setPageSize: (size: number) => void;
+  setSearch: (search: string) => void;
+  setSortColumn: (column: string | undefined) => void;
+  setSortOrder: (order: "asc" | "desc") => void;
+  setSort: (column: string, order: "asc" | "desc") => void;
+  setFilter: (key: string, value: string | undefined) => void;
+  setMultiFilter: (key: string, values: string[]) => void;
+  setFilterMode: (key: string, mode: "and" | "or") => void;
+  setSelectedIds: (ids: string[]) => void;
+  resetFilters: () => void;
+}
+
+export function useDataTableState(
+  options: UseDataTableStateOptions = {},
+): DataTableState & DataTableStateActions {
+  const {
+    syncWithUrl = false,
+    defaultPageSize = DEFAULT_PAGE_SIZE,
+    defaultSortColumn,
+    defaultSortOrder = "asc",
+    urlParamKeys: customKeys,
+  } = options;
+
+  const keys = { ...DEFAULT_URL_PARAM_KEYS, ...customKeys };
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Initialize state from URL if syncing, otherwise defaults
+  const getInitialValue = useCallback(
+    (key: string, defaultValue: string): string => {
+      if (syncWithUrl) {
+        return searchParams.get(key) ?? defaultValue;
+      }
+      return defaultValue;
+    },
+    [syncWithUrl, searchParams],
+  );
+
+  const [page, setPageInternal] = useState(
+    parseInt(getInitialValue(keys.page, "1"), 10),
+  );
+  const [pageSize, setPageSizeInternal] = useState(
+    parseInt(getInitialValue(keys.pageSize, String(defaultPageSize)), 10),
+  );
+  const [search, setSearchInternal] = useState(
+    getInitialValue(keys.search, ""),
+  );
+  const [debouncedSearch, setDebouncedSearch] = useState(
+    getInitialValue(keys.search, ""),
+  );
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [sortColumn, setSortColumnInternal] = useState<string | undefined>(
+    searchParams.get(keys.sort) ?? defaultSortColumn ?? undefined,
+  );
+  const [sortOrder, setSortOrderInternal] = useState<"asc" | "desc">(
+    (getInitialValue(keys.order, defaultSortOrder) as "asc" | "desc") || "asc",
+  );
+  const [filters, setFilters] = useState<Record<string, string | undefined>>(
+    {},
+  );
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [multiFilters, setMultiFilters] = useState<Record<string, string[]>>(
+    {},
+  );
+  const [filterModes, setFilterModes] = useState<Record<string, "and" | "or">>(
+    {},
+  );
+
+  // Initialize filters from URL
+  useEffect(() => {
+    if (!syncWithUrl) return;
+    const initialFilters: Record<string, string | undefined> = {};
+    const initialMultiFilters: Record<string, string[]> = {};
+    const initialFilterModes: Record<string, "and" | "or"> = {};
+    const reservedKeys = new Set(Object.values(keys));
+
+    searchParams.forEach((value, key) => {
+      // Multi-filter values (comma-separated)
+      if (key.startsWith("mf_")) {
+        const filterKey = key.slice(3);
+        initialMultiFilters[filterKey] = value.split(",").filter(Boolean);
+        return;
+      }
+      // Filter modes
+      if (key.startsWith("fm_")) {
+        const filterKey = key.slice(3);
+        if (value === "and" || value === "or") {
+          initialFilterModes[filterKey] = value;
+        }
+        return;
+      }
+      if (
+        key.startsWith("filter_") ||
+        (!reservedKeys.has(key) &&
+          key !== keys.page &&
+          key !== keys.pageSize &&
+          key !== keys.search &&
+          key !== keys.sort &&
+          key !== keys.order)
+      ) {
+        initialFilters[key] = value;
+      }
+    });
+    if (Object.keys(initialFilters).length > 0) {
+      setFilters(initialFilters);
+    }
+    if (Object.keys(initialMultiFilters).length > 0) {
+      setMultiFilters(initialMultiFilters);
+    }
+    if (Object.keys(initialFilterModes).length > 0) {
+      setFilterModes(initialFilterModes);
+    }
+    // Only run on mount
+  }, []);
+
+  // Sync state to URL
+  const syncToUrl = useCallback(
+    (updates: Record<string, string | undefined>) => {
+      if (!syncWithUrl) return;
+
+      const params = new URLSearchParams(searchParams.toString());
+
+      for (const [key, value] of Object.entries(updates)) {
+        if (
+          value === undefined ||
+          value === "" ||
+          (value === "1" && key === keys.page)
+        ) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+
+      const queryString = params.toString();
+      router.replace(`${pathname}${queryString ? `?${queryString}` : ""}`, {
+        scroll: false,
+      });
+    },
+    [syncWithUrl, searchParams, router, pathname, keys.page],
+  );
+
+  const setPage = useCallback(
+    (newPage: number) => {
+      setPageInternal(newPage);
+      syncToUrl({ [keys.page]: String(newPage) });
+    },
+    [syncToUrl, keys.page],
+  );
+
+  const setPageSize = useCallback(
+    (newSize: number) => {
+      setPageSizeInternal(newSize);
+      setPageInternal(1);
+      syncToUrl({
+        [keys.pageSize]: String(newSize),
+        [keys.page]: undefined,
+      });
+    },
+    [syncToUrl, keys.pageSize, keys.page],
+  );
+
+  const setSearch = useCallback(
+    (newSearch: string) => {
+      setSearchInternal(newSearch);
+      setPageInternal(1);
+
+      // Debounce URL sync and query-triggering state by 300ms
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+      searchTimerRef.current = setTimeout(() => {
+        setDebouncedSearch(newSearch);
+        syncToUrl({
+          [keys.search]: newSearch || undefined,
+          [keys.page]: undefined,
+        });
+      }, 300);
+    },
+    [syncToUrl, keys.search, keys.page],
+  );
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, []);
+
+  const setSortColumn = useCallback(
+    (column: string | undefined) => {
+      setSortColumnInternal(column);
+      syncToUrl({ [keys.sort]: column });
+    },
+    [syncToUrl, keys.sort],
+  );
+
+  const setSortOrder = useCallback(
+    (order: "asc" | "desc") => {
+      setSortOrderInternal(order);
+      syncToUrl({ [keys.order]: order });
+    },
+    [syncToUrl, keys.order],
+  );
+
+  const setSort = useCallback(
+    (column: string, order: "asc" | "desc") => {
+      setSortColumnInternal(column);
+      setSortOrderInternal(order);
+      syncToUrl({
+        [keys.sort]: column,
+        [keys.order]: order,
+      });
+    },
+    [syncToUrl, keys.sort, keys.order],
+  );
+
+  const setFilter = useCallback(
+    (key: string, value: string | undefined) => {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+      setPageInternal(1);
+      syncToUrl({ [key]: value, [keys.page]: undefined });
+    },
+    [syncToUrl, keys.page],
+  );
+
+  const setMultiFilter = useCallback(
+    (key: string, values: string[]) => {
+      setMultiFilters((prev) => ({ ...prev, [key]: values }));
+      setPageInternal(1);
+      syncToUrl({
+        [`mf_${key}`]: values.length > 0 ? values.join(",") : undefined,
+        [keys.page]: undefined,
+      });
+    },
+    [syncToUrl, keys.page],
+  );
+
+  const setFilterMode = useCallback(
+    (key: string, mode: "and" | "or") => {
+      setFilterModes((prev) => ({ ...prev, [key]: mode }));
+      setPageInternal(1);
+      syncToUrl({
+        [`fm_${key}`]: mode === "and" ? undefined : mode,
+        [keys.page]: undefined,
+      });
+    },
+    [syncToUrl, keys.page],
+  );
+
+  const resetFilters = useCallback(() => {
+    setFilters({});
+    setMultiFilters({});
+    setFilterModes({});
+    setSearchInternal("");
+    setDebouncedSearch("");
+    setPageInternal(1);
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
+    if (syncWithUrl) {
+      router.replace(pathname, { scroll: false });
+    }
+  }, [syncWithUrl, router, pathname]);
+
+  return {
+    page,
+    pageSize,
+    search,
+    debouncedSearch,
+    sortColumn,
+    sortOrder,
+    filters,
+    multiFilters,
+    filterModes,
+    selectedIds,
+    setPage,
+    setPageSize,
+    setSearch,
+    setSortColumn,
+    setSortOrder,
+    setSort,
+    setFilter,
+    setMultiFilter,
+    setFilterMode,
+    setSelectedIds,
+    resetFilters,
+  };
+}

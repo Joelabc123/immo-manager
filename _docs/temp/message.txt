@@ -1,0 +1,832 @@
+/**
+ * DataTable Component
+ * University of Mannheim E-Learning Platform
+ *
+ * Reusable server-side paginated data table with sorting, filtering,
+ * search, row selection, and bulk actions.
+ */
+
+"use client";
+
+import React, { useCallback, useState } from "react";
+import {
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Search,
+  X,
+  MoreHorizontal,
+  Loader2,
+  ChevronDown,
+  ChevronRight,
+  Check,
+  Tags,
+} from "lucide-react";
+
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandSeparator,
+} from "@/components/ui/command";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
+import {
+  DEFAULT_PAGE_SIZE_OPTIONS,
+  type DataTableColumn,
+  type DataTableFilter,
+  type DataTableBulkAction,
+} from "./types";
+
+interface DataTableProps<TData> {
+  /** Column definitions */
+  columns: DataTableColumn<TData>[];
+  /** Current page data */
+  data: TData[];
+  /** Total number of items across all pages */
+  total: number;
+  /** Current page number */
+  page: number;
+  /** Current page size */
+  pageSize: number;
+  /** Total number of pages */
+  totalPages: number;
+  /** Whether data is loading (initial load, no cached data yet) */
+  isLoading?: boolean;
+  /** Whether data is being refetched (background fetch, cached data still visible) */
+  isFetching?: boolean;
+
+  /** Page change handler */
+  onPageChange: (page: number) => void;
+  /** Page size change handler */
+  onPageSizeChange: (size: number) => void;
+  /** Available page size options */
+  pageSizeOptions?: readonly number[];
+
+  /** Current search value */
+  searchValue?: string;
+  /** Search change handler */
+  onSearchChange?: (value: string) => void;
+  /** Search input placeholder */
+  searchPlaceholder?: string;
+
+  /** Currently sorted column */
+  sortColumn?: string;
+  /** Current sort direction */
+  sortOrder?: "asc" | "desc";
+  /** Sort change handler */
+  onSortChange?: (column: string, order: "asc" | "desc") => void;
+
+  /** Filter definitions */
+  filters?: DataTableFilter[];
+  /** Active filter values */
+  activeFilters?: Record<string, string | undefined>;
+  /** Filter change handler */
+  onFilterChange?: (key: string, value: string | undefined) => void;
+  /** Active multi-select filter values */
+  activeMultiFilters?: Record<string, string[]>;
+  /** Multi-select filter change handler */
+  onMultiFilterChange?: (key: string, values: string[]) => void;
+  /** Active filter modes (AND/OR) */
+  activeFilterModes?: Record<string, "and" | "or">;
+  /** Filter mode change handler */
+  onFilterModeChange?: (key: string, mode: "and" | "or") => void;
+  /** Layout direction for filters: "horizontal" (default) renders inline with search, "vertical" stacks filters below search */
+  filterLayout?: "horizontal" | "vertical";
+
+  /** Enable row selection */
+  selectable?: boolean;
+  /** Currently selected row IDs */
+  selectedIds?: string[];
+  /** Selection change handler */
+  onSelectionChange?: (ids: string[]) => void;
+  /** Function to get a stable ID from a row */
+  getRowId: (row: TData) => string;
+
+  /** Bulk action definitions */
+  bulkActions?: DataTableBulkAction[];
+
+  /** Custom action cell renderer */
+  renderRowActions?: (row: TData) => React.ReactNode;
+
+  /** Row expand renderer. When provided, rows become expandable and this renders the expanded content. */
+  renderExpandedRow?: (row: TData) => React.ReactNode;
+
+  /** Row click handler. When provided, rows become clickable (cursor-pointer). */
+  onRowClick?: (row: TData) => void;
+
+  /** Labels for i18n */
+  labels?: {
+    search?: string;
+    noResults?: string;
+    rowsPerPage?: string;
+    of?: string;
+    page?: string;
+    selected?: string;
+    loading?: string;
+    clearFilters?: string;
+  };
+  /** Optional actions rendered on the right side of the toolbar row (always visible, not tied to row selection) */
+  toolbarActions?: React.ReactNode;
+}
+
+export function DataTable<TData>({
+  columns,
+  data,
+  total,
+  page,
+  pageSize,
+  totalPages,
+  isLoading = false,
+  isFetching = false,
+  onPageChange,
+  onPageSizeChange,
+  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
+  searchValue,
+  onSearchChange,
+  searchPlaceholder,
+  sortColumn,
+  sortOrder = "asc",
+  onSortChange,
+  filters,
+  activeFilters,
+  onFilterChange,
+  activeMultiFilters,
+  onMultiFilterChange,
+  activeFilterModes,
+  onFilterModeChange,
+  filterLayout = "horizontal",
+  selectable = false,
+  selectedIds = [],
+  onSelectionChange,
+  getRowId,
+  bulkActions,
+  renderRowActions,
+  renderExpandedRow,
+  onRowClick,
+  labels = {},
+  toolbarActions,
+}: DataTableProps<TData>) {
+  const {
+    search: searchLabel = "Search...",
+    noResults: noResultsLabel = "No results found.",
+    rowsPerPage: rowsPerPageLabel = "Rows per page",
+    of: ofLabel = "of",
+    page: pageLabel = "Page",
+    selected: selectedLabel = "selected",
+    loading: loadingLabel = "Loading...",
+    clearFilters: clearFiltersLabel = "Clear filters",
+  } = labels;
+
+  // Expandable rows state
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  const handleToggleExpand = useCallback((rowId: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(rowId)) {
+        next.delete(rowId);
+      } else {
+        next.add(rowId);
+      }
+      return next;
+    });
+  }, []);
+
+  // Selection helpers
+  const allCurrentPageIds = data.map(getRowId);
+  const allSelected =
+    allCurrentPageIds.length > 0 &&
+    allCurrentPageIds.every((id) => selectedIds.includes(id));
+  const someSelected =
+    allCurrentPageIds.some((id) => selectedIds.includes(id)) && !allSelected;
+
+  const handleSelectAll = useCallback(() => {
+    if (!onSelectionChange) return;
+    if (allSelected) {
+      onSelectionChange(
+        selectedIds.filter((id) => !allCurrentPageIds.includes(id)),
+      );
+    } else {
+      const newIds = new Set([...selectedIds, ...allCurrentPageIds]);
+      onSelectionChange(Array.from(newIds));
+    }
+  }, [allSelected, selectedIds, allCurrentPageIds, onSelectionChange]);
+
+  const handleSelectRow = useCallback(
+    (rowId: string) => {
+      if (!onSelectionChange) return;
+      if (selectedIds.includes(rowId)) {
+        onSelectionChange(selectedIds.filter((id) => id !== rowId));
+      } else {
+        onSelectionChange([...selectedIds, rowId]);
+      }
+    },
+    [selectedIds, onSelectionChange],
+  );
+
+  const handleSort = useCallback(
+    (columnId: string) => {
+      if (!onSortChange) return;
+      if (sortColumn === columnId) {
+        onSortChange(columnId, sortOrder === "asc" ? "desc" : "asc");
+      } else {
+        onSortChange(columnId, "asc");
+      }
+    },
+    [sortColumn, sortOrder, onSortChange],
+  );
+
+  const getCellValue = useCallback(
+    (row: TData, column: DataTableColumn<TData>): React.ReactNode => {
+      if (column.accessorFn) {
+        return column.accessorFn(row);
+      }
+      if (column.accessorKey) {
+        const value = row[column.accessorKey];
+        if (value instanceof Date) {
+          return value.toLocaleDateString();
+        }
+        if (value === null || value === undefined) {
+          return "-";
+        }
+        return String(value);
+      }
+      return "-";
+    },
+    [],
+  );
+
+  const hasActiveFilters =
+    (searchValue && searchValue.length > 0) ||
+    (activeFilters &&
+      Object.values(activeFilters).some((v) => v !== undefined && v !== "")) ||
+    (activeMultiFilters &&
+      Object.values(activeMultiFilters).some((v) => v.length > 0));
+
+  return (
+    <div className="space-y-4">
+      {/* Toolbar: Search + Filters + Bulk Actions */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-1 items-center gap-2">
+          {onSearchChange && (
+            <div className="relative max-w-sm flex-1">
+              <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+              <Input
+                placeholder={searchPlaceholder ?? searchLabel}
+                value={searchValue ?? ""}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          )}
+
+          {filterLayout === "horizontal" &&
+            filters?.map((filter) =>
+              filter.multiSelect ? (
+                <MultiSelectFilter
+                  key={filter.id}
+                  filter={filter}
+                  selectedValues={activeMultiFilters?.[filter.id] ?? []}
+                  onSelectionChange={(values) =>
+                    onMultiFilterChange?.(filter.id, values)
+                  }
+                  filterMode={activeFilterModes?.[filter.id] ?? "and"}
+                  onFilterModeChange={
+                    filter.toggleMode
+                      ? (mode) => onFilterModeChange?.(filter.id, mode)
+                      : undefined
+                  }
+                />
+              ) : (
+                <Select
+                  key={filter.id}
+                  value={activeFilters?.[filter.id] ?? "all"}
+                  onValueChange={(value) =>
+                    onFilterChange?.(
+                      filter.id,
+                      value === "all" ? undefined : value,
+                    )
+                  }
+                >
+                  <SelectTrigger className="w-auto min-w-30">
+                    <SelectValue placeholder={filter.label} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{filter.label}</SelectItem>
+                    {filter.options.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ),
+            )}
+
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                onSearchChange?.("");
+                filters?.forEach((f) => {
+                  if (f.multiSelect) {
+                    onMultiFilterChange?.(f.id, []);
+                  } else {
+                    onFilterChange?.(f.id, undefined);
+                  }
+                });
+              }}
+            >
+              <X className="mr-1 size-4" />
+              {clearFiltersLabel}
+            </Button>
+          )}
+        </div>
+
+        {/* Bulk actions + toolbar actions */}
+        {(toolbarActions ||
+          (selectable && selectedIds.length > 0 && bulkActions)) && (
+          <div className="flex items-center gap-2">
+            {selectable && selectedIds.length > 0 && bulkActions && (
+              <>
+                <span className="text-muted-foreground text-sm">
+                  {selectedIds.length} {selectedLabel}
+                </span>
+                {bulkActions.map((action) => (
+                  <Button
+                    key={action.label}
+                    variant={
+                      action.variant === "destructive"
+                        ? "destructive"
+                        : "outline"
+                    }
+                    size="sm"
+                    onClick={() => action.onClick(selectedIds)}
+                  >
+                    {action.icon && <action.icon className="mr-1 size-4" />}
+                    {action.label}
+                  </Button>
+                ))}
+              </>
+            )}
+            {toolbarActions}
+          </div>
+        )}
+      </div>
+
+      {/* Vertical filters (stacked below search) */}
+      {filterLayout === "vertical" && filters && filters.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {filters.map((filter) =>
+            filter.multiSelect ? (
+              <MultiSelectFilter
+                key={filter.id}
+                filter={filter}
+                selectedValues={activeMultiFilters?.[filter.id] ?? []}
+                onSelectionChange={(values) =>
+                  onMultiFilterChange?.(filter.id, values)
+                }
+                filterMode={activeFilterModes?.[filter.id] ?? "and"}
+                onFilterModeChange={
+                  filter.toggleMode
+                    ? (mode) => onFilterModeChange?.(filter.id, mode)
+                    : undefined
+                }
+              />
+            ) : (
+              <Select
+                key={filter.id}
+                value={activeFilters?.[filter.id] ?? "all"}
+                onValueChange={(value) =>
+                  onFilterChange?.(
+                    filter.id,
+                    value === "all" ? undefined : value,
+                  )
+                }
+              >
+                <SelectTrigger className="w-auto min-w-30">
+                  <SelectValue placeholder={filter.label} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{filter.label}</SelectItem>
+                  {filter.options.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ),
+          )}
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="relative rounded-md border">
+        {/* Subtle refetch indicator */}
+        {isFetching && !isLoading && (
+          <div className="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden rounded-t-md">
+            <div className="bg-primary h-full w-full animate-pulse" />
+          </div>
+        )}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {selectable && (
+                <TableHead className="w-10">
+                  <Checkbox
+                    checked={
+                      allSelected
+                        ? true
+                        : someSelected
+                          ? "indeterminate"
+                          : false
+                    }
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all"
+                  />
+                </TableHead>
+              )}
+              {columns.map((column) => (
+                <TableHead key={column.id} className={column.className}>
+                  {column.sortable && onSortChange ? (
+                    <button
+                      className="flex items-center gap-1 hover:text-foreground transition-colors"
+                      onClick={() => handleSort(column.id)}
+                    >
+                      {column.header}
+                      {sortColumn === column.id ? (
+                        sortOrder === "asc" ? (
+                          <ArrowUp className="size-4" />
+                        ) : (
+                          <ArrowDown className="size-4" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="size-4 opacity-50" />
+                      )}
+                    </button>
+                  ) : (
+                    column.header
+                  )}
+                </TableHead>
+              ))}
+              {renderRowActions && (
+                <TableHead className="w-15">
+                  <MoreHorizontal className="size-4 opacity-0" />
+                </TableHead>
+              )}
+              {renderExpandedRow && <TableHead className="w-10" />}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={
+                    columns.length +
+                    (selectable ? 1 : 0) +
+                    (renderRowActions ? 1 : 0) +
+                    (renderExpandedRow ? 1 : 0)
+                  }
+                  className="h-24 text-center"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="size-4 animate-spin" />
+                    {loadingLabel}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : data.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={
+                    columns.length +
+                    (selectable ? 1 : 0) +
+                    (renderRowActions ? 1 : 0) +
+                    (renderExpandedRow ? 1 : 0)
+                  }
+                  className="h-24 text-center"
+                >
+                  {noResultsLabel}
+                </TableCell>
+              </TableRow>
+            ) : (
+              data.map((row) => {
+                const rowId = getRowId(row);
+                const isSelected = selectedIds.includes(rowId);
+                const isExpanded = expandedIds.has(rowId);
+
+                return (
+                  <React.Fragment key={rowId}>
+                    <TableRow
+                      data-state={isSelected ? "selected" : undefined}
+                      className={onRowClick ? "cursor-pointer" : undefined}
+                      onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    >
+                      {selectable && (
+                        <TableCell>
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => handleSelectRow(rowId)}
+                            aria-label={`Select row ${rowId}`}
+                          />
+                        </TableCell>
+                      )}
+                      {columns.map((column) => (
+                        <TableCell key={column.id} className={column.className}>
+                          {getCellValue(row, column)}
+                        </TableCell>
+                      ))}
+                      {renderRowActions && (
+                        <TableCell>{renderRowActions(row)}</TableCell>
+                      )}
+                      {renderExpandedRow && (
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={() => handleToggleExpand(rowId)}
+                            aria-label={
+                              isExpanded ? "Collapse row" : "Expand row"
+                            }
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="size-4" />
+                            ) : (
+                              <ChevronRight className="size-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                    {renderExpandedRow && isExpanded && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={
+                            columns.length +
+                            (selectable ? 1 : 0) +
+                            (renderRowActions ? 1 : 0) +
+                            1
+                          }
+                          className="bg-muted/30 p-4"
+                        >
+                          {renderExpandedRow(row)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-muted-foreground flex items-center gap-2 text-sm">
+          <span>{rowsPerPageLabel}</span>
+          <Select
+            value={String(pageSize)}
+            onValueChange={(value) => onPageSizeChange(parseInt(value, 10))}
+          >
+            <SelectTrigger className="w-auto">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {pageSizeOptions.map((size) => (
+                <SelectItem key={size} value={String(size)}>
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <span className="text-muted-foreground text-sm">
+            {pageLabel} {page} {ofLabel} {totalPages || 1} ({total} total)
+          </span>
+
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(1)}
+              disabled={page <= 1}
+            >
+              &laquo;
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(page - 1)}
+              disabled={page <= 1}
+            >
+              &lsaquo;
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(page + 1)}
+              disabled={page >= totalPages}
+            >
+              &rsaquo;
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(totalPages)}
+              disabled={page >= totalPages}
+            >
+              &raquo;
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// MULTI-SELECT FILTER COMPONENT
+// ============================================================================
+
+interface MultiSelectFilterProps {
+  filter: DataTableFilter;
+  selectedValues: string[];
+  onSelectionChange: (values: string[]) => void;
+  filterMode: "and" | "or";
+  onFilterModeChange?: (mode: "and" | "or") => void;
+}
+
+function MultiSelectFilter({
+  filter,
+  selectedValues,
+  onSelectionChange,
+  filterMode,
+  onFilterModeChange,
+}: MultiSelectFilterProps) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const selectedSet = new Set(selectedValues);
+  const selectedCount = selectedValues.length;
+  const hasSelection = selectedCount > 0;
+
+  const filteredOptions = filter.options.filter((opt) =>
+    opt.label.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const handleToggle = (value: string) => {
+    if (selectedSet.has(value)) {
+      onSelectionChange(selectedValues.filter((v) => v !== value));
+    } else {
+      onSelectionChange([...selectedValues, value]);
+    }
+  };
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(o) => {
+        setOpen(o);
+        if (!o) setSearch("");
+      }}
+    >
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn("h-9 gap-1", hasSelection && "border-primary/50")}
+        >
+          <Tags className="size-3.5" />
+          {filter.label}
+          {hasSelection && (
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px]">
+              {selectedCount}
+            </Badge>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-56 p-0" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder={`Search ${filter.label.toLowerCase()}...`}
+            value={search}
+            onValueChange={setSearch}
+          />
+          <CommandList>
+            <CommandEmpty className="py-3 text-center text-sm text-muted-foreground">
+              No options found.
+            </CommandEmpty>
+            <CommandGroup>
+              {filteredOptions.map((opt) => {
+                const isSelected = selectedSet.has(opt.value);
+                return (
+                  <CommandItem
+                    key={opt.value}
+                    value={opt.value}
+                    onSelect={() => handleToggle(opt.value)}
+                    className="flex items-center gap-2"
+                  >
+                    <div
+                      className={cn(
+                        "flex size-4 items-center justify-center rounded-sm border",
+                        isSelected
+                          ? "bg-primary border-primary text-primary-foreground"
+                          : "border-muted-foreground/30",
+                      )}
+                    >
+                      {isSelected && <Check className="size-3" />}
+                    </div>
+                    <span className="truncate">{opt.label}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+
+          {/* AND/OR toggle + clear */}
+          {(onFilterModeChange || hasSelection) && (
+            <>
+              <CommandSeparator />
+              <div className="flex items-center justify-between p-1.5">
+                {onFilterModeChange && hasSelection ? (
+                  <div className="flex items-center rounded-md border text-xs">
+                    <button
+                      type="button"
+                      className={cn(
+                        "px-2 py-0.5 rounded-l-md transition-colors",
+                        filterMode === "and"
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-accent",
+                      )}
+                      onClick={() => onFilterModeChange("and")}
+                    >
+                      AND
+                    </button>
+                    <button
+                      type="button"
+                      className={cn(
+                        "px-2 py-0.5 rounded-r-md transition-colors",
+                        filterMode === "or"
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-accent",
+                      )}
+                      onClick={() => onFilterModeChange("or")}
+                    >
+                      OR
+                    </button>
+                  </div>
+                ) : (
+                  <span />
+                )}
+                {hasSelection && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => onSelectionChange([])}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+            </>
+          )}
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}

@@ -1,41 +1,150 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Search, ClipboardList } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AuditLogTable } from "@/components/audit/audit-log-table";
+  DataTable,
+  useDataTableState,
+  type DataTableColumn,
+  type DataTableFilter,
+} from "@/components/data-table";
 import { AUDIT_ENTITY_TYPES } from "@repo/shared/types";
 import { AUDIT_ACTIONS } from "@repo/shared/types";
+import type { inferRouterOutputs } from "@trpc/server";
+import type { AppRouter } from "@/server/routers/_app";
 
-const ENTITY_TYPE_VALUES = Object.values(AUDIT_ENTITY_TYPES);
-const ACTION_VALUES = Object.values(AUDIT_ACTIONS);
+type AuditItem =
+  inferRouterOutputs<AppRouter>["audit"]["list"]["items"][number];
+
+function formatDate(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return d.toLocaleString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getActionVariant(
+  action: string,
+): "default" | "secondary" | "destructive" | "outline" {
+  switch (action) {
+    case "create":
+      return "default";
+    case "delete":
+      return "destructive";
+    case "update":
+      return "secondary";
+    default:
+      return "outline";
+  }
+}
 
 export default function AuditPage() {
   const t = useTranslations("audit");
 
-  const [entityType, setEntityType] = useState<string | null>(null);
-  const [action, setAction] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-
-  const { data, isLoading } = trpc.audit.list.useQuery({
-    entityType: entityType ?? undefined,
-    action: action ?? undefined,
-    entityId: search || undefined,
-    page,
-    limit: 25,
+  const tableState = useDataTableState({
+    syncWithUrl: true,
+    defaultSortColumn: "createdAt",
+    defaultSortOrder: "desc",
   });
+
+  const { data, isLoading, isFetching } = trpc.audit.list.useQuery({
+    search: tableState.debouncedSearch || undefined,
+    entityType: (tableState.filters.entityType as AuditItem["entityType"]) ?? undefined,
+    action: (tableState.filters.action as AuditItem["action"]) ?? undefined,
+    sortBy: (tableState.sortColumn ?? "createdAt") as
+      | "createdAt"
+      | "action"
+      | "entityType"
+      | "fieldName",
+    sortOrder: tableState.sortOrder,
+    page: tableState.page,
+    pageSize: tableState.pageSize,
+  });
+
+  const columns = useMemo<DataTableColumn<AuditItem>[]>(
+    () => [
+      {
+        id: "createdAt",
+        header: t("table.date"),
+        sortable: true,
+        accessorFn: (row) => (
+          <span className="text-muted-foreground">
+            {formatDate(row.createdAt)}
+          </span>
+        ),
+      },
+      {
+        id: "action",
+        header: t("table.action"),
+        sortable: true,
+        accessorFn: (row) => (
+          <Badge variant={getActionVariant(row.action)}>
+            {t(`actions.${row.action}` as "actions.create")}
+          </Badge>
+        ),
+      },
+      {
+        id: "entityType",
+        header: t("table.entityType"),
+        sortable: true,
+        accessorFn: (row) =>
+          t(`entityTypes.${row.entityType}` as "entityTypes.property"),
+      },
+      {
+        id: "fieldName",
+        header: t("table.field"),
+        sortable: true,
+        accessorFn: (row) => (
+          <span className="font-mono text-xs">{row.fieldName ?? "-"}</span>
+        ),
+      },
+      {
+        id: "oldValue",
+        header: t("table.oldValue"),
+        className: "max-w-[200px]",
+        accessorFn: (row) => (
+          <span className="truncate text-xs">{row.oldValue ?? "-"}</span>
+        ),
+      },
+      {
+        id: "newValue",
+        header: t("table.newValue"),
+        className: "max-w-[200px]",
+        accessorFn: (row) => (
+          <span className="truncate text-xs">{row.newValue ?? "-"}</span>
+        ),
+      },
+    ],
+    [t],
+  );
+
+  const filters = useMemo<DataTableFilter[]>(
+    () => [
+      {
+        key: "entityType",
+        label: t("allEntities"),
+        options: Object.values(AUDIT_ENTITY_TYPES).map((et) => ({
+          value: et,
+          label: t(`entityTypes.${et}` as "entityTypes.property"),
+        })),
+      },
+      {
+        key: "action",
+        label: t("allActions"),
+        options: Object.values(AUDIT_ACTIONS).map((a) => ({
+          value: a,
+          label: t(`actions.${a}` as "actions.create"),
+        })),
+      },
+    ],
+    [t],
+  );
 
   return (
     <div className="space-y-6">
@@ -45,106 +154,34 @@ export default function AuditPage() {
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder={t("searchPlaceholder")}
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="pl-9"
-          />
-        </div>
-
-        <Select
-          value={entityType ?? "all"}
-          onValueChange={(val) => {
-            setEntityType(val === "all" ? null : val);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={t("filterByEntity")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("allEntities")}</SelectItem>
-            {ENTITY_TYPE_VALUES.map((et) => (
-              <SelectItem key={et} value={et}>
-                {t(`entityTypes.${et}` as "entityTypes.property")}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={action ?? "all"}
-          onValueChange={(val) => {
-            setAction(val === "all" ? null : val);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder={t("filterByAction")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("allActions")}</SelectItem>
-            {ACTION_VALUES.map((a) => (
-              <SelectItem key={a} value={a}>
-                {t(`actions.${a}` as "actions.create")}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Table */}
-      {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <Skeleton key={i} className="h-10 w-full" />
-          ))}
-        </div>
-      ) : data ? (
-        <>
-          <AuditLogTable items={data.items} />
-
-          {/* Pagination */}
-          {data.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page <= 1}
-                onClick={() => setPage(page - 1)}
-              >
-                {t("previous")}
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {page} / {data.totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page >= data.totalPages}
-                onClick={() => setPage(page + 1)}
-              >
-                {t("next")}
-              </Button>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="rounded-full bg-muted p-4 mb-4">
-            <ClipboardList className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-medium">{t("noEntries")}</h3>
-        </div>
-      )}
+      {/* DataTable */}
+      <DataTable<AuditItem>
+        columns={columns}
+        data={data?.items ?? []}
+        total={data?.total ?? 0}
+        page={tableState.page}
+        pageSize={tableState.pageSize}
+        totalPages={data?.totalPages ?? 0}
+        isLoading={isLoading}
+        isFetching={isFetching}
+        onPageChange={tableState.setPage}
+        onPageSizeChange={tableState.setPageSize}
+        searchValue={tableState.search}
+        onSearchChange={tableState.setSearch}
+        searchPlaceholder={t("searchPlaceholder")}
+        sortColumn={tableState.sortColumn}
+        sortOrder={tableState.sortOrder}
+        onSortChange={tableState.setSort}
+        filters={filters}
+        activeFilters={tableState.filters}
+        onFilterChange={tableState.setFilter}
+        getRowId={(row) => row.id}
+        labels={{
+          noResults: t("noEntries"),
+          rowsPerPage: t("table.rowsPerPage"),
+          of: t("table.of"),
+        }}
+      />
     </div>
   );
 }

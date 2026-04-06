@@ -231,7 +231,7 @@ export function UploadDocumentDialog({
             onClick={() => handleClose(false)}
             disabled={uploading}
           >
-            {t("../common.cancel", { defaultValue: "Cancel" })}
+            {t("cancel")}
           </Button>
           <Button
             onClick={handleUpload}

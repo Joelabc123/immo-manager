@@ -1,27 +1,35 @@
 "use client";
 
-import { useState, Suspense, lazy } from "react";
+import { useState, Suspense, lazy, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Plus, Search, LayoutGrid, Map as MapIcon } from "lucide-react";
+import {
+  Plus,
+  Building2,
+  MoreHorizontal,
+  Pencil,
+  Copy,
+  Trash2,
+} from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PropertyCard } from "@/components/properties/property-card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PropertyKpiBar } from "@/components/properties/property-kpi-bar";
 import { AddPropertyWizard } from "@/components/properties/add-property-wizard";
 import { EditPropertyDialog } from "@/components/properties/edit-property-dialog";
 import { DeletePropertyDialog } from "@/components/properties/delete-property-dialog";
 import { DuplicatePropertyDialog } from "@/components/properties/duplicate-property-dialog";
-import { PROPERTY_STATUS } from "@repo/shared/types";
+import { DataTable, useDataTableState } from "@/components/data-table";
+import type { DataTableColumn, DataTableFilter } from "@/components/data-table";
+import { useCurrency } from "@/lib/hooks/use-currency";
+import { PROPERTY_STATUS, PROPERTY_TYPES } from "@repo/shared/types";
 
 const PropertyMap = lazy(() =>
   import("@/components/properties/property-map").then((m) => ({
@@ -36,16 +44,48 @@ type SortBy =
   | "city"
   | "livingAreaSqm";
 
+const STATUS_COLORS: Record<string, string> = {
+  rented:
+    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  vacant: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  owner_occupied:
+    "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  fix_flip:
+    "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+  renovation:
+    "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
+  sale_planned:
+    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+};
+
+interface PropertyItem {
+  id: string;
+  type: string;
+  status: string;
+  street: string | null;
+  city: string | null;
+  zipCode: string | null;
+  livingAreaSqm: number;
+  purchasePrice: number;
+  purchaseDate: string;
+  marketValue: number | null;
+  thumbnailPath: string | null;
+  unitCount: number;
+  latitude: string | null;
+  longitude: string | null;
+  tags: Array<{ id: string; name: string; color: string | null }>;
+}
+
 export default function PropertiesPage() {
   const router = useRouter();
   const t = useTranslations("properties");
+  const { formatCurrency } = useCurrency();
 
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<SortBy>("createdAt");
-  const [sortOrder] = useState<"asc" | "desc">("desc");
-  const [page, setPage] = useState(1);
-  const [showMap, setShowMap] = useState(false);
+  const tableState = useDataTableState({
+    syncWithUrl: true,
+    defaultSortColumn: "createdAt",
+    defaultSortOrder: "desc",
+  });
 
   // Dialog states
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -53,21 +93,163 @@ export default function PropertiesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [duplicateId, setDuplicateId] = useState<string | null>(null);
 
-  const { data: propertiesData, isLoading } = trpc.properties.list.useQuery({
-    search: search || undefined,
-    status: statusFilter ?? undefined,
-    sortBy,
-    sortOrder,
-    page,
-    pageSize: 20,
+  const {
+    data: propertiesData,
+    isLoading,
+    isFetching,
+  } = trpc.properties.list.useQuery({
+    search: tableState.debouncedSearch || undefined,
+    status: tableState.filters.status ?? undefined,
+    type: tableState.filters.type ?? undefined,
+    sortBy: (tableState.sortColumn as SortBy) || "createdAt",
+    sortOrder: tableState.sortOrder,
+    page: tableState.page,
+    pageSize: tableState.pageSize,
   });
 
   const { data: kpis, isLoading: kpisLoading } =
     trpc.properties.getAggregatedKpis.useQuery();
 
-  const handlePropertyClick = (id: string) => {
-    router.push(`/properties/${id}`);
+  const handlePropertyClick = (row: PropertyItem) => {
+    router.push(`/properties/${row.id}`);
   };
+
+  const columns = useMemo<DataTableColumn<PropertyItem>[]>(
+    () => [
+      {
+        id: "thumbnail",
+        header: "",
+        className: "w-[50px]",
+        accessorFn: (row) => {
+          const thumbnailUrl = row.thumbnailPath
+            ? `/api/uploads/${row.thumbnailPath}`
+            : null;
+          return thumbnailUrl ? (
+            <img
+              src={thumbnailUrl}
+              alt=""
+              className="h-8 w-8 rounded object-cover"
+            />
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+            </div>
+          );
+        },
+      },
+      {
+        id: "city",
+        header: t("table.address"),
+        sortable: true,
+        accessorFn: (row) => {
+          const address = [row.street, row.zipCode, row.city]
+            .filter(Boolean)
+            .join(", ");
+          return (
+            <span className="font-medium">{address || t("noAddress")}</span>
+          );
+        },
+      },
+      {
+        id: "type",
+        header: t("table.type"),
+        accessorFn: (row) => t(`types.${row.type}`),
+      },
+      {
+        id: "status",
+        header: t("table.status"),
+        accessorFn: (row) => (
+          <span
+            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[row.status] ?? "bg-gray-100 text-gray-800"}`}
+          >
+            {t(`status.${row.status}`)}
+          </span>
+        ),
+      },
+      {
+        id: "livingAreaSqm",
+        header: t("table.area"),
+        sortable: true,
+        accessorFn: (row) => `${row.livingAreaSqm} m²`,
+      },
+      {
+        id: "purchasePrice",
+        header: t("table.purchasePrice"),
+        sortable: true,
+        accessorFn: (row) => formatCurrency(row.purchasePrice),
+      },
+      {
+        id: "marketValue",
+        header: t("table.marketValue"),
+        sortable: true,
+        accessorFn: (row) =>
+          row.marketValue ? formatCurrency(row.marketValue) : "-",
+      },
+      {
+        id: "units",
+        header: t("table.units"),
+        accessorFn: (row) => row.unitCount,
+      },
+    ],
+    [t, formatCurrency],
+  );
+
+  const filters = useMemo<DataTableFilter[]>(
+    () => [
+      {
+        key: "status",
+        label: t("filterByStatus"),
+        placeholder: t("allStatuses"),
+        options: Object.values(PROPERTY_STATUS).map((status) => ({
+          value: status,
+          label: t(`status.${status}`),
+        })),
+      },
+      {
+        key: "type",
+        label: t("filterByType"),
+        placeholder: t("allTypes"),
+        options: Object.values(PROPERTY_TYPES).map((type) => ({
+          value: type,
+          label: t(`types.${type}`),
+        })),
+      },
+    ],
+    [t],
+  );
+
+  const renderRowActions = (row: PropertyItem) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="ghost" size="icon" className="h-8 w-8" />
+        }
+      >
+        <MoreHorizontal className="h-4 w-4" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem
+          onClick={() => setEditId(row.id)}
+        >
+          <Pencil className="mr-2 h-4 w-4" />
+          {t("edit")}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setDuplicateId(row.id)}
+        >
+          <Copy className="mr-2 h-4 w-4" />
+          {t("duplicate")}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setDeleteId(row.id)}
+          className="text-destructive"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          {t("deleteAction")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   return (
     <div className="space-y-6">
@@ -77,10 +259,6 @@ export default function PropertiesPage() {
           <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
-        <Button onClick={() => setWizardOpen(true)}>
-          <Plus className="mr-1.5 h-4 w-4" />
-          {t("addProperty")}
-        </Button>
       </div>
 
       {/* KPI Bar */}
@@ -92,153 +270,58 @@ export default function PropertiesPage() {
         isLoading={kpisLoading}
       />
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder={t("searchPlaceholder")}
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="pl-9"
-          />
-        </div>
-
-        <Select
-          value={statusFilter ?? "all"}
-          onValueChange={(val) => {
-            setStatusFilter(val === "all" ? null : val);
-            setPage(1);
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={t("filterByStatus")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("allStatuses")}</SelectItem>
-            {Object.values(PROPERTY_STATUS).map((status) => (
-              <SelectItem key={status} value={status}>
-                {t(`status.${status}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={sortBy}
-          onValueChange={(val) => val && setSortBy(val as SortBy)}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="createdAt">{t("sort.newest")}</SelectItem>
-            <SelectItem value="purchasePrice">
-              {t("sort.purchasePrice")}
-            </SelectItem>
-            <SelectItem value="marketValue">{t("sort.marketValue")}</SelectItem>
-            <SelectItem value="city">{t("sort.city")}</SelectItem>
-            <SelectItem value="livingAreaSqm">{t("sort.area")}</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Button
-          variant={showMap ? "default" : "outline"}
-          size="icon"
-          onClick={() => setShowMap(!showMap)}
-        >
-          {showMap ? (
-            <LayoutGrid className="h-4 w-4" />
-          ) : (
-            <MapIcon className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
-
-      {/* Map View */}
-      {showMap && propertiesData && (
+      {/* Map — always visible */}
+      {propertiesData && propertiesData.items.length > 0 && (
         <Suspense
           fallback={<Skeleton className="h-[300px] w-full rounded-lg" />}
         >
           <div className="rounded-lg overflow-hidden border">
             <PropertyMap
               properties={propertiesData.items}
-              onMarkerClick={handlePropertyClick}
+              onMarkerClick={(id) => router.push(`/properties/${id}`)}
               className="h-[300px] w-full"
             />
           </div>
         </Suspense>
       )}
 
-      {/* Property Grid */}
-      {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="space-y-3">
-              <Skeleton className="h-40 w-full rounded-xl" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-          ))}
-        </div>
-      ) : propertiesData && propertiesData.items.length > 0 ? (
-        <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {propertiesData.items.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                onClick={handlePropertyClick}
-                onEdit={setEditId}
-                onDelete={setDeleteId}
-                onDuplicate={setDuplicateId}
-              />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {propertiesData.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page <= 1}
-                onClick={() => setPage(page - 1)}
-              >
-                {t("previous")}
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {page} / {propertiesData.totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page >= propertiesData.totalPages}
-                onClick={() => setPage(page + 1)}
-              >
-                {t("next")}
-              </Button>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="rounded-full bg-muted p-4 mb-4">
-            <Plus className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-medium">{t("noProperties")}</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            {t("noPropertiesDescription")}
-          </p>
-          <Button className="mt-4" onClick={() => setWizardOpen(true)}>
+      {/* DataTable */}
+      <DataTable<PropertyItem>
+        columns={columns}
+        data={propertiesData?.items ?? []}
+        total={propertiesData?.total ?? 0}
+        page={tableState.page}
+        pageSize={tableState.pageSize}
+        totalPages={propertiesData?.totalPages ?? 0}
+        isLoading={isLoading}
+        isFetching={isFetching}
+        onPageChange={tableState.setPage}
+        onPageSizeChange={tableState.setPageSize}
+        searchValue={tableState.search}
+        onSearchChange={tableState.setSearch}
+        searchPlaceholder={t("searchPlaceholder")}
+        sortColumn={tableState.sortColumn}
+        sortOrder={tableState.sortOrder}
+        onSortChange={tableState.setSort}
+        filters={filters}
+        activeFilters={tableState.filters}
+        onFilterChange={tableState.setFilter}
+        getRowId={(row) => row.id}
+        onRowClick={handlePropertyClick}
+        renderRowActions={renderRowActions}
+        toolbarActions={
+          <Button onClick={() => setWizardOpen(true)}>
             <Plus className="mr-1.5 h-4 w-4" />
             {t("addProperty")}
           </Button>
-        </div>
-      )}
+        }
+        labels={{
+          noResults: t("table.noResults"),
+          rowsPerPage: t("table.rowsPerPage"),
+          of: t("table.of"),
+          selected: t("table.selected"),
+        }}
+      />
 
       {/* Dialogs */}
       <AddPropertyWizard open={wizardOpen} onOpenChange={setWizardOpen} />

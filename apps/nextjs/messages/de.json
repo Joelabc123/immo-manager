@@ -84,6 +84,7 @@
     "floor": "Etage",
     "type": "Typ",
     "status": "Status",
+    "statusLabel": "Status",
     "street": "Strasse",
     "city": "Stadt",
     "zipCode": "PLZ",
@@ -116,6 +117,21 @@
       "fix_flip": "Fix & Flip",
       "renovation": "In Renovierung",
       "sale_planned": "Verkauf geplant"
+    },
+    "filterByType": "Nach Typ filtern",
+    "allTypes": "Alle Typen",
+    "table": {
+      "address": "Adresse",
+      "type": "Typ",
+      "status": "Status",
+      "area": "Flaeche",
+      "purchasePrice": "Kaufpreis",
+      "marketValue": "Marktwert",
+      "units": "Einheiten",
+      "noResults": "Keine Immobilien gefunden.",
+      "rowsPerPage": "Zeilen pro Seite",
+      "of": "von",
+      "selected": "ausgewaehlt"
     },
     "sort": {
       "newest": "Neueste zuerst",
@@ -216,6 +232,23 @@
       "graduated": "Staffelmiete",
       "indexed": "Indexmiete"
     },
+    "edit": "Bearbeiten",
+    "deleteAction": "Loeschen",
+    "contractInfo": "Vertragsdaten",
+    "months": "Monate",
+    "yes": "Ja",
+    "no": "Nein",
+    "table": {
+      "name": "Name",
+      "status": "Status",
+      "unit": "Einheit",
+      "coldRent": "Kaltmiete",
+      "warmRent": "Warmmiete",
+      "rentStart": "Mietbeginn",
+      "rowsPerPage": "Zeilen pro Seite",
+      "of": "von",
+      "noResults": "Keine Ergebnisse gefunden."
+    },
     "sort": {
       "name": "Name",
       "rentStart": "Mietbeginn",
@@ -239,13 +272,21 @@
     "loanStart": "Darlehensbeginn",
     "loanTermMonths": "Laufzeit (Monate)",
     "annualSpecialRepaymentLimit": "Jaehrl. Sondertilgungslimit",
+    "optional": "optional",
     "save": "Speichern",
     "saving": "Wird gespeichert...",
     "creating": "Wird erstellt...",
     "deleting": "Wird geloescht...",
     "cancel": "Abbrechen",
     "deleteWarning": "Sind Sie sicher, dass Sie diesen Kredit loeschen moechten?",
-    "amortization": "Tilgungsplan",
+    "amortization": {
+      "title": "Tilgungsplan",
+      "year": "Jahr",
+      "totalPayments": "Gesamtzahlung",
+      "totalInterest": "Zinsen",
+      "totalPrincipal": "Tilgung",
+      "remainingBalance": "Restschuld"
+    },
     "showAmortization": "Tilgungsplan anzeigen",
     "hideAmortization": "Tilgungsplan ausblenden",
     "year": "Jahr",
@@ -270,6 +311,8 @@
     "isRecurring": "Wiederkehrend",
     "recurringInterval": "Intervall",
     "isApportionable": "Umlagefaehig",
+    "selectCategory": "Kategorie waehlen",
+    "interval": "Intervall",
     "save": "Speichern",
     "saving": "Wird gespeichert...",
     "creating": "Wird erstellt...",
@@ -362,7 +405,9 @@
     "cancel": "Abbrechen",
     "deleteWarning": "Sind Sie sicher, dass Sie diese Einheit loeschen moechten?",
     "willBeDeleted": "Folgende Daten werden ebenfalls geloescht",
-    "tenantsAssigned": "Zugewiesene Mieter"
+    "tenantsAssigned": "Zugewiesene Mieter",
+    "noUnits": "Keine Mieteinheiten vorhanden",
+    "optional": "optional"
   },
   "cashflow": {
     "title": "Cashflow",
@@ -375,7 +420,13 @@
     "taxAmount": "Steuerlast",
     "cashflowAfterTax": "Cashflow nach Steuern",
     "perMonth": "pro Monat",
-    "noCashflowData": "Keine Cashflow-Daten verfuegbar"
+    "noCashflowData": "Keine Cashflow-Daten verfuegbar",
+    "totalRent": "Kaltmiete",
+    "loanPayments": "Bankraten",
+    "expenses": "Nebenkosten",
+    "cashflow": "Cashflow",
+    "annualCashflow": "Jaehrlicher Cashflow",
+    "grossYield": "Bruttorendite"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -403,7 +454,9 @@
       "title": "Vermoegensprognose",
       "growthRate": "Wertsteigerung",
       "inflationRate": "Inflation",
+      "inflation": "Inflation",
       "rentGrowthRate": "Mietsteigerung",
+      "rentGrowth": "Mietsteigerung",
       "years": "Jahre",
       "retirement": "Rente",
       "marketValue": "Marktwert",
@@ -515,6 +568,8 @@
       "verdict": "Fazit",
       "verdictSpecialRepayment": "Sondertilgung ist vorteilhafter",
       "verdictEtf": "ETF-Investment ist vorteilhafter",
+      "winnerSpecialRepayment": "Sondertilgung ist vorteilhafter",
+      "winnerEtf": "ETF-Investment ist vorteilhafter",
       "advantage": "Vorteil",
       "interestSaved": "Zinsen gespart",
       "monthsSaved": "Monate gespart",
@@ -750,7 +805,8 @@
       "image": "Bild",
       "defect_report": "Maengelanzeige",
       "other": "Sonstige"
-    }
+    },
+    "cancel": "Abbrechen"
   },
   "sharing": {
     "title": "Teilen",
@@ -814,7 +870,7 @@
     "title": "Audit-Log",
     "subtitle": "Alle Aenderungen an Ihren Daten im Ueberblick",
     "sectionTitle": "Aenderungsverlauf",
-    "searchPlaceholder": "Nach Entity-ID filtern...",
+    "searchPlaceholder": "Suche in Feldern und Werten...",
     "filterByEntity": "Nach Typ filtern",
     "filterByAction": "Nach Aktion filtern",
     "allEntities": "Alle Typen",
@@ -828,7 +884,9 @@
       "entityType": "Typ",
       "field": "Feld",
       "oldValue": "Alter Wert",
-      "newValue": "Neuer Wert"
+      "newValue": "Neuer Wert",
+      "rowsPerPage": "Zeilen pro Seite",
+      "of": "von"
     },
     "actions": {
       "create": "Erstellt",

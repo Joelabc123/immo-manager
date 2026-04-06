@@ -119,7 +119,7 @@ export function EditPropertyDialog({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>{t("status")}</Label>
+              <Label>{t("statusLabel")}</Label>
               <Select
                 value={watch("status")}
                 onValueChange={(val) => val && setValue("status", val)}

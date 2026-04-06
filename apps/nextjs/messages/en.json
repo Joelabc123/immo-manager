@@ -84,6 +84,7 @@
     "floor": "Floor",
     "type": "Type",
     "status": "Status",
+    "statusLabel": "Status",
     "street": "Street",
     "city": "City",
     "zipCode": "ZIP Code",
@@ -116,6 +117,21 @@
       "fix_flip": "Fix & Flip",
       "renovation": "In Renovation",
       "sale_planned": "Sale Planned"
+    },
+    "filterByType": "Filter by type",
+    "allTypes": "All types",
+    "table": {
+      "address": "Address",
+      "type": "Type",
+      "status": "Status",
+      "area": "Area",
+      "purchasePrice": "Purchase Price",
+      "marketValue": "Market Value",
+      "units": "Units",
+      "noResults": "No properties found.",
+      "rowsPerPage": "Rows per page",
+      "of": "of",
+      "selected": "selected"
     },
     "sort": {
       "newest": "Newest first",
@@ -216,6 +232,23 @@
       "graduated": "Graduated Rent",
       "indexed": "Indexed Rent"
     },
+    "edit": "Edit",
+    "deleteAction": "Delete",
+    "contractInfo": "Contract Details",
+    "months": "Months",
+    "yes": "Yes",
+    "no": "No",
+    "table": {
+      "name": "Name",
+      "status": "Status",
+      "unit": "Unit",
+      "coldRent": "Cold Rent",
+      "warmRent": "Warm Rent",
+      "rentStart": "Rent Start",
+      "rowsPerPage": "Rows per page",
+      "of": "of",
+      "noResults": "No results found."
+    },
     "sort": {
       "name": "Name",
       "rentStart": "Rent Start",
@@ -239,13 +272,21 @@
     "loanStart": "Loan Start",
     "loanTermMonths": "Term (Months)",
     "annualSpecialRepaymentLimit": "Annual Special Repayment Limit",
+    "optional": "optional",
     "save": "Save",
     "saving": "Saving...",
     "creating": "Creating...",
     "deleting": "Deleting...",
     "cancel": "Cancel",
     "deleteWarning": "Are you sure you want to delete this loan?",
-    "amortization": "Amortization Schedule",
+    "amortization": {
+      "title": "Amortization Schedule",
+      "year": "Year",
+      "totalPayments": "Total Payments",
+      "totalInterest": "Interest",
+      "totalPrincipal": "Principal",
+      "remainingBalance": "Remaining"
+    },
     "showAmortization": "Show Amortization",
     "hideAmortization": "Hide Amortization",
     "year": "Year",
@@ -270,6 +311,8 @@
     "isRecurring": "Recurring",
     "recurringInterval": "Interval",
     "isApportionable": "Apportionable",
+    "selectCategory": "Select category",
+    "interval": "Interval",
     "save": "Save",
     "saving": "Saving...",
     "creating": "Creating...",
@@ -362,7 +405,9 @@
     "cancel": "Cancel",
     "deleteWarning": "Are you sure you want to delete this unit?",
     "willBeDeleted": "The following data will also be deleted",
-    "tenantsAssigned": "Assigned Tenants"
+    "tenantsAssigned": "Assigned Tenants",
+    "noUnits": "No units available",
+    "optional": "optional"
   },
   "cashflow": {
     "title": "Cashflow",
@@ -375,7 +420,13 @@
     "taxAmount": "Tax",
     "cashflowAfterTax": "Cashflow After Tax",
     "perMonth": "per month",
-    "noCashflowData": "No cashflow data available"
+    "noCashflowData": "No cashflow data available",
+    "totalRent": "Gross Rent",
+    "loanPayments": "Loan Payments",
+    "expenses": "Expenses",
+    "cashflow": "Cashflow",
+    "annualCashflow": "Annual Cashflow",
+    "grossYield": "Gross Yield"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -403,7 +454,9 @@
       "title": "Wealth Forecast",
       "growthRate": "Appreciation",
       "inflationRate": "Inflation",
+      "inflation": "Inflation",
       "rentGrowthRate": "Rent Growth",
+      "rentGrowth": "Rent Growth",
       "years": "Years",
       "retirement": "Retirement",
       "marketValue": "Market Value",
@@ -515,6 +568,8 @@
       "verdict": "Verdict",
       "verdictSpecialRepayment": "Special repayment is more advantageous",
       "verdictEtf": "ETF investment is more advantageous",
+      "winnerSpecialRepayment": "Special repayment is more advantageous",
+      "winnerEtf": "ETF investment is more advantageous",
       "advantage": "Advantage",
       "interestSaved": "Interest Saved",
       "monthsSaved": "Months Saved",
@@ -750,7 +805,8 @@
       "image": "Image",
       "defect_report": "Defect Report",
       "other": "Other"
-    }
+    },
+    "cancel": "Cancel"
   },
   "sharing": {
     "title": "Share",
@@ -814,7 +870,7 @@
     "title": "Audit Log",
     "subtitle": "Track all changes to your data",
     "sectionTitle": "Change History",
-    "searchPlaceholder": "Filter by entity ID...",
+    "searchPlaceholder": "Search fields and values...",
     "filterByEntity": "Filter by type",
     "filterByAction": "Filter by action",
     "allEntities": "All types",
@@ -828,7 +884,9 @@
       "entityType": "Type",
       "field": "Field",
       "oldValue": "Old Value",
-      "newValue": "New Value"
+      "newValue": "New Value",
+      "rowsPerPage": "Rows per page",
+      "of": "of"
     },
     "actions": {
       "create": "Created",
