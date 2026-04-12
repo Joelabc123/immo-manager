@@ -62,10 +62,7 @@ export function stopAllCronJobs(): void {
 export function initCronJobs(): void {
   console.log("[CRON] Initializing cron jobs...");
 
-  // Email sync: fetch new emails every 15 minutes
-  import("./email-sync").then(({ registerEmailSyncJob }) => {
-    registerEmailSyncJob();
-  });
+  // Email sync is now handled by the email microservice (apps/email/)
 
   // Market data sync: fetch ECB interest rates daily at 06:00
   import("./market-data").then(({ registerMarketDataSyncJob }) => {

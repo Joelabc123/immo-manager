@@ -33,11 +33,18 @@ export default function TenantsPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const { data: tenantsData, isLoading, isFetching } = trpc.tenants.list.useQuery({
+  const {
+    data: tenantsData,
+    isLoading,
+    isFetching,
+  } = trpc.tenants.list.useQuery({
     search: tableState.debouncedSearch || undefined,
     status: tableState.filters.status as "active" | "former" | undefined,
     propertyId: tableState.filters.property || undefined,
-    sortBy: (tableState.sortColumn ?? "name") as "name" | "rentStart" | "coldRent",
+    sortBy: (tableState.sortColumn ?? "name") as
+      | "name"
+      | "rentStart"
+      | "coldRent",
     sortOrder: tableState.sortOrder,
     page: tableState.page,
     pageSize: tableState.pageSize,
@@ -191,15 +198,13 @@ export default function TenantsPage() {
         filters={filters}
         activeFilters={tableState.filters}
         onFilterChange={tableState.setFilter}
+        searchClassName="flex-[7] min-w-0"
+        filterClassName="w-auto flex-[1.5] min-w-0"
         getRowId={(row) => row.id}
         onRowClick={(row) => router.push(`/tenants/${row.id}`)}
         renderRowActions={(row) => (
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setEditId(row.id)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setEditId(row.id)}>
               <Pencil className="h-4 w-4" />
             </Button>
             <Button

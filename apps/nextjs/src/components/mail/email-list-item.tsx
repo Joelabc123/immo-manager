@@ -3,32 +3,35 @@
 import { cn } from "@/lib/utils";
 import { formatDate } from "@repo/shared/utils";
 import { Badge } from "@/components/ui/badge";
-import { Mail, MailOpen, Send, Eye } from "lucide-react";
+import { Mail, MailOpen, Send, Eye, Paperclip } from "lucide-react";
 
 interface Email {
   id: string;
   fromAddress: string;
   subject: string;
+  snippet?: string | null;
   receivedAt: Date | string;
   isRead: boolean;
   isInbound: boolean;
-  tenantId: string | null;
-  propertyId: string | null;
-  threadId: string | null;
-  openedAt: Date | string | null;
+  tenantId?: string | null;
+  propertyId?: string | null;
+  threadId?: string | null;
+  openedAt?: Date | string | null;
+  hasAttachments?: boolean;
 }
 
 interface EmailListItemProps {
   email: Email;
   isSelected: boolean;
-  showAssign: boolean;
   onSelect: () => void;
+  tenantName?: string;
 }
 
 export function EmailListItem({
   email,
   isSelected,
   onSelect,
+  tenantName,
 }: EmailListItemProps) {
   const date = new Date(email.receivedAt);
 
@@ -59,6 +62,9 @@ export function EmailListItem({
           </span>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
+          {email.hasAttachments && (
+            <Paperclip className="h-3 w-3 text-muted-foreground" />
+          )}
           {email.openedAt && <Eye className="h-3 w-3 text-green-500" />}
           <span className="text-xs text-muted-foreground">
             {formatDate(date)}
@@ -75,9 +81,15 @@ export function EmailListItem({
         {email.subject || "(No Subject)"}
       </span>
 
-      {email.tenantId && (
+      {email.snippet && (
+        <span className="truncate text-xs text-muted-foreground">
+          {email.snippet}
+        </span>
+      )}
+
+      {tenantName && (
         <Badge variant="secondary" className="w-fit text-xs">
-          Tenant
+          {tenantName}
         </Badge>
       )}
     </button>

@@ -35,8 +35,6 @@ export function ProfileSection() {
   });
 
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [emailSignature, setEmailSignature] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -60,8 +58,6 @@ export function ProfileSection() {
 
   if (!initialized) {
     setName(profile.name);
-    setEmail(profile.email);
-    setEmailSignature(profile.emailSignature ?? "");
     setInitialized(true);
   }
 
@@ -69,8 +65,8 @@ export function ProfileSection() {
     e.preventDefault();
     updateMutation.mutate({
       name,
-      email,
-      emailSignature: emailSignature || null,
+      email: profile.email,
+      emailSignature: profile.emailSignature ?? null,
     });
   };
 
@@ -165,25 +161,6 @@ export function ProfileSection() {
               id="profile-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="profile-email">{t("email")}</Label>
-            <Input
-              id="profile-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="profile-signature">{t("emailSignature")}</Label>
-            <Input
-              id="profile-signature"
-              value={emailSignature}
-              onChange={(e) => setEmailSignature(e.target.value)}
             />
           </div>
 

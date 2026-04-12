@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -11,8 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Bold, Italic, List, ListOrdered, Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TemplateSelector } from "./template-selector";
 
 interface ReplyEditorProps {
+  accountId: string;
   replyTo?: string;
   initialTo?: string;
   initialSubject?: string;
@@ -21,6 +23,7 @@ interface ReplyEditorProps {
 }
 
 export function ReplyEditor({
+  accountId,
   replyTo,
   initialTo = "",
   initialSubject = "",
@@ -48,6 +51,7 @@ export function ReplyEditor({
   });
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Placeholder.configure({
@@ -62,18 +66,27 @@ export function ReplyEditor({
     },
   });
 
-  const handleSend = useCallback(() => {
+  const handleSend = () => {
     if (!to || !editor) return;
     const html = editor.getHTML();
     if (!html || html === "<p></p>") return;
 
     sendMutation.mutate({
+      accountId,
       to: to.split(",").map((addr) => addr.trim()),
       subject,
       htmlBody: html,
       replyToMessageId: replyTo,
     });
-  }, [to, subject, editor, replyTo, sendMutation]);
+  };
+
+  const handleTemplateSelect = (template: {
+    subject: string;
+    body: string;
+  }) => {
+    setSubject(template.subject);
+    editor?.commands.setContent(template.body);
+  };
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border bg-background p-3">
@@ -128,6 +141,8 @@ export function ReplyEditor({
         >
           <ListOrdered className="h-4 w-4" />
         </ToolbarButton>
+        <div className="mx-1 h-5 w-px bg-border" />
+        <TemplateSelector onSelect={handleTemplateSelect} />
       </div>
 
       {/* Editor */}

@@ -10,7 +10,8 @@
     "./types": "./src/types/index.ts",
     "./validation": "./src/validation/index.ts",
     "./calculations": "./src/calculations/index.ts",
-    "./utils": "./src/utils/index.ts"
+    "./utils": "./src/utils/index.ts",
+    "./utils/redis": "./src/utils/redis.ts"
   },
   "scripts": {
     "type-check": "tsc --noEmit",
@@ -26,6 +27,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.4.0",
     "drizzle-orm": "^0.45.2",
+    "ioredis": "^5.6.1",
     "postgres": "^3.4.8",
     "zod": "^4.3.6"
   },

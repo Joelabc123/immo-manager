@@ -31,6 +31,7 @@ export function RentAdjustmentDialog({
   onOpenChange,
 }: RentAdjustmentDialogProps) {
   const t = useTranslations("rentAdjustments");
+  const tCommon = useTranslations("common");
   const { formatCurrency } = useCurrency();
   const utils = trpc.useUtils();
   const [newColdRent, setNewColdRent] = useState(
@@ -119,7 +120,7 @@ export function RentAdjustmentDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("../common.cancel", { defaultValue: "Cancel" })}
+            {tCommon("cancel")}
           </Button>
           <Button
             onClick={() =>

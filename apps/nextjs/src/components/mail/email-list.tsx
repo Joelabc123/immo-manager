@@ -10,13 +10,15 @@ interface Email {
   id: string;
   fromAddress: string;
   subject: string;
+  snippet?: string | null;
   receivedAt: Date | string;
   isRead: boolean;
   isInbound: boolean;
-  tenantId: string | null;
-  propertyId: string | null;
-  threadId: string | null;
-  openedAt: Date | string | null;
+  tenantId?: string | null;
+  propertyId?: string | null;
+  threadId?: string | null;
+  openedAt?: Date | string | null;
+  hasAttachments?: boolean;
 }
 
 interface EmailListProps {
@@ -26,9 +28,9 @@ interface EmailListProps {
   limit: number;
   isLoading: boolean;
   selectedId: string | null;
-  showAssign: boolean;
   onSelect: (id: string) => void;
   onPageChange: (page: number) => void;
+  tenantNames?: Map<string, string>;
 }
 
 export function EmailList({
@@ -38,9 +40,9 @@ export function EmailList({
   limit,
   isLoading,
   selectedId,
-  showAssign,
   onSelect,
   onPageChange,
+  tenantNames,
 }: EmailListProps) {
   const t = useTranslations("email");
   const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -78,8 +80,10 @@ export function EmailList({
             key={email.id}
             email={email}
             isSelected={email.id === selectedId}
-            showAssign={showAssign}
             onSelect={() => onSelect(email.id)}
+            tenantName={
+              email.tenantId ? tenantNames?.get(email.tenantId) : undefined
+            }
           />
         ))}
       </div>

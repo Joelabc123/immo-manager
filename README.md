@@ -38,12 +38,13 @@ Die Applikation ist dann erreichbar unter: [http://localhost:3000](http://localh
 
 ## Demo-Login
 
-| Feld     | Wert                       |
-| -------- | -------------------------- |
-| E-Mail   | `demo@immo-manager.de`     |
-| Passwort | `demo1234`                 |
+| Feld     | Wert                   |
+| -------- | ---------------------- |
+| E-Mail   | `demo@immo-manager.de` |
+| Passwort | `demo1234`             |
 
 Der Demo-User "Max Mustermann" wird mit dem Seed erstellt und enthaelt:
+
 - 4 Immobilien (Berlin, Muenchen, Hamburg, Frankfurt)
 - 4 Kredite bei verschiedenen Banken
 - 8 Mieteinheiten
@@ -157,9 +158,9 @@ immo-manager/
 | `make db-generate`  | Drizzle Migrationen generieren                   |
 | `make db-push`      | Schema direkt auf DB anwenden (nur Dev)          |
 | `make db-migrate`   | Ausstehende Migrationen ausführen                |
-| `make db-studio`    | Drizzle Studio oeffnen (Datenbank-GUI)            |
-| `make db-reset`     | Datenbank zuruecksetzen (loescht alle Daten!)      |
-| `make db-seed`      | Datenbank mit Demodaten befuellen                  |
+| `make db-studio`    | Drizzle Studio oeffnen (Datenbank-GUI)           |
+| `make db-reset`     | Datenbank zuruecksetzen (loescht alle Daten!)    |
+| `make db-seed`      | Datenbank mit Demodaten befuellen                |
 | **Code-Qualität**   |                                                  |
 | `make type-check`   | TypeScript Type Checking                         |
 | `make lint`         | ESLint ausführen                                 |

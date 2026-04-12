@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLocale } from "next-intl";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { cn } from "@/lib/utils";
 
 interface MapProperty {
   id: string;
@@ -20,6 +22,26 @@ interface PropertyMapProps {
   center?: [number, number];
   zoom?: number;
 }
+
+interface TileConfig {
+  url: string;
+  attribution: string;
+  subdomains?: string;
+}
+
+const TILE_CONFIGS: Record<string, TileConfig> = {
+  de: {
+    url: "https://tile.openstreetmap.de/{z}/{x}/{y}.png",
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  },
+  en: {
+    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: "abcd",
+  },
+};
 
 // Fix Leaflet default icon issue
 const defaultIcon = L.icon({
@@ -53,33 +75,49 @@ export function PropertyMap({
   center = [51.1657, 10.4515], // Germany center
   zoom = 6,
 }: PropertyMapProps) {
+  const locale = useLocale();
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
     mapRef.current = L.map(containerRef.current).setView(center, zoom);
 
-    L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-      {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: "abcd",
-        maxZoom: 20,
-      },
-    ).addTo(mapRef.current);
+    const config = TILE_CONFIGS[locale] ?? TILE_CONFIGS.en;
+    tileLayerRef.current = L.tileLayer(config.url, {
+      attribution: config.attribution,
+      subdomains: config.subdomains ?? "",
+      maxZoom: 20,
+    }).addTo(mapRef.current);
 
     markersRef.current = L.layerGroup().addTo(mapRef.current);
 
     return () => {
       mapRef.current?.remove();
       mapRef.current = null;
+      tileLayerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- map should only initialize once
   }, []);
+
+  // Swap tile layer when locale changes
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    if (tileLayerRef.current) {
+      tileLayerRef.current.remove();
+    }
+
+    const config = TILE_CONFIGS[locale] ?? TILE_CONFIGS.en;
+    tileLayerRef.current = L.tileLayer(config.url, {
+      attribution: config.attribution,
+      subdomains: config.subdomains ?? "",
+      maxZoom: 20,
+    }).addTo(mapRef.current);
+  }, [locale]);
 
   useEffect(() => {
     if (!mapRef.current || !markersRef.current) return;
@@ -125,5 +163,5 @@ export function PropertyMap({
     }
   }, [properties, selectedId, onMarkerClick]);
 
-  return <div ref={containerRef} className={className} />;
+  return <div ref={containerRef} className={cn("z-0", className)} />;
 }

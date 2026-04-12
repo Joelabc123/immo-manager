@@ -40,6 +40,7 @@ interface RentPaymentTableProps {
 
 export function RentPaymentTable({ tenantId }: RentPaymentTableProps) {
   const t = useTranslations("rentPayments");
+  const tCommon = useTranslations("common");
   const { formatCurrency } = useCurrency();
   const utils = trpc.useUtils();
   const [recordDialogOpen, setRecordDialogOpen] = useState(false);
@@ -188,7 +189,7 @@ export function RentPaymentTable({ tenantId }: RentPaymentTableProps) {
               variant="outline"
               onClick={() => setRecordDialogOpen(false)}
             >
-              {t("../common.cancel", { defaultValue: "Cancel" })}
+              {tCommon("cancel")}
             </Button>
             <Button onClick={handleRecord} disabled={recordMutation.isPending}>
               {recordMutation.isPending ? t("recording") : t("recordPayment")}

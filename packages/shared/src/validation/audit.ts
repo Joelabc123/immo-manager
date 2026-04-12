@@ -9,7 +9,12 @@ const entityTypeValues = Object.values(AUDIT_ENTITY_TYPES) as [
 
 const actionValues = Object.values(AUDIT_ACTIONS) as [string, ...string[]];
 
-const auditSortColumns = ["createdAt", "action", "entityType", "fieldName"] as const;
+const auditSortColumns = [
+  "createdAt",
+  "action",
+  "entityType",
+  "fieldName",
+] as const;
 
 export const listAuditLogsInput = z.object({
   entityType: z.enum(entityTypeValues).optional(),

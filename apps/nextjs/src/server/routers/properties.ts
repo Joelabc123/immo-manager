@@ -26,6 +26,7 @@ import {
 import { router, protectedProcedure } from "../trpc";
 import { logAudit, diffChanges } from "../services/audit";
 import { AUDIT_ENTITY_TYPES } from "@repo/shared/types";
+import { geocodeAddressClient } from "@/lib/geocoding";
 
 const PROPERTY_TRACKED_FIELDS = [
   "street",
@@ -52,11 +53,27 @@ export const propertiesRouter = router({
   create: protectedProcedure
     .input(createPropertyInput)
     .mutation(async ({ ctx, input }) => {
+      // Geocode address if street and city are provided
+      let latitude: string | undefined;
+      let longitude: string | undefined;
+      if (input.street && input.city) {
+        const query = [input.street, input.zipCode, input.city, input.country]
+          .filter(Boolean)
+          .join(", ");
+        const result = await geocodeAddressClient(query);
+        if (result) {
+          latitude = String(result.latitude);
+          longitude = String(result.longitude);
+        }
+      }
+
       const [property] = await db
         .insert(properties)
         .values({
           userId: ctx.user.id,
           ...input,
+          latitude,
+          longitude,
         })
         .returning();
 
@@ -273,10 +290,38 @@ export const propertiesRouter = router({
         });
       }
 
+      // Re-geocode if address fields changed
+      const updateData: Record<string, unknown> = { ...input.data };
+      const addressChanged =
+        (input.data.street !== undefined &&
+          input.data.street !== existing.street) ||
+        (input.data.city !== undefined && input.data.city !== existing.city) ||
+        (input.data.zipCode !== undefined &&
+          input.data.zipCode !== existing.zipCode) ||
+        (input.data.country !== undefined &&
+          input.data.country !== existing.country);
+
+      if (addressChanged) {
+        const street = input.data.street ?? existing.street;
+        const city = input.data.city ?? existing.city;
+        if (street && city) {
+          const zipCode = input.data.zipCode ?? existing.zipCode;
+          const country = input.data.country ?? existing.country;
+          const query = [street, zipCode, city, country]
+            .filter(Boolean)
+            .join(", ");
+          const result = await geocodeAddressClient(query);
+          if (result) {
+            updateData.latitude = String(result.latitude);
+            updateData.longitude = String(result.longitude);
+          }
+        }
+      }
+
       const [updated] = await db
         .update(properties)
         .set({
-          ...input.data,
+          ...updateData,
           updatedAt: new Date(),
         })
         .where(eq(properties.id, input.id))

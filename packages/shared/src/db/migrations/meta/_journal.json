@@ -15,6 +15,20 @@
       "when": 1775313989340,
       "tag": "0001_sloppy_luminals",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776028732121,
+      "tag": "0002_faithful_flatman",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776036488591,
+      "tag": "0003_lowly_stark_industries",
+      "breakpoints": true
     }
   ]
 }

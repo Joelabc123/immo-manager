@@ -55,7 +55,8 @@ export default function AuditPage() {
 
   const { data, isLoading, isFetching } = trpc.audit.list.useQuery({
     search: tableState.debouncedSearch || undefined,
-    entityType: (tableState.filters.entityType as AuditItem["entityType"]) ?? undefined,
+    entityType:
+      (tableState.filters.entityType as AuditItem["entityType"]) ?? undefined,
     action: (tableState.filters.action as AuditItem["action"]) ?? undefined,
     sortBy: (tableState.sortColumn ?? "createdAt") as
       | "createdAt"

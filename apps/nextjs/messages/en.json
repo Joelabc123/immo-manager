@@ -120,6 +120,8 @@
     },
     "filterByType": "Filter by type",
     "allTypes": "All types",
+    "showMap": "Show map",
+    "hideMap": "Hide map",
     "table": {
       "address": "Address",
       "type": "Type",
@@ -506,6 +508,77 @@
           "title": "Special Repayment"
         }
       }
+    },
+    "toolbar": {
+      "edit": "Edit",
+      "done": "Done",
+      "addWidget": "Add Widget",
+      "reset": "Reset",
+      "confirmReset": "Confirm Reset?"
+    },
+    "catalog": {
+      "title": "Widget Catalog"
+    },
+    "widgets": {
+      "kpiBar": {
+        "name": "KPI Bar",
+        "description": "Net worth, cashflow, health score and portfolio value"
+      },
+      "healthScore": {
+        "name": "Health Score",
+        "description": "Detailed breakdown of portfolio health"
+      },
+      "wealthForecast": {
+        "name": "Wealth Forecast",
+        "description": "Long-term wealth projection with appreciation"
+      },
+      "portfolioAllocation": {
+        "name": "Portfolio Allocation",
+        "description": "Distribution by market value or count"
+      },
+      "actionCenter": {
+        "name": "Action Center",
+        "description": "Risks and opportunities at a glance"
+      },
+      "rentIncomeTimeline": {
+        "name": "Rent Income Timeline",
+        "description": "Monthly rental income over the last 12 months"
+      },
+      "vacancyRate": {
+        "name": "Vacancy Rate",
+        "description": "Proportion of vacant units in the portfolio"
+      },
+      "upcomingDeadlines": {
+        "name": "Upcoming Deadlines",
+        "description": "Expiring interest bindings and contracts"
+      },
+      "rentArrears": {
+        "name": "Rent Arrears",
+        "description": "Outstanding payments by overdue period"
+      },
+      "expensesByCategory": {
+        "name": "Expenses by Category",
+        "description": "Distribution of operating costs"
+      },
+      "ltvOverview": {
+        "name": "LTV Overview",
+        "description": "Loan-to-value ratio per property"
+      },
+      "marketComparison": {
+        "name": "Market Comparison",
+        "description": "Actual rent vs. market rent per square meter"
+      },
+      "amortizationProgress": {
+        "name": "Amortization Progress",
+        "description": "Repaid portion per loan"
+      },
+      "quickActions": {
+        "name": "Quick Actions",
+        "description": "Frequently used actions in one click"
+      },
+      "shrink": "Shrink",
+      "grow": "Grow",
+      "resize": "Resize"
     }
   },
   "analysis": {
@@ -626,9 +699,14 @@
   "email": {
     "title": "Email",
     "sync": "Sync",
+    "syncing": "Syncing...",
     "selectEmail": "Select an email from the list",
     "empty": "No emails found",
     "notFound": "Email not found",
+    "noAccount": "No email account configured. Add one in Settings.",
+    "allMail": "All Mail",
+    "labels": "Labels",
+    "tenants": "Tenants",
     "opened": "Opened",
     "reply": "Reply",
     "tabs": {
@@ -726,7 +804,7 @@
       "save": "Save"
     },
     "emailAccount": {
-      "title": "Email Account",
+      "title": "Email Accounts",
       "imapHost": "IMAP Server",
       "imapPort": "IMAP Port",
       "smtpHost": "SMTP Server",
@@ -735,12 +813,21 @@
       "password": "Password",
       "passwordPlaceholder": "Leave unchanged",
       "fromAddress": "From Address",
-      "create": "Create Account",
+      "label": "Account Label",
+      "labelPlaceholder": "e.g. Work, Personal",
+      "syncInterval": "Sync Interval",
+      "syncing": "Syncing",
+      "error": "Error",
+      "create": "Add Account",
+      "addAccount": "Add Email Account",
       "update": "Update",
-      "delete": "Delete Account",
+      "delete": "Delete",
+      "setDefault": "Set as Default",
+      "cancel": "Cancel",
       "test": "Test Connection",
       "testSuccess": "Connection established successfully.",
-      "testFailed": "Connection failed. Please check your credentials."
+      "testFailed": "Connection failed. Please check your credentials.",
+      "saveFailed": "Failed to save account. Please try again."
     },
     "notifications": {
       "title": "Notifications",

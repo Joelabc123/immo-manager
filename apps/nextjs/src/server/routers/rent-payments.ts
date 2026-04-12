@@ -2,11 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, sql, sum } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@repo/shared/db";
-import {
-  rentPayments,
-  tenants,
-  rentalUnits,
-} from "@repo/shared/db/schema";
+import { rentPayments, tenants, rentalUnits } from "@repo/shared/db/schema";
 import { PAYMENT_STATUS } from "@repo/shared/types";
 import {
   recordRentPaymentInput,

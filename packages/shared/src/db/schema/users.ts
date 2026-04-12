@@ -5,6 +5,7 @@ import {
   timestamp,
   integer,
   boolean,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -47,6 +48,8 @@ export const users = pgTable("users", {
   trackingPixelEnabled: boolean("tracking_pixel_enabled")
     .notNull()
     .default(false),
+  dashboardLayout: jsonb("dashboard_layout"),
+  defaultEmailAccountId: uuid("default_email_account_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

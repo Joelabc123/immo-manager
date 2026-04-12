@@ -1,7 +1,10 @@
 export { DataTable } from "./data-table";
 export { DataTableSkeleton } from "./data-table-skeleton";
 export { useDataTableState } from "./use-data-table-state";
-export type { DataTableState, DataTableStateActions } from "./use-data-table-state";
+export type {
+  DataTableState,
+  DataTableStateActions,
+} from "./use-data-table-state";
 export type {
   DataTableColumn,
   DataTableFilter,

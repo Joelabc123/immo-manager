@@ -46,6 +46,7 @@ export function DunningSection({
   overdueAmount = 0,
 }: DunningSectionProps) {
   const t = useTranslations("dunning");
+  const tCommon = useTranslations("common");
   const { formatCurrency } = useCurrency();
   const utils = trpc.useUtils();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -148,7 +149,7 @@ export function DunningSection({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              {t("../common.cancel", { defaultValue: "Cancel" })}
+              {tCommon("cancel")}
             </Button>
             <Button
               onClick={() =>

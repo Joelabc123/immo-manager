@@ -8,10 +8,10 @@
 # Application code runs on the host machine with hot-reload.
 # =============================================================================
 
-.PHONY: help install dev up down logs db-generate db-push db-migrate db-studio db-reset db-seed clean type-check lint lint-fix format format-check check build prod-up prod-down prod-logs prod-ps prod-restart prod-reset setup
+.PHONY: help install dev up down logs db-generate db-push db-migrate db-studio db-reset db-seed clean type-check lint lint-fix format format-check check build prod-up prod-down prod-logs prod-ps prod-restart prod-reset setup email-dev
 
 # Default shell
-SHELL := /bin/zsh
+SHELL := bash
 
 # Colors for output
 CYAN := \033[0;36m
@@ -47,12 +47,13 @@ install: ## Install all dependencies
 # INFRASTRUCTURE (Docker)
 # =============================================================================
 
-up: ## Start infrastructure (Postgres) in Docker
+up: ## Start infrastructure (Postgres + Redis) in Docker
 	@echo "$(CYAN)Starting infrastructure services...$(NC)"
 	docker compose -f docker-compose.dev.yml up -d
 	@echo "$(GREEN)Infrastructure started$(NC)"
 	@echo ""
 	@echo "  PostgreSQL: localhost:5432"
+	@echo "  Redis:      localhost:6379"
 	@echo ""
 
 down: ## Stop infrastructure
@@ -67,16 +68,24 @@ logs: ## Show infrastructure logs
 # DEVELOPMENT
 # =============================================================================
 
-dev: up ## Start development (infrastructure + Next.js with hot-reload)
+dev: up ## Start development (infrastructure + Next.js + email microservice)
 	@if [ ! -f .env ]; then \
 		echo "$(RED)ERROR: No .env file found. Run: make setup$(NC)"; \
 		exit 1; \
 	fi
-	@echo "$(CYAN)Starting development server...$(NC)"
+	@echo "$(CYAN)Starting development server + email microservice...$(NC)"
 	@echo ""
 	@echo "$(YELLOW)NOTE: App runs on host machine with hot-reload$(NC)"
 	@echo ""
-	pnpm --filter @repo/nextjs dev
+	pnpm --filter @repo/email dev & pnpm --filter @repo/nextjs dev
+
+email-dev: up ## Start email microservice in dev mode (with hot-reload)
+	@if [ ! -f .env ]; then \
+		echo "$(RED)ERROR: No .env file found. Run: make setup$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(CYAN)Starting email microservice...$(NC)"
+	pnpm --filter @repo/email dev
 
 # =============================================================================
 # DATABASE

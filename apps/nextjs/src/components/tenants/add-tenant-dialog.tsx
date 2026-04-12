@@ -100,11 +100,24 @@ export function AddTenantDialog({ open, onOpenChange }: AddTenantDialogProps) {
       ...data,
       coldRent: Math.round(data.coldRent * 100),
       warmRent: Math.round(data.warmRent * 100),
+      rentEnd: data.rentEnd || undefined,
+      phone: data.phone || undefined,
+      iban: data.iban || undefined,
+      previousAddress: data.previousAddress || undefined,
     });
   });
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      form.reset();
+      setStep(0);
+      setSelectedPropertyId("");
+    }
+    onOpenChange(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("addTenant")}</DialogTitle>
@@ -244,13 +257,17 @@ export function AddTenantDialog({ open, onOpenChange }: AddTenantDialogProps) {
                   <SelectTrigger>
                     <SelectValue placeholder={t("selectProperty")} />
                   </SelectTrigger>
-                  <SelectContent>
-                    {propertiesData?.items.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {[p.street, p.city].filter(Boolean).join(", ") ||
-                          p.id.slice(0, 8)}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="w-auto min-w-[var(--anchor-width)]">
+                    {propertiesData?.items.map((p) => {
+                      const displayName =
+                        [p.street, p.city].filter(Boolean).join(", ") ||
+                        p.id.slice(0, 8);
+                      return (
+                        <SelectItem key={p.id} value={p.id} label={displayName}>
+                          {displayName}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>

@@ -120,6 +120,8 @@
     },
     "filterByType": "Nach Typ filtern",
     "allTypes": "Alle Typen",
+    "showMap": "Karte anzeigen",
+    "hideMap": "Karte ausblenden",
     "table": {
       "address": "Adresse",
       "type": "Typ",
@@ -506,6 +508,77 @@
           "title": "Sondertilgung"
         }
       }
+    },
+    "toolbar": {
+      "edit": "Bearbeiten",
+      "done": "Fertig",
+      "addWidget": "Widget hinzufuegen",
+      "reset": "Zuruecksetzen",
+      "confirmReset": "Wirklich zuruecksetzen?"
+    },
+    "catalog": {
+      "title": "Widget-Katalog"
+    },
+    "widgets": {
+      "kpiBar": {
+        "name": "Kennzahlen-Leiste",
+        "description": "Nettovermoegen, Cashflow, Gesundheitsscore und Portfoliowert"
+      },
+      "healthScore": {
+        "name": "Gesundheitsscore",
+        "description": "Detaillierte Aufschluesselung der Portfolio-Gesundheit"
+      },
+      "wealthForecast": {
+        "name": "Vermoegensprognose",
+        "description": "Langfristige Vermoegensprojektion mit Wertsteigerung"
+      },
+      "portfolioAllocation": {
+        "name": "Portfolioverteilung",
+        "description": "Verteilung nach Marktwert oder Anzahl"
+      },
+      "actionCenter": {
+        "name": "Handlungscenter",
+        "description": "Risiken und Chancen auf einen Blick"
+      },
+      "rentIncomeTimeline": {
+        "name": "Mieteinnahmen-Verlauf",
+        "description": "Monatliche Mieteinnahmen der letzten 12 Monate"
+      },
+      "vacancyRate": {
+        "name": "Leerstandsquote",
+        "description": "Anteil leerstehender Einheiten im Portfolio"
+      },
+      "upcomingDeadlines": {
+        "name": "Naechste Faelligkeiten",
+        "description": "Auslaufende Zinsbindungen und Vertraege"
+      },
+      "rentArrears": {
+        "name": "Mietrueckstaende",
+        "description": "Offene Zahlungen nach Verzugsdauer"
+      },
+      "expensesByCategory": {
+        "name": "Ausgaben nach Kategorie",
+        "description": "Verteilung der Bewirtschaftungskosten"
+      },
+      "ltvOverview": {
+        "name": "LTV-Uebersicht",
+        "description": "Beleihungsauslauf je Immobilie"
+      },
+      "marketComparison": {
+        "name": "Marktvergleich",
+        "description": "Ist-Miete vs. Marktmiete je Quadratmeter"
+      },
+      "amortizationProgress": {
+        "name": "Tilgungsfortschritt",
+        "description": "Getilgter Anteil je Darlehen"
+      },
+      "quickActions": {
+        "name": "Schnellaktionen",
+        "description": "Haeufig genutzte Aktionen auf einen Klick"
+      },
+      "shrink": "Verkleinern",
+      "grow": "Vergroessern",
+      "resize": "Groesse aendern"
     }
   },
   "analysis": {
@@ -626,9 +699,14 @@
   "email": {
     "title": "E-Mail",
     "sync": "Synchronisieren",
+    "syncing": "Synchronisiere...",
     "selectEmail": "Waehlen Sie eine E-Mail aus der Liste",
     "empty": "Keine E-Mails vorhanden",
     "notFound": "E-Mail nicht gefunden",
+    "noAccount": "Kein E-Mail-Konto eingerichtet. Fuegen Sie eines in den Einstellungen hinzu.",
+    "allMail": "Alle Mails",
+    "labels": "Labels",
+    "tenants": "Mieter",
     "opened": "Geoeffnet",
     "reply": "Antworten",
     "tabs": {
@@ -726,7 +804,7 @@
       "save": "Speichern"
     },
     "emailAccount": {
-      "title": "E-Mail-Konto",
+      "title": "E-Mail-Konten",
       "imapHost": "IMAP-Server",
       "imapPort": "IMAP-Port",
       "smtpHost": "SMTP-Server",
@@ -735,12 +813,21 @@
       "password": "Passwort",
       "passwordPlaceholder": "Unveraendert lassen",
       "fromAddress": "Absender-Adresse",
-      "create": "Konto anlegen",
+      "label": "Konto-Bezeichnung",
+      "labelPlaceholder": "z.B. Arbeit, Privat",
+      "syncInterval": "Sync-Intervall",
+      "syncing": "Synchronisiert",
+      "error": "Fehler",
+      "create": "Konto hinzufuegen",
+      "addAccount": "E-Mail-Konto hinzufuegen",
       "update": "Aktualisieren",
-      "delete": "Konto loeschen",
+      "delete": "Loeschen",
+      "setDefault": "Als Standard setzen",
+      "cancel": "Abbrechen",
       "test": "Verbindung testen",
       "testSuccess": "Verbindung erfolgreich hergestellt.",
-      "testFailed": "Verbindung fehlgeschlagen. Bitte Zugangsdaten pruefen."
+      "testFailed": "Verbindung fehlgeschlagen. Bitte Zugangsdaten pruefen.",
+      "saveFailed": "Konto konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
     },
     "notifications": {
       "title": "Benachrichtigungen",

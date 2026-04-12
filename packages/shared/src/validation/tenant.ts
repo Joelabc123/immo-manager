@@ -21,8 +21,8 @@ export const createTenantInput = z.object({
   depositPaid: z.boolean().default(false),
   rentStart: z.string(),
   rentEnd: z.string().optional(),
-  coldRent: z.number().int().positive(),
-  warmRent: z.number().int().positive(),
+  coldRent: z.number().positive(),
+  warmRent: z.number().positive(),
   noticePeriodMonths: z.number().int().positive().optional(),
   rentType: z.enum(rentTypeValues).optional(),
 });

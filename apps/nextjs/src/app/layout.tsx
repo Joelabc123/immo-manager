@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
@@ -7,7 +7,10 @@ import { ServiceWorkerRegistration } from "@/components/service-worker-registrat
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const montserratHeading = Montserrat({subsets:['latin'],variable:'--font-montserrat'});
+const montserratHeading = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,11 +22,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#0f172a",
+};
+
 export const metadata: Metadata = {
   title: "Immo Manager",
   description: "Immobilien Management System",
   manifest: "/manifest.json",
-  themeColor: "#0f172a",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -48,7 +54,13 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, montserratHeading.variable)}
+      className={cn(
+        "h-full",
+        "antialiased",
+        geistSans.variable,
+        geistMono.variable,
+        montserratHeading.variable,
+      )}
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider messages={messages}>

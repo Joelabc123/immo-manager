@@ -115,6 +115,12 @@ interface DataTableProps<TData> {
 
   /* Extra toolbar content rendered on the right side */
   toolbarActions?: React.ReactNode;
+
+  /** Additional CSS class for the search input wrapper */
+  searchClassName?: string;
+
+  /** Additional CSS class for each filter Select trigger */
+  filterClassName?: string;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -166,6 +172,8 @@ export function DataTable<TData>({
   onRowClick,
   labels = {},
   toolbarActions,
+  searchClassName,
+  filterClassName,
 }: DataTableProps<TData>) {
   const {
     noResults: noResultsLabel = "No results found.",
@@ -177,9 +185,7 @@ export function DataTable<TData>({
 
   /* ---- Column count for colSpan ---- */
   const totalCols =
-    columns.length +
-    (selectable ? 1 : 0) +
-    (renderRowActions ? 1 : 0);
+    columns.length + (selectable ? 1 : 0) + (renderRowActions ? 1 : 0);
 
   /* ---- Selection helpers ---- */
   const allPageSelected =
@@ -232,11 +238,15 @@ export function DataTable<TData>({
   return (
     <div className="space-y-4">
       {/* ---- Toolbar ---- */}
-      {(onSearchChange || (filters && filters.length > 0) || toolbarActions) && (
+      {(onSearchChange ||
+        (filters && filters.length > 0) ||
+        toolbarActions) && (
         <div className="flex flex-wrap items-center gap-3">
           {/* Search */}
           {onSearchChange && (
-            <div className="relative flex-1 min-w-[200px]">
+            <div
+              className={cn("relative flex-1 min-w-[200px]", searchClassName)}
+            >
               <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder={searchPlaceholder ?? labels.search ?? "Search..."}
@@ -257,32 +267,43 @@ export function DataTable<TData>({
           )}
 
           {/* Single-select filters */}
-          {filters?.map((filter) => (
-            <Select
-              key={filter.key}
-              value={activeFilters?.[filter.key] ?? ALL_VALUE}
-              onValueChange={(val) =>
-                onFilterChange?.(
-                  filter.key,
-                  val === null || val === ALL_VALUE ? undefined : val,
-                )
-              }
-            >
-              <SelectTrigger className="w-[180px]" size="sm">
-                <SelectValue placeholder={filter.label} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ALL_VALUE}>
-                  {filter.placeholder ?? allFilterLabel}
-                </SelectItem>
-                {filter.options.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
+          {filters?.map((filter) => {
+            const activeValue = activeFilters?.[filter.key];
+            const displayLabel = activeValue
+              ? (filter.options.find((opt) => opt.value === activeValue)
+                  ?.label ?? activeValue)
+              : (filter.placeholder ?? allFilterLabel);
+
+            return (
+              <Select
+                key={filter.key}
+                value={activeValue ?? ALL_VALUE}
+                onValueChange={(val) =>
+                  onFilterChange?.(
+                    filter.key,
+                    val === null || val === ALL_VALUE ? undefined : val,
+                  )
+                }
+              >
+                <SelectTrigger
+                  className={cn("w-[180px]", filterClassName)}
+                  size="sm"
+                >
+                  <span className="truncate">{displayLabel}</span>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_VALUE}>
+                    {filter.placeholder ?? allFilterLabel}
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ))}
+                  {filter.options.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            );
+          })}
 
           {/* Toolbar actions (right-aligned) */}
           {toolbarActions && (
@@ -302,7 +323,9 @@ export function DataTable<TData>({
           {bulkActions?.map((action) => (
             <Button
               key={action.id}
-              variant={action.variant === "destructive" ? "destructive" : "outline"}
+              variant={
+                action.variant === "destructive" ? "destructive" : "outline"
+              }
               size="sm"
               onClick={() => action.onClick(selectedIds)}
             >

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc";
 import { formatDate } from "@repo/shared/utils";
@@ -9,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ManualAssignDialog } from "./manual-assign-dialog";
-import { ReplyEditor } from "./reply-editor";
 import {
   ArrowLeft,
   Reply,
@@ -19,12 +19,18 @@ import {
   Mail as MailIcon,
 } from "lucide-react";
 
+const ReplyEditor = dynamic(
+  () => import("./reply-editor").then((m) => ({ default: m.ReplyEditor })),
+  { ssr: false },
+);
+
 interface MailReaderProps {
   emailId: string;
+  accountId: string;
   onBack: () => void;
 }
 
-export function MailReader({ emailId, onBack }: MailReaderProps) {
+export function MailReader({ emailId, accountId, onBack }: MailReaderProps) {
   const t = useTranslations("email");
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [showReplyEditor, setShowReplyEditor] = useState(false);
@@ -36,7 +42,7 @@ export function MailReader({ emailId, onBack }: MailReaderProps) {
   });
 
   const { data: thread } = trpc.email.getThread.useQuery(
-    { threadId: body?.email?.threadId ?? "" },
+    { threadId: body?.email?.threadId ?? "", accountId },
     { enabled: !!body?.email?.threadId },
   );
 
@@ -128,6 +134,21 @@ export function MailReader({ emailId, onBack }: MailReaderProps) {
         </div>
       </div>
 
+      {/* Labels */}
+      {body?.labels && body.labels.length > 0 && (
+        <div className="flex items-center gap-1.5 border-b px-3 py-1.5">
+          {body.labels.map((label) => (
+            <Badge key={label.id} variant="secondary" className="text-xs gap-1">
+              <div
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: label.color }}
+              />
+              {label.name}
+            </Badge>
+          ))}
+        </div>
+      )}
+
       {/* Thread indicator */}
       {hasThread && (
         <div className="border-b px-3 py-1.5 text-xs text-muted-foreground">
@@ -148,6 +169,7 @@ export function MailReader({ emailId, onBack }: MailReaderProps) {
       {showReplyEditor && (
         <div className="border-t p-3">
           <ReplyEditor
+            accountId={accountId}
             replyTo={email.messageId}
             initialTo={
               email.isInbound ? email.fromAddress : (email.toAddresses ?? "")

@@ -10,6 +10,8 @@ import {
   Pencil,
   Copy,
   Trash2,
+  Map,
+  PanelRightClose,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -92,6 +94,7 @@ export default function PropertiesPage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [duplicateId, setDuplicateId] = useState<string | null>(null);
+  const [showMap, setShowMap] = useState(true);
 
   const {
     data: propertiesData,
@@ -221,22 +224,16 @@ export default function PropertiesPage() {
   const renderRowActions = (row: PropertyItem) => (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={
-          <Button variant="ghost" size="icon" className="h-8 w-8" />
-        }
+        render={<Button variant="ghost" size="icon" className="h-8 w-8" />}
       >
         <MoreHorizontal className="h-4 w-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => setEditId(row.id)}
-        >
+        <DropdownMenuItem onClick={() => setEditId(row.id)}>
           <Pencil className="mr-2 h-4 w-4" />
           {t("edit")}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setDuplicateId(row.id)}
-        >
+        <DropdownMenuItem onClick={() => setDuplicateId(row.id)}>
           <Copy className="mr-2 h-4 w-4" />
           {t("duplicate")}
         </DropdownMenuItem>
@@ -259,6 +256,23 @@ export default function PropertiesPage() {
           <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowMap((prev) => !prev)}
+        >
+          {showMap ? (
+            <>
+              <PanelRightClose className="mr-1.5 h-4 w-4" />
+              {t("hideMap")}
+            </>
+          ) : (
+            <>
+              <Map className="mr-1.5 h-4 w-4" />
+              {t("showMap")}
+            </>
+          )}
+        </Button>
       </div>
 
       {/* KPI Bar */}
@@ -270,58 +284,69 @@ export default function PropertiesPage() {
         isLoading={kpisLoading}
       />
 
-      {/* Map — always visible */}
-      {propertiesData && propertiesData.items.length > 0 && (
-        <Suspense
-          fallback={<Skeleton className="h-[300px] w-full rounded-lg" />}
-        >
-          <div className="rounded-lg overflow-hidden border">
-            <PropertyMap
-              properties={propertiesData.items}
-              onMarkerClick={(id) => router.push(`/properties/${id}`)}
-              className="h-[300px] w-full"
-            />
-          </div>
-        </Suspense>
-      )}
+      {/* Split layout: DataTable + Map */}
+      <div className="flex flex-col gap-6 lg:flex-row">
+        {/* DataTable */}
+        <div className={showMap ? "min-w-0 lg:w-1/2" : "w-full"}>
+          <DataTable<PropertyItem>
+            columns={columns}
+            data={propertiesData?.items ?? []}
+            total={propertiesData?.total ?? 0}
+            page={tableState.page}
+            pageSize={tableState.pageSize}
+            totalPages={propertiesData?.totalPages ?? 0}
+            isLoading={isLoading}
+            isFetching={isFetching}
+            onPageChange={tableState.setPage}
+            onPageSizeChange={tableState.setPageSize}
+            searchValue={tableState.search}
+            onSearchChange={tableState.setSearch}
+            searchPlaceholder={t("searchPlaceholder")}
+            sortColumn={tableState.sortColumn}
+            sortOrder={tableState.sortOrder}
+            onSortChange={tableState.setSort}
+            filters={filters}
+            activeFilters={tableState.filters}
+            onFilterChange={tableState.setFilter}
+            getRowId={(row) => row.id}
+            onRowClick={handlePropertyClick}
+            renderRowActions={renderRowActions}
+            toolbarActions={
+              <Button onClick={() => setWizardOpen(true)}>
+                <Plus className="mr-1.5 h-4 w-4" />
+                {t("addProperty")}
+              </Button>
+            }
+            labels={{
+              noResults: t("table.noResults"),
+              rowsPerPage: t("table.rowsPerPage"),
+              of: t("table.of"),
+              selected: t("table.selected"),
+            }}
+          />
+        </div>
 
-      {/* DataTable */}
-      <DataTable<PropertyItem>
-        columns={columns}
-        data={propertiesData?.items ?? []}
-        total={propertiesData?.total ?? 0}
-        page={tableState.page}
-        pageSize={tableState.pageSize}
-        totalPages={propertiesData?.totalPages ?? 0}
-        isLoading={isLoading}
-        isFetching={isFetching}
-        onPageChange={tableState.setPage}
-        onPageSizeChange={tableState.setPageSize}
-        searchValue={tableState.search}
-        onSearchChange={tableState.setSearch}
-        searchPlaceholder={t("searchPlaceholder")}
-        sortColumn={tableState.sortColumn}
-        sortOrder={tableState.sortOrder}
-        onSortChange={tableState.setSort}
-        filters={filters}
-        activeFilters={tableState.filters}
-        onFilterChange={tableState.setFilter}
-        getRowId={(row) => row.id}
-        onRowClick={handlePropertyClick}
-        renderRowActions={renderRowActions}
-        toolbarActions={
-          <Button onClick={() => setWizardOpen(true)}>
-            <Plus className="mr-1.5 h-4 w-4" />
-            {t("addProperty")}
-          </Button>
-        }
-        labels={{
-          noResults: t("table.noResults"),
-          rowsPerPage: t("table.rowsPerPage"),
-          of: t("table.of"),
-          selected: t("table.selected"),
-        }}
-      />
+        {/* Map — sticky sidebar (50% on lg+, full width stacked on mobile) */}
+        {showMap && propertiesData && propertiesData.items.length > 0 && (
+          <div className="w-full lg:w-1/2">
+            <div className="lg:sticky lg:top-20">
+              <Suspense
+                fallback={
+                  <Skeleton className="h-[380px] w-full rounded-lg lg:h-[calc(95vh-12rem)]" />
+                }
+              >
+                <div className="overflow-hidden rounded-lg border">
+                  <PropertyMap
+                    properties={propertiesData.items}
+                    onMarkerClick={(id) => router.push(`/properties/${id}`)}
+                    className="h-[380px] w-full lg:h-[calc(95vh-12rem)]"
+                  />
+                </div>
+              </Suspense>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Dialogs */}
       <AddPropertyWizard open={wizardOpen} onOpenChange={setWizardOpen} />

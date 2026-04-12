@@ -129,6 +129,10 @@ export function EditTenantDialog({
         ...data,
         coldRent: Math.round(data.coldRent * 100),
         warmRent: Math.round(data.warmRent * 100),
+        rentEnd: data.rentEnd || undefined,
+        phone: data.phone || undefined,
+        iban: data.iban || undefined,
+        previousAddress: data.previousAddress || undefined,
       },
     });
   });

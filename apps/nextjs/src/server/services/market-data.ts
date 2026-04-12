@@ -83,7 +83,12 @@ async function fetchEcbSeries(
     .toISOString()
     .split("T")[0];
 
-  const url = `${ECB_DATA_API}/${seriesKey}?startPeriod=${startDate}&endPeriod=${endDate}&format=jsondata`;
+  // ECB API expects flowRef/key format (e.g. FM/D.U2.EUR.4F.KR.MRR_FR.LEV)
+  const dotIndex = seriesKey.indexOf(".");
+  const flowRef = seriesKey.substring(0, dotIndex);
+  const key = seriesKey.substring(dotIndex + 1);
+
+  const url = `${ECB_DATA_API}/${flowRef}/${key}?startPeriod=${startDate}&endPeriod=${endDate}&format=jsondata`;
 
   try {
     const response = await fetch(url, {

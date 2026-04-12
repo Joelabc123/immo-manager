@@ -1,4 +1,4 @@
-import { and, eq, sql, count } from "drizzle-orm";
+import { and, eq, sql, count, gte, lte } from "drizzle-orm";
 import { db } from "@repo/shared/db";
 import {
   properties,
@@ -17,7 +17,9 @@ import { evaluateActionCenterRules } from "@repo/shared/calculations";
 import {
   wealthForecastInput,
   dismissActionItemInput,
+  saveDashboardLayoutInput,
 } from "@repo/shared/validation";
+import { DEFAULT_DASHBOARD_LAYOUT } from "@repo/shared/types";
 import { getAllRentBenchmarks } from "../services/market-data";
 
 import { router, protectedProcedure } from "../trpc";
@@ -530,4 +532,483 @@ export const dashboardRouter = router({
 
       return { success: true };
     }),
+
+  getRentIncomeTimeline: protectedProcedure.query(async ({ ctx }) => {
+    const today = new Date();
+    const twelveMonthsAgo = new Date(today);
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+    twelveMonthsAgo.setDate(1);
+
+    const result = await db
+      .select({
+        month: sql<string>`to_char(${rentPayments.dueDate}, 'YYYY-MM')`,
+        amount: sql<number>`COALESCE(SUM(COALESCE(${rentPayments.paidAmount}, 0)), 0)`,
+      })
+      .from(rentPayments)
+      .innerJoin(tenants, eq(rentPayments.tenantId, tenants.id))
+      .where(
+        and(
+          eq(tenants.userId, ctx.user.id),
+          gte(
+            rentPayments.dueDate,
+            twelveMonthsAgo.toISOString().split("T")[0],
+          ),
+        ),
+      )
+      .groupBy(sql`to_char(${rentPayments.dueDate}, 'YYYY-MM')`)
+      .orderBy(sql`to_char(${rentPayments.dueDate}, 'YYYY-MM')`);
+
+    return result.map((r) => ({
+      month: r.month,
+      amount: Number(r.amount),
+    }));
+  }),
+
+  getVacancyRate: protectedProcedure.query(async ({ ctx }) => {
+    const today = new Date().toISOString().split("T")[0];
+
+    const allUnits = await db
+      .select({
+        id: rentalUnits.id,
+        name: rentalUnits.name,
+        propertyId: rentalUnits.propertyId,
+      })
+      .from(rentalUnits)
+      .innerJoin(properties, eq(rentalUnits.propertyId, properties.id))
+      .where(eq(properties.userId, ctx.user.id));
+
+    const activeTenantUnits = await db
+      .select({ rentalUnitId: tenants.rentalUnitId })
+      .from(tenants)
+      .where(
+        and(
+          eq(tenants.userId, ctx.user.id),
+          sql`${tenants.rentStart} <= ${today}`,
+          sql`(${tenants.rentEnd} IS NULL OR ${tenants.rentEnd} >= ${today})`,
+        ),
+      );
+
+    const occupiedIds = new Set(
+      activeTenantUnits
+        .map((t) => t.rentalUnitId)
+        .filter((id): id is string => id !== null),
+    );
+
+    const vacantUnits = allUnits.filter((u) => !occupiedIds.has(u.id));
+
+    return {
+      totalUnits: allUnits.length,
+      occupiedUnits: allUnits.length - vacantUnits.length,
+      vacantUnits: vacantUnits.length,
+      vacantUnitNames: vacantUnits.map((u) => u.name),
+    };
+  }),
+
+  getUpcomingDeadlines: protectedProcedure.query(async ({ ctx }) => {
+    const today = new Date();
+    const ninetyDaysLater = new Date(today);
+    ninetyDaysLater.setDate(ninetyDaysLater.getDate() + 90);
+    const todayStr = today.toISOString().split("T")[0];
+    const futureStr = ninetyDaysLater.toISOString().split("T")[0];
+
+    const propertyNameMap = new Map<string, string>();
+    const userProperties = await db
+      .select({
+        id: properties.id,
+        street: properties.street,
+        city: properties.city,
+        type: properties.type,
+      })
+      .from(properties)
+      .where(eq(properties.userId, ctx.user.id));
+
+    for (const p of userProperties) {
+      propertyNameMap.set(
+        p.id,
+        p.street && p.city ? `${p.street}, ${p.city}` : (p.city ?? p.type),
+      );
+    }
+
+    const propertyIds = userProperties.map((p) => p.id);
+    if (propertyIds.length === 0) return [];
+
+    const deadlines: Array<{
+      id: string;
+      type: string;
+      label: string;
+      propertyName: string;
+      date: string;
+      daysRemaining: number;
+    }> = [];
+
+    // Interest binding expiry
+    const expiringLoans = await db
+      .select({
+        id: loans.id,
+        propertyId: loans.propertyId,
+        bankName: loans.bankName,
+        interestFixedUntil: loans.interestFixedUntil,
+      })
+      .from(loans)
+      .where(
+        and(
+          sql`${loans.propertyId} IN ${propertyIds}`,
+          sql`${loans.interestFixedUntil} IS NOT NULL`,
+          gte(loans.interestFixedUntil, todayStr),
+          lte(loans.interestFixedUntil, futureStr),
+        ),
+      );
+
+    for (const loan of expiringLoans) {
+      if (!loan.interestFixedUntil) continue;
+      const expiryDate = new Date(loan.interestFixedUntil);
+      const daysRemaining = Math.ceil(
+        (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      deadlines.push({
+        id: `loan-${loan.id}`,
+        type: "interest_binding",
+        label: loan.bankName,
+        propertyName: propertyNameMap.get(loan.propertyId) ?? "Unknown",
+        date: loan.interestFixedUntil,
+        daysRemaining,
+      });
+    }
+
+    // Contract expiry (tenant rentEnd)
+    const expiringTenants = await db
+      .select({
+        id: tenants.id,
+        firstName: tenants.firstName,
+        lastName: tenants.lastName,
+        rentalUnitId: tenants.rentalUnitId,
+        rentEnd: tenants.rentEnd,
+      })
+      .from(tenants)
+      .where(
+        and(
+          eq(tenants.userId, ctx.user.id),
+          sql`${tenants.rentEnd} IS NOT NULL`,
+          gte(tenants.rentEnd, todayStr),
+          lte(tenants.rentEnd, futureStr),
+        ),
+      );
+
+    const unitToProperty = new Map<string, string>();
+    if (expiringTenants.length > 0) {
+      const units = await db
+        .select({ id: rentalUnits.id, propertyId: rentalUnits.propertyId })
+        .from(rentalUnits)
+        .where(sql`${rentalUnits.propertyId} IN ${propertyIds}`);
+      for (const u of units) {
+        unitToProperty.set(u.id, u.propertyId);
+      }
+    }
+
+    for (const tenant of expiringTenants) {
+      if (!tenant.rentEnd) continue;
+      const expiryDate = new Date(tenant.rentEnd);
+      const daysRemaining = Math.ceil(
+        (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      const propId = tenant.rentalUnitId
+        ? unitToProperty.get(tenant.rentalUnitId)
+        : null;
+      deadlines.push({
+        id: `tenant-${tenant.id}`,
+        type: "contract_expiry",
+        label: `${tenant.firstName} ${tenant.lastName}`,
+        propertyName: propId
+          ? (propertyNameMap.get(propId) ?? "Unknown")
+          : "Unknown",
+        date: tenant.rentEnd,
+        daysRemaining,
+      });
+    }
+
+    deadlines.sort((a, b) => a.daysRemaining - b.daysRemaining);
+    return deadlines.slice(0, 10);
+  }),
+
+  getRentArrears: protectedProcedure.query(async ({ ctx }) => {
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
+
+    const overduePayments = await db
+      .select({
+        tenantId: rentPayments.tenantId,
+        expectedAmount: rentPayments.expectedAmount,
+        paidAmount: rentPayments.paidAmount,
+        dueDate: rentPayments.dueDate,
+      })
+      .from(rentPayments)
+      .innerJoin(tenants, eq(rentPayments.tenantId, tenants.id))
+      .where(
+        and(
+          eq(tenants.userId, ctx.user.id),
+          eq(rentPayments.status, PAYMENT_STATUS.pending),
+          sql`${rentPayments.dueDate} < ${todayStr}`,
+        ),
+      );
+
+    const buckets = [
+      { label: "0-30", amount: 0, count: 0 },
+      { label: "30-60", amount: 0, count: 0 },
+      { label: "60+", amount: 0, count: 0 },
+    ];
+
+    const tenantBuckets = new Map<string, Set<string>>();
+
+    for (const payment of overduePayments) {
+      const dueDate = new Date(payment.dueDate);
+      const daysOverdue = Math.floor(
+        (today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      const overdue = payment.expectedAmount - (payment.paidAmount ?? 0);
+
+      let bucketIndex: number;
+      if (daysOverdue <= 30) {
+        bucketIndex = 0;
+      } else if (daysOverdue <= 60) {
+        bucketIndex = 1;
+      } else {
+        bucketIndex = 2;
+      }
+
+      buckets[bucketIndex].amount += overdue;
+      if (!tenantBuckets.has(buckets[bucketIndex].label)) {
+        tenantBuckets.set(buckets[bucketIndex].label, new Set());
+      }
+      tenantBuckets.get(buckets[bucketIndex].label)!.add(payment.tenantId);
+    }
+
+    for (const bucket of buckets) {
+      bucket.count = tenantBuckets.get(bucket.label)?.size ?? 0;
+    }
+
+    const totalOverdue = buckets.reduce((sum, b) => sum + b.amount, 0);
+
+    return { buckets, totalOverdue };
+  }),
+
+  getExpensesByCategory: protectedProcedure.query(async ({ ctx }) => {
+    const result = await db
+      .select({
+        category: expenses.category,
+        amount: sql<number>`COALESCE(SUM(${expenses.amount}), 0)`,
+      })
+      .from(expenses)
+      .innerJoin(properties, eq(expenses.propertyId, properties.id))
+      .where(eq(properties.userId, ctx.user.id))
+      .groupBy(expenses.category)
+      .orderBy(sql`SUM(${expenses.amount}) DESC`);
+
+    return result.map((r) => ({
+      category: r.category,
+      amount: Number(r.amount),
+    }));
+  }),
+
+  getLtvOverview: protectedProcedure.query(async ({ ctx }) => {
+    const userProperties = await db
+      .select({
+        id: properties.id,
+        street: properties.street,
+        city: properties.city,
+        type: properties.type,
+        marketValue: sql<number>`COALESCE(${properties.marketValue}, ${properties.purchasePrice})`,
+      })
+      .from(properties)
+      .where(eq(properties.userId, ctx.user.id));
+
+    if (userProperties.length === 0) return [];
+
+    const propertyIds = userProperties.map((p) => p.id);
+
+    const loanAggs = await db
+      .select({
+        propertyId: loans.propertyId,
+        totalRemaining: sql<number>`COALESCE(SUM(${loans.remainingBalance}), 0)`,
+      })
+      .from(loans)
+      .where(sql`${loans.propertyId} IN ${propertyIds}`)
+      .groupBy(loans.propertyId);
+
+    const loanMap = new Map(
+      loanAggs.map((l) => [l.propertyId, Number(l.totalRemaining)]),
+    );
+
+    return userProperties
+      .map((p) => {
+        const remaining = loanMap.get(p.id) ?? 0;
+        const marketValue = Number(p.marketValue);
+        const ltv = marketValue > 0 ? (remaining / marketValue) * 100 : 0;
+
+        return {
+          propertyId: p.id,
+          propertyName:
+            p.street && p.city ? `${p.street}, ${p.city}` : (p.city ?? p.type),
+          ltv,
+        };
+      })
+      .filter((p) => p.ltv > 0)
+      .sort((a, b) => b.ltv - a.ltv);
+  }),
+
+  getMarketComparison: protectedProcedure.query(async ({ ctx }) => {
+    const today = new Date().toISOString().split("T")[0];
+    const cityBenchmarks = await getAllRentBenchmarks();
+
+    const userProperties = await db
+      .select({
+        id: properties.id,
+        street: properties.street,
+        city: properties.city,
+        type: properties.type,
+        livingAreaSqm: properties.livingAreaSqm,
+      })
+      .from(properties)
+      .where(eq(properties.userId, ctx.user.id));
+
+    if (userProperties.length === 0) return [];
+
+    const propertyIds = userProperties.map((p) => p.id);
+
+    const unitIds = await db
+      .select({ id: rentalUnits.id, propertyId: rentalUnits.propertyId })
+      .from(rentalUnits)
+      .where(sql`${rentalUnits.propertyId} IN ${propertyIds}`);
+
+    const unitToProperty = new Map(unitIds.map((u) => [u.id, u.propertyId]));
+
+    const activeTenants = await db
+      .select({
+        rentalUnitId: tenants.rentalUnitId,
+        coldRent: tenants.coldRent,
+      })
+      .from(tenants)
+      .where(
+        and(
+          eq(tenants.userId, ctx.user.id),
+          sql`${tenants.rentStart} <= ${today}`,
+          sql`(${tenants.rentEnd} IS NULL OR ${tenants.rentEnd} >= ${today})`,
+        ),
+      );
+
+    const rentByProperty = new Map<string, number>();
+    for (const tenant of activeTenants) {
+      if (!tenant.rentalUnitId) continue;
+      const propId = unitToProperty.get(tenant.rentalUnitId);
+      if (!propId) continue;
+      rentByProperty.set(
+        propId,
+        (rentByProperty.get(propId) ?? 0) + tenant.coldRent,
+      );
+    }
+
+    const result: Array<{
+      propertyId: string;
+      propertyName: string;
+      actualRentSqm: number;
+      benchmarkRentSqm: number;
+    }> = [];
+
+    for (const p of userProperties) {
+      if (!p.city || !p.livingAreaSqm || p.livingAreaSqm === 0) continue;
+      const benchmark = cityBenchmarks.get(p.city.toLowerCase().trim());
+      if (!benchmark) continue;
+
+      const totalRent = rentByProperty.get(p.id) ?? 0;
+      const actualPerSqm = Math.round(totalRent / p.livingAreaSqm);
+
+      result.push({
+        propertyId: p.id,
+        propertyName:
+          p.street && p.city ? `${p.street}, ${p.city}` : (p.city ?? p.type),
+        actualRentSqm: actualPerSqm,
+        benchmarkRentSqm: benchmark,
+      });
+    }
+
+    return result;
+  }),
+
+  getAmortizationProgress: protectedProcedure.query(async ({ ctx }) => {
+    const userLoans = await db
+      .select({
+        id: loans.id,
+        propertyId: loans.propertyId,
+        bankName: loans.bankName,
+        loanAmount: loans.loanAmount,
+        remainingBalance: loans.remainingBalance,
+      })
+      .from(loans)
+      .innerJoin(properties, eq(loans.propertyId, properties.id))
+      .where(eq(properties.userId, ctx.user.id));
+
+    const propertyNames = await db
+      .select({
+        id: properties.id,
+        street: properties.street,
+        city: properties.city,
+        type: properties.type,
+      })
+      .from(properties)
+      .where(eq(properties.userId, ctx.user.id));
+
+    const nameMap = new Map(
+      propertyNames.map((p) => [
+        p.id,
+        p.street && p.city ? `${p.street}, ${p.city}` : (p.city ?? p.type),
+      ]),
+    );
+
+    return userLoans.map((loan) => ({
+      loanId: loan.id,
+      bankName: loan.bankName,
+      propertyName: nameMap.get(loan.propertyId) ?? "Unknown",
+      originalAmount: loan.loanAmount,
+      remainingBalance: loan.remainingBalance,
+    }));
+  }),
+
+  getDashboardLayout: protectedProcedure.query(async ({ ctx }) => {
+    const [user] = await db
+      .select({ dashboardLayout: users.dashboardLayout })
+      .from(users)
+      .where(eq(users.id, ctx.user.id))
+      .limit(1);
+
+    if (user?.dashboardLayout) {
+      return user.dashboardLayout as typeof DEFAULT_DASHBOARD_LAYOUT;
+    }
+
+    return DEFAULT_DASHBOARD_LAYOUT;
+  }),
+
+  saveDashboardLayout: protectedProcedure
+    .input(saveDashboardLayoutInput)
+    .mutation(async ({ ctx, input }) => {
+      await db
+        .update(users)
+        .set({
+          dashboardLayout: input.layout,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, ctx.user.id));
+
+      return { success: true };
+    }),
+
+  resetDashboardLayout: protectedProcedure.mutation(async ({ ctx }) => {
+    await db
+      .update(users)
+      .set({
+        dashboardLayout: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, ctx.user.id));
+
+    return { success: true };
+  }),
 });

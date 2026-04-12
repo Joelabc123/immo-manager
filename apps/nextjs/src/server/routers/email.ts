@@ -1,12 +1,27 @@
 import { TRPCError } from "@trpc/server";
-import { eq, and, desc, isNull, isNotNull, count } from "drizzle-orm";
+import {
+  eq,
+  and,
+  desc,
+  isNull,
+  isNotNull,
+  count,
+  inArray,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@repo/shared/db";
 import {
   emailAccounts,
+  emailFolders,
   emails,
+  emailLabels,
+  emailEmailLabels,
   emailTemplates,
   users,
+  tenants,
+  rentalUnits,
+  properties,
 } from "@repo/shared/db/schema";
 import {
   createEmailAccountInput,
@@ -17,29 +32,63 @@ import {
   listEmailsInput,
   createEmailTemplateInput,
   updateEmailTemplateInput,
+  createLabelInput,
+  updateLabelInput,
+  assignLabelsInput,
 } from "@repo/shared/validation";
+import { PREDEFINED_LABELS, AUDIT_ENTITY_TYPES } from "@repo/shared/types";
+import { publishEvent, REDIS_CHANNELS } from "@repo/shared/utils/redis";
 import { router, protectedProcedure } from "../trpc";
 import { logAudit } from "../services/audit";
-import { AUDIT_ENTITY_TYPES } from "@repo/shared/types";
 import {
   encryptEmailPassword,
   decryptEmailPassword,
 } from "../services/email-crypto";
 import { logger } from "@/lib/logger";
 
-// Helper to fetch email source from IMAP by message-id
-async function fetchEmailSource(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  client: any,
-  messageId: string,
-): Promise<Buffer | null> {
-  const uids = await client.search(
-    { header: { "message-id": messageId } },
-    { uid: true },
+/**
+ * Verify that an email account belongs to the current user.
+ * Throws NOT_FOUND if the account does not exist or belongs to another user.
+ */
+async function verifyAccountOwnership(accountId: string, userId: string) {
+  const [account] = await db
+    .select()
+    .from(emailAccounts)
+    .where(
+      and(eq(emailAccounts.id, accountId), eq(emailAccounts.userId, userId)),
+    )
+    .limit(1);
+
+  if (!account) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Email account not found",
+    });
+  }
+
+  return account;
+}
+
+/**
+ * Seed predefined labels for a user (only if they have none yet).
+ */
+async function seedPredefinedLabels(userId: string) {
+  const existing = await db
+    .select({ id: emailLabels.id })
+    .from(emailLabels)
+    .where(eq(emailLabels.userId, userId))
+    .limit(1);
+
+  if (existing.length > 0) return;
+
+  await db.insert(emailLabels).values(
+    PREDEFINED_LABELS.map((label) => ({
+      userId,
+      name: label.name,
+      color: label.color,
+      isPredefined: true,
+    })),
   );
-  if (!uids || uids.length === 0) return null;
-  const message = await client.fetchOne(String(uids[0]), { source: true });
-  return message?.source ?? null;
 }
 
 export const emailRouter = router({
@@ -48,21 +97,6 @@ export const emailRouter = router({
   createAccount: protectedProcedure
     .input(createEmailAccountInput)
     .mutation(async ({ ctx, input }) => {
-      // Only one email account per user
-      const existing = await db
-        .select({ id: emailAccounts.id })
-        .from(emailAccounts)
-        .where(eq(emailAccounts.userId, ctx.user.id))
-        .limit(1);
-
-      if (existing.length > 0) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message:
-            "Email account already configured. Update or delete it first.",
-        });
-      }
-
       const { encryptedPassword, encryptionIv, encryptionTag } =
         encryptEmailPassword(input.password);
 
@@ -70,6 +104,7 @@ export const emailRouter = router({
         .insert(emailAccounts)
         .values({
           userId: ctx.user.id,
+          label: input.label,
           imapHost: input.imapHost,
           imapPort: input.imapPort,
           smtpHost: input.smtpHost,
@@ -79,16 +114,36 @@ export const emailRouter = router({
           encryptionIv,
           encryptionTag,
           fromAddress: input.fromAddress,
+          syncIntervalMinutes: input.syncIntervalMinutes,
         })
         .returning({
           id: emailAccounts.id,
+          label: emailAccounts.label,
           imapHost: emailAccounts.imapHost,
           imapPort: emailAccounts.imapPort,
           smtpHost: emailAccounts.smtpHost,
           smtpPort: emailAccounts.smtpPort,
           username: emailAccounts.username,
           fromAddress: emailAccounts.fromAddress,
+          syncIntervalMinutes: emailAccounts.syncIntervalMinutes,
+          isActive: emailAccounts.isActive,
         });
+
+      // Seed predefined labels on first account creation
+      await seedPredefinedLabels(ctx.user.id);
+
+      // Set as default if it's the first account
+      const allAccounts = await db
+        .select({ id: emailAccounts.id })
+        .from(emailAccounts)
+        .where(eq(emailAccounts.userId, ctx.user.id));
+
+      if (allAccounts.length === 1) {
+        await db
+          .update(users)
+          .set({ defaultEmailAccountId: account.id })
+          .where(eq(users.id, ctx.user.id));
+      }
 
       logger.info(
         { userId: ctx.user.id, accountId: account.id },
@@ -102,58 +157,91 @@ export const emailRouter = router({
         action: "create",
       });
 
+      // Notify email microservice
+      await publishEvent(REDIS_CHANNELS.EMAIL_ACCOUNT_UPDATED, {
+        accountId: account.id,
+        userId: ctx.user.id,
+        action: "create",
+      });
+
       return account;
     }),
 
-  getAccount: protectedProcedure.query(async ({ ctx }) => {
-    const [account] = await db
+  getAccounts: protectedProcedure.query(async ({ ctx }) => {
+    return db
       .select({
         id: emailAccounts.id,
+        label: emailAccounts.label,
         imapHost: emailAccounts.imapHost,
         imapPort: emailAccounts.imapPort,
         smtpHost: emailAccounts.smtpHost,
         smtpPort: emailAccounts.smtpPort,
         username: emailAccounts.username,
         fromAddress: emailAccounts.fromAddress,
+        syncIntervalMinutes: emailAccounts.syncIntervalMinutes,
+        lastSyncAt: emailAccounts.lastSyncAt,
+        syncStatus: emailAccounts.syncStatus,
+        syncError: emailAccounts.syncError,
+        isActive: emailAccounts.isActive,
         createdAt: emailAccounts.createdAt,
         updatedAt: emailAccounts.updatedAt,
       })
       .from(emailAccounts)
       .where(eq(emailAccounts.userId, ctx.user.id))
-      .limit(1);
-
-    return account ?? null;
+      .orderBy(emailAccounts.createdAt);
   }),
+
+  getAccount: protectedProcedure
+    .input(z.object({ accountId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const account = await verifyAccountOwnership(
+        input.accountId,
+        ctx.user.id,
+      );
+      // Return without sensitive fields
+      return {
+        id: account.id,
+        label: account.label,
+        imapHost: account.imapHost,
+        imapPort: account.imapPort,
+        smtpHost: account.smtpHost,
+        smtpPort: account.smtpPort,
+        username: account.username,
+        fromAddress: account.fromAddress,
+        syncIntervalMinutes: account.syncIntervalMinutes,
+        lastSyncAt: account.lastSyncAt,
+        syncStatus: account.syncStatus,
+        syncError: account.syncError,
+        isActive: account.isActive,
+        createdAt: account.createdAt,
+        updatedAt: account.updatedAt,
+      };
+    }),
+
+  setDefaultAccount: protectedProcedure
+    .input(z.object({ accountId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      await verifyAccountOwnership(input.accountId, ctx.user.id);
+
+      await db
+        .update(users)
+        .set({ defaultEmailAccountId: input.accountId })
+        .where(eq(users.id, ctx.user.id));
+
+      return { success: true };
+    }),
 
   updateAccount: protectedProcedure
     .input(updateEmailAccountInput)
     .mutation(async ({ ctx, input }) => {
-      const [existing] = await db
-        .select({
-          id: emailAccounts.id,
-          userId: emailAccounts.userId,
-        })
-        .from(emailAccounts)
-        .where(
-          and(
-            eq(emailAccounts.id, input.id),
-            eq(emailAccounts.userId, ctx.user.id),
-          ),
-        )
-        .limit(1);
-
-      if (!existing) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Email account not found",
-        });
-      }
+      await verifyAccountOwnership(input.id, ctx.user.id);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updateData: Record<string, any> = {
         updatedAt: new Date(),
       };
 
+      if (input.label !== undefined) updateData.label = input.label;
       if (input.imapHost !== undefined) updateData.imapHost = input.imapHost;
       if (input.imapPort !== undefined) updateData.imapPort = input.imapPort;
       if (input.smtpHost !== undefined) updateData.smtpHost = input.smtpHost;
@@ -161,6 +249,9 @@ export const emailRouter = router({
       if (input.username !== undefined) updateData.username = input.username;
       if (input.fromAddress !== undefined)
         updateData.fromAddress = input.fromAddress;
+      if (input.syncIntervalMinutes !== undefined)
+        updateData.syncIntervalMinutes = input.syncIntervalMinutes;
+      if (input.isActive !== undefined) updateData.isActive = input.isActive;
 
       if (input.password !== undefined) {
         const { encryptedPassword, encryptionIv, encryptionTag } =
@@ -176,12 +267,15 @@ export const emailRouter = router({
         .where(eq(emailAccounts.id, input.id))
         .returning({
           id: emailAccounts.id,
+          label: emailAccounts.label,
           imapHost: emailAccounts.imapHost,
           imapPort: emailAccounts.imapPort,
           smtpHost: emailAccounts.smtpHost,
           smtpPort: emailAccounts.smtpPort,
           username: emailAccounts.username,
           fromAddress: emailAccounts.fromAddress,
+          syncIntervalMinutes: emailAccounts.syncIntervalMinutes,
+          isActive: emailAccounts.isActive,
         });
 
       logger.info(
@@ -196,33 +290,64 @@ export const emailRouter = router({
         action: "update",
       });
 
+      await publishEvent(REDIS_CHANNELS.EMAIL_ACCOUNT_UPDATED, {
+        accountId: updated.id,
+        userId: ctx.user.id,
+        action: "update",
+      });
+
       return updated;
     }),
 
-  deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {
-    const deleted = await db
-      .delete(emailAccounts)
-      .where(eq(emailAccounts.userId, ctx.user.id))
-      .returning({ id: emailAccounts.id });
+  deleteAccount: protectedProcedure
+    .input(z.object({ accountId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      await verifyAccountOwnership(input.accountId, ctx.user.id);
 
-    if (deleted.length === 0) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "No email account found",
+      await db
+        .delete(emailAccounts)
+        .where(eq(emailAccounts.id, input.accountId));
+
+      // If this was the default, clear or reassign
+      const [user] = await db
+        .select({ defaultEmailAccountId: users.defaultEmailAccountId })
+        .from(users)
+        .where(eq(users.id, ctx.user.id))
+        .limit(1);
+
+      if (user?.defaultEmailAccountId === input.accountId) {
+        const [next] = await db
+          .select({ id: emailAccounts.id })
+          .from(emailAccounts)
+          .where(eq(emailAccounts.userId, ctx.user.id))
+          .limit(1);
+
+        await db
+          .update(users)
+          .set({ defaultEmailAccountId: next?.id ?? null })
+          .where(eq(users.id, ctx.user.id));
+      }
+
+      logger.info(
+        { userId: ctx.user.id, accountId: input.accountId },
+        "Email account deleted",
+      );
+
+      logAudit({
+        userId: ctx.user.id,
+        entityType: AUDIT_ENTITY_TYPES.email_account,
+        entityId: input.accountId,
+        action: "delete",
       });
-    }
 
-    logger.info({ userId: ctx.user.id }, "Email account deleted");
+      await publishEvent(REDIS_CHANNELS.EMAIL_ACCOUNT_UPDATED, {
+        accountId: input.accountId,
+        userId: ctx.user.id,
+        action: "delete",
+      });
 
-    logAudit({
-      userId: ctx.user.id,
-      entityType: AUDIT_ENTITY_TYPES.email_account,
-      entityId: deleted[0].id,
-      action: "delete",
-    });
-
-    return { success: true };
-  }),
+      return { success: true };
+    }),
 
   testConnection: protectedProcedure
     .input(testEmailConnectionInput)
@@ -273,68 +398,339 @@ export const emailRouter = router({
       return results;
     }),
 
+  // ────────────────── Folders ──────────────────
+
+  listFolders: protectedProcedure
+    .input(z.object({ accountId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      await verifyAccountOwnership(input.accountId, ctx.user.id);
+
+      return db
+        .select()
+        .from(emailFolders)
+        .where(eq(emailFolders.emailAccountId, input.accountId))
+        .orderBy(emailFolders.type, emailFolders.name);
+    }),
+
+  // ────────────────── Labels ──────────────────
+
+  listLabels: protectedProcedure.query(async ({ ctx }) => {
+    return db
+      .select()
+      .from(emailLabels)
+      .where(eq(emailLabels.userId, ctx.user.id))
+      .orderBy(emailLabels.isPredefined, emailLabels.name);
+  }),
+
+  createLabel: protectedProcedure
+    .input(createLabelInput)
+    .mutation(async ({ ctx, input }) => {
+      const [label] = await db
+        .insert(emailLabels)
+        .values({
+          userId: ctx.user.id,
+          name: input.name,
+          color: input.color,
+          isPredefined: false,
+        })
+        .returning();
+
+      return label;
+    }),
+
+  updateLabel: protectedProcedure
+    .input(updateLabelInput)
+    .mutation(async ({ ctx, input }) => {
+      const updateData: Record<string, unknown> = {};
+      if (input.name !== undefined) updateData.name = input.name;
+      if (input.color !== undefined) updateData.color = input.color;
+
+      const [updated] = await db
+        .update(emailLabels)
+        .set(updateData)
+        .where(
+          and(
+            eq(emailLabels.id, input.id),
+            eq(emailLabels.userId, ctx.user.id),
+          ),
+        )
+        .returning();
+
+      if (!updated) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Label not found",
+        });
+      }
+
+      return updated;
+    }),
+
+  deleteLabel: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const deleted = await db
+        .delete(emailLabels)
+        .where(
+          and(
+            eq(emailLabels.id, input.id),
+            eq(emailLabels.userId, ctx.user.id),
+            eq(emailLabels.isPredefined, false),
+          ),
+        )
+        .returning({ id: emailLabels.id });
+
+      if (deleted.length === 0) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Label not found or is predefined",
+        });
+      }
+
+      return { success: true };
+    }),
+
+  assignLabels: protectedProcedure
+    .input(assignLabelsInput)
+    .mutation(async ({ ctx, input }) => {
+      // Verify the email belongs to one of the user's accounts
+      const [email] = await db
+        .select({ id: emails.id, emailAccountId: emails.emailAccountId })
+        .from(emails)
+        .where(eq(emails.id, input.emailId))
+        .limit(1);
+
+      if (!email) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Email not found" });
+      }
+
+      await verifyAccountOwnership(email.emailAccountId, ctx.user.id);
+
+      // Verify all labels belong to the user
+      if (input.labelIds.length > 0) {
+        const validLabels = await db
+          .select({ id: emailLabels.id })
+          .from(emailLabels)
+          .where(
+            and(
+              inArray(emailLabels.id, input.labelIds),
+              eq(emailLabels.userId, ctx.user.id),
+            ),
+          );
+
+        if (validLabels.length !== input.labelIds.length) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "One or more labels not found",
+          });
+        }
+      }
+
+      // Remove existing labels
+      await db
+        .delete(emailEmailLabels)
+        .where(eq(emailEmailLabels.emailId, input.emailId));
+
+      // Insert new assignments
+      if (input.labelIds.length > 0) {
+        await db.insert(emailEmailLabels).values(
+          input.labelIds.map((labelId) => ({
+            emailId: input.emailId,
+            labelId,
+          })),
+        );
+      }
+
+      return { success: true };
+    }),
+
+  removeLabel: protectedProcedure
+    .input(
+      z.object({
+        emailId: z.string().uuid(),
+        labelId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [email] = await db
+        .select({ emailAccountId: emails.emailAccountId })
+        .from(emails)
+        .where(eq(emails.id, input.emailId))
+        .limit(1);
+
+      if (!email) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Email not found" });
+      }
+
+      await verifyAccountOwnership(email.emailAccountId, ctx.user.id);
+
+      await db
+        .delete(emailEmailLabels)
+        .where(
+          and(
+            eq(emailEmailLabels.emailId, input.emailId),
+            eq(emailEmailLabels.labelId, input.labelId),
+          ),
+        );
+
+      return { success: true };
+    }),
+
   // ────────────────── Email Listing & Actions ──────────────────
+
+  tenantsWithEmails: protectedProcedure
+    .input(z.object({ accountId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      await verifyAccountOwnership(input.accountId, ctx.user.id);
+
+      // Find all tenants who have sent at least one inbound email to this account
+      const results = await db
+        .select({
+          tenantId: emails.tenantId,
+          firstName: tenants.firstName,
+          lastName: tenants.lastName,
+          propertyStreet: properties.street,
+          propertyCity: properties.city,
+          unreadCount: sql<number>`count(*) filter (where ${emails.isRead} = false)`,
+        })
+        .from(emails)
+        .innerJoin(tenants, eq(emails.tenantId, tenants.id))
+        .leftJoin(rentalUnits, eq(tenants.rentalUnitId, rentalUnits.id))
+        .leftJoin(properties, eq(rentalUnits.propertyId, properties.id))
+        .where(
+          and(
+            eq(emails.emailAccountId, input.accountId),
+            isNotNull(emails.tenantId),
+            eq(emails.isInbound, true),
+          ),
+        )
+        .groupBy(
+          emails.tenantId,
+          tenants.firstName,
+          tenants.lastName,
+          properties.street,
+          properties.city,
+        )
+        .orderBy(tenants.lastName, tenants.firstName);
+
+      return results.map((r) => ({
+        tenantId: r.tenantId!,
+        firstName: r.firstName,
+        lastName: r.lastName,
+        propertyName:
+          [r.propertyStreet, r.propertyCity].filter(Boolean).join(", ") || null,
+        unreadCount: Number(r.unreadCount),
+      }));
+    }),
 
   list: protectedProcedure
     .input(listEmailsInput)
     .query(async ({ ctx, input }) => {
-      const [account] = await db
-        .select({ id: emailAccounts.id })
-        .from(emailAccounts)
-        .where(eq(emailAccounts.userId, ctx.user.id))
-        .limit(1);
+      await verifyAccountOwnership(input.accountId, ctx.user.id);
 
-      if (!account) {
-        return { emails: [], total: 0, page: input.page, limit: input.limit };
+      const conditions = [eq(emails.emailAccountId, input.accountId)];
+
+      if (input.tenantId) {
+        // Tenant view: show only inbound emails from this tenant (cross-folder)
+        conditions.push(eq(emails.tenantId, input.tenantId));
+        conditions.push(eq(emails.isInbound, true));
+      } else if (input.folderId) {
+        conditions.push(eq(emails.folderId, input.folderId));
+      } else if (input.inboundOnly) {
+        // "Alle Mails" view: only received emails
+        conditions.push(eq(emails.isInbound, true));
       }
 
-      const matchCondition = input.matched
-        ? isNotNull(emails.tenantId)
-        : isNull(emails.tenantId);
+      if (input.matched === true) {
+        conditions.push(isNotNull(emails.tenantId));
+      } else if (input.matched === false) {
+        conditions.push(isNull(emails.tenantId));
+      }
 
-      const whereClause = and(
-        eq(emails.emailAccountId, account.id),
-        matchCondition,
-      );
+      const whereClause = and(...conditions);
 
-      const [totalResult] = await db
-        .select({ count: count() })
-        .from(emails)
-        .where(whereClause);
+      const emailSelect = {
+        id: emails.id,
+        emailAccountId: emails.emailAccountId,
+        folderId: emails.folderId,
+        tenantId: emails.tenantId,
+        propertyId: emails.propertyId,
+        messageId: emails.messageId,
+        inReplyTo: emails.inReplyTo,
+        threadId: emails.threadId,
+        fromAddress: emails.fromAddress,
+        toAddresses: emails.toAddresses,
+        subject: emails.subject,
+        snippet: emails.snippet,
+        receivedAt: emails.receivedAt,
+        isRead: emails.isRead,
+        isInbound: emails.isInbound,
+        hasAttachments: emails.hasAttachments,
+        createdAt: emails.createdAt,
+      };
 
-      const results = await db
-        .select()
-        .from(emails)
-        .where(whereClause)
-        .orderBy(desc(emails.receivedAt))
-        .limit(input.limit)
-        .offset((input.page - 1) * input.limit);
+      let emailResults;
+      let totalCount: number;
+
+      if (input.labelId) {
+        const labelCondition = and(
+          whereClause,
+          eq(emailEmailLabels.labelId, input.labelId),
+        );
+
+        // Fix: include label join in count query
+        const [totalResult] = await db
+          .select({ count: count() })
+          .from(emails)
+          .innerJoin(emailEmailLabels, eq(emails.id, emailEmailLabels.emailId))
+          .where(labelCondition);
+
+        totalCount = totalResult.count;
+
+        emailResults = await db
+          .select(emailSelect)
+          .from(emails)
+          .innerJoin(emailEmailLabels, eq(emails.id, emailEmailLabels.emailId))
+          .where(labelCondition)
+          .orderBy(desc(emails.receivedAt))
+          .limit(input.limit)
+          .offset((input.page - 1) * input.limit);
+      } else {
+        const [totalResult] = await db
+          .select({ count: count() })
+          .from(emails)
+          .where(whereClause);
+
+        totalCount = totalResult.count;
+
+        emailResults = await db
+          .select(emailSelect)
+          .from(emails)
+          .where(whereClause)
+          .orderBy(desc(emails.receivedAt))
+          .limit(input.limit)
+          .offset((input.page - 1) * input.limit);
+      }
 
       return {
-        emails: results,
-        total: totalResult.count,
+        emails: emailResults,
+        total: totalCount,
         page: input.page,
         limit: input.limit,
       };
     }),
 
   getThread: protectedProcedure
-    .input(z.object({ threadId: z.string() }))
+    .input(z.object({ threadId: z.string(), accountId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      const [account] = await db
-        .select({ id: emailAccounts.id })
-        .from(emailAccounts)
-        .where(eq(emailAccounts.userId, ctx.user.id))
-        .limit(1);
-
-      if (!account) return [];
+      await verifyAccountOwnership(input.accountId, ctx.user.id);
 
       return db
         .select()
         .from(emails)
         .where(
           and(
-            eq(emails.emailAccountId, account.id),
+            eq(emails.emailAccountId, input.accountId),
             eq(emails.threadId, input.threadId),
           ),
         )
@@ -344,114 +740,59 @@ export const emailRouter = router({
   getBody: protectedProcedure
     .input(z.object({ emailId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      const [account] = await db
-        .select()
-        .from(emailAccounts)
-        .where(eq(emailAccounts.userId, ctx.user.id))
-        .limit(1);
-
-      if (!account) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No email account configured",
-        });
-      }
-
       const [email] = await db
         .select()
         .from(emails)
-        .where(
-          and(
-            eq(emails.id, input.emailId),
-            eq(emails.emailAccountId, account.id),
-          ),
-        )
+        .where(eq(emails.id, input.emailId))
         .limit(1);
 
       if (!email) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Email not found" });
       }
 
-      try {
-        const password = decryptEmailPassword(account);
-        const { ImapFlow } = await import("imapflow");
-        const client = new ImapFlow({
-          host: account.imapHost,
-          port: account.imapPort,
-          secure: account.imapPort === 993,
-          auth: { user: account.username, pass: password },
-          logger: false,
-        });
+      await verifyAccountOwnership(email.emailAccountId, ctx.user.id);
 
-        await client.connect();
-        const lock = await client.getMailboxLock("INBOX");
+      // Get labels for this email
+      const labels = await db
+        .select({
+          id: emailLabels.id,
+          name: emailLabels.name,
+          color: emailLabels.color,
+          isPredefined: emailLabels.isPredefined,
+        })
+        .from(emailEmailLabels)
+        .innerJoin(emailLabels, eq(emailEmailLabels.labelId, emailLabels.id))
+        .where(eq(emailEmailLabels.emailId, input.emailId));
 
-        try {
-          const source = await fetchEmailSource(client, email.messageId);
-
-          if (!source) {
-            return {
-              email,
-              html: "",
-              text: "Email body no longer available on server.",
-            };
-          }
-
-          const { simpleParser } = await import("mailparser");
-          const parsed = await simpleParser(source);
-
-          return {
-            email,
-            html: parsed.html || "",
-            text: parsed.text || "",
-          };
-        } finally {
-          lock.release();
-          await client.logout();
-        }
-      } catch (error) {
-        logger.error(
-          { err: error, emailId: input.emailId },
-          "Failed to fetch email body",
-        );
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to fetch email body from server",
-        });
-      }
+      return {
+        email,
+        html: email.htmlBody ?? "",
+        text: email.textBody ?? "",
+        labels,
+      };
     }),
 
   getAttachments: protectedProcedure
     .input(z.object({ emailId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      const [account] = await db
-        .select()
-        .from(emailAccounts)
-        .where(eq(emailAccounts.userId, ctx.user.id))
-        .limit(1);
-
-      if (!account) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No email account configured",
-        });
-      }
-
       const [email] = await db
         .select()
         .from(emails)
-        .where(
-          and(
-            eq(emails.id, input.emailId),
-            eq(emails.emailAccountId, account.id),
-          ),
-        )
+        .where(eq(emails.id, input.emailId))
         .limit(1);
 
       if (!email) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Email not found" });
       }
 
+      const account = await verifyAccountOwnership(
+        email.emailAccountId,
+        ctx.user.id,
+      );
+
+      if (!email.hasAttachments) return [];
+
+      // Fetch from IMAP on-demand (attachments are not cached in DB)
       try {
         const password = decryptEmailPassword(account);
         const { ImapFlow } = await import("imapflow");
@@ -464,27 +805,41 @@ export const emailRouter = router({
         });
 
         await client.connect();
-        const lock = await client.getMailboxLock("INBOX");
+
+        // Find the folder for this email
+        const [folder] = email.folderId
+          ? await db
+              .select({ path: emailFolders.path })
+              .from(emailFolders)
+              .where(eq(emailFolders.id, email.folderId))
+              .limit(1)
+          : [{ path: "INBOX" }];
+
+        const lock = await client.getMailboxLock(folder.path);
 
         try {
-          const source = await fetchEmailSource(client, email.messageId);
+          if (email.uid) {
+            const message = await client.fetchOne(String(email.uid), {
+              source: true,
+            });
+            if (!message || !message.source) return [];
 
-          if (!source) return [];
+            const { simpleParser } = await import("mailparser");
+            const parsed = await simpleParser(message.source);
 
-          const { simpleParser } = await import("mailparser");
-          const parsed = await simpleParser(source);
-
-          return (parsed.attachments || []).map(
-            (att: {
-              filename?: string;
-              contentType: string;
-              size: number;
-            }) => ({
-              filename: att.filename || "attachment",
-              contentType: att.contentType,
-              size: att.size,
-            }),
-          );
+            return (parsed.attachments || []).map(
+              (att: {
+                filename?: string;
+                contentType: string;
+                size: number;
+              }) => ({
+                filename: att.filename || "attachment",
+                contentType: att.contentType,
+                size: att.size,
+              }),
+            );
+          }
+          return [];
         } finally {
           lock.release();
           await client.logout();
@@ -501,28 +856,22 @@ export const emailRouter = router({
   markRead: protectedProcedure
     .input(z.object({ emailId: z.string().uuid(), isRead: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      const [account] = await db
-        .select({ id: emailAccounts.id })
-        .from(emailAccounts)
-        .where(eq(emailAccounts.userId, ctx.user.id))
+      const [email] = await db
+        .select({ emailAccountId: emails.emailAccountId })
+        .from(emails)
+        .where(eq(emails.id, input.emailId))
         .limit(1);
 
-      if (!account) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No email account configured",
-        });
+      if (!email) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Email not found" });
       }
+
+      await verifyAccountOwnership(email.emailAccountId, ctx.user.id);
 
       await db
         .update(emails)
         .set({ isRead: input.isRead })
-        .where(
-          and(
-            eq(emails.id, input.emailId),
-            eq(emails.emailAccountId, account.id),
-          ),
-        );
+        .where(eq(emails.id, input.emailId));
 
       return { success: true };
     }),
@@ -530,18 +879,17 @@ export const emailRouter = router({
   assign: protectedProcedure
     .input(manualAssignInput)
     .mutation(async ({ ctx, input }) => {
-      const [account] = await db
-        .select({ id: emailAccounts.id })
-        .from(emailAccounts)
-        .where(eq(emailAccounts.userId, ctx.user.id))
+      const [email] = await db
+        .select({ emailAccountId: emails.emailAccountId })
+        .from(emails)
+        .where(eq(emails.id, input.emailId))
         .limit(1);
 
-      if (!account) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No email account configured",
-        });
+      if (!email) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Email not found" });
       }
+
+      await verifyAccountOwnership(email.emailAccountId, ctx.user.id);
 
       await db
         .update(emails)
@@ -549,73 +897,76 @@ export const emailRouter = router({
           tenantId: input.tenantId,
           propertyId: input.propertyId,
         })
-        .where(
-          and(
-            eq(emails.id, input.emailId),
-            eq(emails.emailAccountId, account.id),
-          ),
-        );
+        .where(eq(emails.id, input.emailId));
 
       return { success: true };
     }),
 
-  getUnreadCount: protectedProcedure.query(async ({ ctx }) => {
-    const [account] = await db
-      .select({ id: emailAccounts.id })
-      .from(emailAccounts)
-      .where(eq(emailAccounts.userId, ctx.user.id))
-      .limit(1);
+  getUnreadCount: protectedProcedure
+    .input(z.object({ accountId: z.string().uuid().optional() }))
+    .query(async ({ ctx, input }) => {
+      if (input.accountId) {
+        await verifyAccountOwnership(input.accountId, ctx.user.id);
 
-    if (!account) return { count: 0 };
+        const [result] = await db
+          .select({ count: count() })
+          .from(emails)
+          .where(
+            and(
+              eq(emails.emailAccountId, input.accountId),
+              eq(emails.isRead, false),
+            ),
+          );
 
-    const [result] = await db
-      .select({ count: count() })
-      .from(emails)
-      .where(
-        and(eq(emails.emailAccountId, account.id), eq(emails.isRead, false)),
-      );
+        return { count: result.count };
+      }
 
-    return { count: result.count };
-  }),
+      // Count across all accounts
+      const accounts = await db
+        .select({ id: emailAccounts.id })
+        .from(emailAccounts)
+        .where(eq(emailAccounts.userId, ctx.user.id));
 
-  syncNow: protectedProcedure.mutation(async ({ ctx }) => {
-    const [account] = await db
-      .select()
-      .from(emailAccounts)
-      .where(eq(emailAccounts.userId, ctx.user.id))
-      .limit(1);
+      if (accounts.length === 0) return { count: 0 };
 
-    if (!account) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "No email account configured",
+      const [result] = await db
+        .select({ count: count() })
+        .from(emails)
+        .where(
+          and(
+            inArray(
+              emails.emailAccountId,
+              accounts.map((a) => a.id),
+            ),
+            eq(emails.isRead, false),
+          ),
+        );
+
+      return { count: result.count };
+    }),
+
+  syncNow: protectedProcedure
+    .input(z.object({ accountId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      await verifyAccountOwnership(input.accountId, ctx.user.id);
+
+      // Publish sync request via Redis — the email microservice handles it
+      await publishEvent(REDIS_CHANNELS.EMAIL_SYNC_REQUEST, {
+        accountId: input.accountId,
       });
-    }
 
-    // Dynamic import to avoid circular deps
-    const { syncEmailAccount } = await import("../services/email-sync");
-    const result = await syncEmailAccount(account);
-
-    return result;
-  }),
+      return { success: true, message: "Sync requested" };
+    }),
 
   // ────────────────── Email Sending ──────────────────
 
   send: protectedProcedure
     .input(sendEmailInput)
     .mutation(async ({ ctx, input }) => {
-      const [account] = await db
-        .select()
-        .from(emailAccounts)
-        .where(eq(emailAccounts.userId, ctx.user.id))
-        .limit(1);
-
-      if (!account) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No email account configured",
-        });
-      }
+      const account = await verifyAccountOwnership(
+        input.accountId,
+        ctx.user.id,
+      );
 
       const [user] = await db
         .select({
@@ -668,9 +1019,22 @@ export const emailRouter = router({
         references: input.replyToMessageId,
       });
 
+      // Find the "sent" folder for this account
+      const [sentFolder] = await db
+        .select({ id: emailFolders.id })
+        .from(emailFolders)
+        .where(
+          and(
+            eq(emailFolders.emailAccountId, account.id),
+            eq(emailFolders.type, "sent"),
+          ),
+        )
+        .limit(1);
+
       // Store sent email in DB
       await db.insert(emails).values({
         emailAccountId: account.id,
+        folderId: sentFolder?.id ?? null,
         tenantId: input.tenantId ?? null,
         propertyId: input.propertyId ?? null,
         messageId,
@@ -679,6 +1043,9 @@ export const emailRouter = router({
         fromAddress: account.fromAddress,
         toAddresses: input.to.join(", "),
         subject: input.subject,
+        htmlBody,
+        textBody: null,
+        snippet: input.subject.slice(0, 200),
         receivedAt: new Date(),
         isRead: true,
         isInbound: false,
@@ -786,33 +1153,20 @@ export const emailRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const [account] = await db
-        .select()
-        .from(emailAccounts)
-        .where(eq(emailAccounts.userId, ctx.user.id))
-        .limit(1);
-
-      if (!account) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "No email account configured",
-        });
-      }
-
       const [email] = await db
         .select()
         .from(emails)
-        .where(
-          and(
-            eq(emails.id, input.emailId),
-            eq(emails.emailAccountId, account.id),
-          ),
-        )
+        .where(eq(emails.id, input.emailId))
         .limit(1);
 
       if (!email) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Email not found" });
       }
+
+      const account = await verifyAccountOwnership(
+        email.emailAccountId,
+        ctx.user.id,
+      );
 
       try {
         const password = decryptEmailPassword(account);
@@ -826,10 +1180,26 @@ export const emailRouter = router({
         });
 
         await client.connect();
-        const lock = await client.getMailboxLock("INBOX");
+
+        // Find the folder for this email
+        const [folder] = email.folderId
+          ? await db
+              .select({ path: emailFolders.path })
+              .from(emailFolders)
+              .where(eq(emailFolders.id, email.folderId))
+              .limit(1)
+          : [{ path: "INBOX" }];
+
+        const lock = await client.getMailboxLock(folder.path);
 
         try {
-          const source = await fetchEmailSource(client, email.messageId);
+          let source: Buffer | null = null;
+          if (email.uid) {
+            const message = await client.fetchOne(String(email.uid), {
+              source: true,
+            });
+            source = message ? (message.source ?? null) : null;
+          }
 
           if (!source) {
             throw new TRPCError({
