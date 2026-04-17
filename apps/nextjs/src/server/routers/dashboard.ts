@@ -17,9 +17,7 @@ import { evaluateActionCenterRules } from "@repo/shared/calculations";
 import {
   wealthForecastInput,
   dismissActionItemInput,
-  saveDashboardLayoutInput,
 } from "@repo/shared/validation";
-import { DEFAULT_DASHBOARD_LAYOUT } from "@repo/shared/types";
 import { getAllRentBenchmarks } from "../services/market-data";
 
 import { router, protectedProcedure } from "../trpc";
@@ -970,45 +968,5 @@ export const dashboardRouter = router({
       originalAmount: loan.loanAmount,
       remainingBalance: loan.remainingBalance,
     }));
-  }),
-
-  getDashboardLayout: protectedProcedure.query(async ({ ctx }) => {
-    const [user] = await db
-      .select({ dashboardLayout: users.dashboardLayout })
-      .from(users)
-      .where(eq(users.id, ctx.user.id))
-      .limit(1);
-
-    if (user?.dashboardLayout) {
-      return user.dashboardLayout as typeof DEFAULT_DASHBOARD_LAYOUT;
-    }
-
-    return DEFAULT_DASHBOARD_LAYOUT;
-  }),
-
-  saveDashboardLayout: protectedProcedure
-    .input(saveDashboardLayoutInput)
-    .mutation(async ({ ctx, input }) => {
-      await db
-        .update(users)
-        .set({
-          dashboardLayout: input.layout,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, ctx.user.id));
-
-      return { success: true };
-    }),
-
-  resetDashboardLayout: protectedProcedure.mutation(async ({ ctx }) => {
-    await db
-      .update(users)
-      .set({
-        dashboardLayout: null,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, ctx.user.id));
-
-    return { success: true };
   }),
 });

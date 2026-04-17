@@ -10,6 +10,7 @@ import { expensesRouter } from "./expenses";
 import { dunningRouter } from "./dunning";
 import { rentAdjustmentsRouter } from "./rent-adjustments";
 import { dashboardRouter } from "./dashboard";
+import { dashboardPresetsRouter } from "./dashboard-presets";
 import { scenariosRouter } from "./scenarios";
 import { analysisRouter } from "./analysis";
 import { emailRouter } from "./email";
@@ -32,6 +33,7 @@ export const appRouter = router({
   dunning: dunningRouter,
   rentAdjustments: rentAdjustmentsRouter,
   dashboard: dashboardRouter,
+  dashboardPresets: dashboardPresetsRouter,
   scenarios: scenariosRouter,
   analysis: analysisRouter,
   email: emailRouter,

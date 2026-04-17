@@ -432,6 +432,8 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "loadError": "Dashboard could not be loaded.",
+    "retry": "Retry",
     "kpi": {
       "netWorth": "Net Worth",
       "netWorthTooltip": "Market value of all properties minus outstanding loans",
@@ -579,6 +581,64 @@
       "shrink": "Shrink",
       "grow": "Grow",
       "resize": "Resize"
+    },
+    "bento": {
+      "edit": "Edit",
+      "done": "Done",
+      "addWidget": "Add Widget",
+      "remove": "Remove",
+      "reset": "Reset",
+      "resetConfirm": "Delete all dashboard presets and restore the default layout?",
+      "catalog": {
+        "title": "Widget Catalog",
+        "description": "Drag widgets onto the dashboard",
+        "searchPlaceholder": "Search widgets...",
+        "clearSearch": "Clear search",
+        "empty": "No widgets found",
+        "favorites": "Favorites",
+        "categories": {
+          "all": "All",
+          "financial": "Financial",
+          "portfolio": "Portfolio",
+          "operations": "Operations",
+          "actions": "Actions"
+        }
+      },
+      "widget": {
+        "kpiBar": "KPI Bar",
+        "healthScore": "Health Score",
+        "wealthForecast": "Wealth Forecast",
+        "portfolioAllocation": "Portfolio Allocation",
+        "actionCenter": "Action Center",
+        "rentIncomeTimeline": "Rent Income Timeline",
+        "vacancyRate": "Vacancy Rate",
+        "upcomingDeadlines": "Upcoming Deadlines",
+        "rentArrears": "Rent Arrears",
+        "expensesByCategory": "Expenses by Category",
+        "ltvOverview": "LTV Overview",
+        "marketComparison": "Market Comparison",
+        "amortizationProgress": "Amortization Progress",
+        "quickActions": "Quick Actions"
+      },
+      "presets": {
+        "none": "No preset",
+        "switchTo": "Switch preset",
+        "noOthers": "No other presets created",
+        "create": "New preset",
+        "rename": "Rename",
+        "duplicate": "Duplicate",
+        "setDefault": "Set as default",
+        "delete": "Delete",
+        "createTitle": "Create preset",
+        "renameTitle": "Rename preset",
+        "duplicateTitle": "Duplicate preset",
+        "deleteTitle": "Delete preset",
+        "namePrompt": "Choose a name (1-60 characters).",
+        "nameLabel": "Name",
+        "cancel": "Cancel",
+        "confirm": "Save",
+        "deletePrompt": "Delete the preset \"{name}\"? This cannot be undone."
+      }
     }
   },
   "analysis": {

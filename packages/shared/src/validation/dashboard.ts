@@ -1,9 +1,78 @@
-import { z } from "zod";
+﻿import { z } from "zod";
+import { WIDGET_TYPES, WIDGET_SIZE_VARIANTS } from "../types/dashboard";
+
+const widgetTypeSchema = z.enum(
+  Object.values(WIDGET_TYPES) as [string, ...string[]],
+);
+
+const widgetSizeVariantSchema = z.enum(
+  Object.keys(WIDGET_SIZE_VARIANTS) as [string, ...string[]],
+);
+
+const widgetPositionSchema = z.object({
+  x: z.number().int().min(0).max(11),
+  y: z.number().int().min(0),
+});
+
+const widgetSizeSchema = z.object({
+  cols: z.number().int().min(1).max(12),
+  rows: z.number().int().min(1).max(12),
+});
+
+const widgetInstanceSchema = z.object({
+  id: z.string().min(1).max(64),
+  type: widgetTypeSchema,
+  variant: widgetSizeVariantSchema,
+  position: widgetPositionSchema,
+  size: widgetSizeSchema,
+  config: z.record(z.string(), z.unknown()).optional(),
+});
+
+const dashboardLayoutSchema = z.object({
+  widgets: z.array(widgetInstanceSchema).max(60),
+  version: z.number().int().min(1),
+});
+
+const presetNameSchema = z
+  .string()
+  .trim()
+  .min(1, "Name is required")
+  .max(60, "Name must be at most 60 characters");
+
+export const createPresetInput = z.object({
+  name: presetNameSchema,
+  layout: dashboardLayoutSchema,
+  isDefault: z.boolean().optional(),
+});
+
+export const updatePresetInput = z.object({
+  id: z.string().uuid(),
+  layout: dashboardLayoutSchema,
+});
+
+export const renamePresetInput = z.object({
+  id: z.string().uuid(),
+  name: presetNameSchema,
+});
+
+export const presetIdInput = z.object({
+  id: z.string().uuid(),
+});
+
+export const duplicatePresetInput = z.object({
+  id: z.string().uuid(),
+  name: presetNameSchema,
+});
+
+export type CreatePresetInput = z.infer<typeof createPresetInput>;
+export type UpdatePresetInput = z.infer<typeof updatePresetInput>;
+export type RenamePresetInput = z.infer<typeof renamePresetInput>;
+export type PresetIdInput = z.infer<typeof presetIdInput>;
+export type DuplicatePresetInput = z.infer<typeof duplicatePresetInput>;
+
 import { SCENARIO_MODULES } from "../types/common";
-import { WIDGET_TYPES } from "../types/dashboard";
 
 const moduleValues = Object.values(SCENARIO_MODULES) as [string, ...string[]];
-const widgetTypeValues = Object.values(WIDGET_TYPES) as [string, ...string[]];
 
 export const wealthForecastInput = z.object({
   growthRate: z.number().int().min(0).max(2000).default(200),
@@ -33,32 +102,3 @@ export type WealthForecastInput = z.infer<typeof wealthForecastInput>;
 export type DismissActionItemInput = z.infer<typeof dismissActionItemInput>;
 export type SaveScenarioInput = z.infer<typeof saveScenarioInput>;
 export type UpdateScenarioInput = z.infer<typeof updateScenarioInput>;
-
-const widgetSizeSchema = z.object({
-  cols: z.number().int().min(1).max(12),
-  rows: z.number().int().min(1).max(6),
-});
-
-const widgetPositionSchema = z.object({
-  x: z.number().int().min(0).max(11),
-  y: z.number().int().min(0),
-});
-
-const widgetInstanceSchema = z.object({
-  id: z.string().min(1).max(100),
-  type: z.enum(widgetTypeValues),
-  position: widgetPositionSchema,
-  size: widgetSizeSchema,
-  config: z.record(z.string(), z.unknown()).optional(),
-});
-
-export const dashboardLayoutSchema = z.object({
-  widgets: z.array(widgetInstanceSchema).max(50),
-  version: z.number().int().min(1),
-});
-
-export const saveDashboardLayoutInput = z.object({
-  layout: dashboardLayoutSchema,
-});
-
-export type SaveDashboardLayoutInput = z.infer<typeof saveDashboardLayoutInput>;

@@ -432,6 +432,8 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "loadError": "Dashboard konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
     "kpi": {
       "netWorth": "Nettovermoegen",
       "netWorthTooltip": "Marktwert aller Immobilien abzueglich offener Kredite",
@@ -579,6 +581,64 @@
       "shrink": "Verkleinern",
       "grow": "Vergroessern",
       "resize": "Groesse aendern"
+    },
+    "bento": {
+      "edit": "Bearbeiten",
+      "done": "Fertig",
+      "addWidget": "Widget hinzufuegen",
+      "remove": "Entfernen",
+      "reset": "Zuruecksetzen",
+      "resetConfirm": "Alle Dashboard-Presets loeschen und das Standard-Layout wiederherstellen?",
+      "catalog": {
+        "title": "Widget-Katalog",
+        "description": "Ziehe Widgets auf das Dashboard",
+        "searchPlaceholder": "Widgets suchen...",
+        "clearSearch": "Suche leeren",
+        "empty": "Keine Widgets gefunden",
+        "favorites": "Favoriten",
+        "categories": {
+          "all": "Alle",
+          "financial": "Finanzen",
+          "portfolio": "Portfolio",
+          "operations": "Betrieb",
+          "actions": "Aktionen"
+        }
+      },
+      "widget": {
+        "kpiBar": "KPI-Leiste",
+        "healthScore": "Health Score",
+        "wealthForecast": "Vermoegensprognose",
+        "portfolioAllocation": "Portfolio-Verteilung",
+        "actionCenter": "Aktionszentrum",
+        "rentIncomeTimeline": "Mieteinnahmen-Verlauf",
+        "vacancyRate": "Leerstandsquote",
+        "upcomingDeadlines": "Anstehende Fristen",
+        "rentArrears": "Mietrueckstaende",
+        "expensesByCategory": "Ausgaben nach Kategorie",
+        "ltvOverview": "LTV-Uebersicht",
+        "marketComparison": "Marktvergleich",
+        "amortizationProgress": "Tilgungsfortschritt",
+        "quickActions": "Schnellaktionen"
+      },
+      "presets": {
+        "none": "Kein Preset",
+        "switchTo": "Preset wechseln",
+        "noOthers": "Keine weiteren erstellt",
+        "create": "Neues Preset",
+        "rename": "Umbenennen",
+        "duplicate": "Duplizieren",
+        "setDefault": "Als Standard festlegen",
+        "delete": "Loeschen",
+        "createTitle": "Preset erstellen",
+        "renameTitle": "Preset umbenennen",
+        "duplicateTitle": "Preset duplizieren",
+        "deleteTitle": "Preset loeschen",
+        "namePrompt": "Waehle einen Namen (1-60 Zeichen).",
+        "nameLabel": "Name",
+        "cancel": "Abbrechen",
+        "confirm": "Speichern",
+        "deletePrompt": "Preset \"{name}\" loeschen? Dies kann nicht rueckgaengig gemacht werden."
+      }
     }
   },
   "analysis": {

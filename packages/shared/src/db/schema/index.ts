@@ -20,3 +20,4 @@ export * from "./market-data";
 export * from "./push-subscriptions";
 export * from "./action-center";
 export * from "./maintenance-reserves";
+export * from "./dashboard-presets";

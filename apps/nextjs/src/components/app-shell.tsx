@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -14,6 +15,8 @@ import {
   Mail,
   ClipboardList,
   MoreHorizontal,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
@@ -21,6 +24,12 @@ import { useWebSocket } from "@/lib/websocket";
 import { useUser } from "@/components/user-provider";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Sheet,
   SheetContent,
@@ -46,6 +55,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const logoutMutation = trpc.auth.logout.useMutation();
   const utils = trpc.useUtils();
   const { user } = useUser();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Establish WebSocket connection for real-time updates
   useWebSocket();
@@ -59,39 +69,68 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col border-r bg-card">
+      <aside
+        className={cn(
+          "hidden md:flex flex-col border-r bg-card transition-all duration-300",
+          sidebarCollapsed ? "w-16" : "w-64",
+        )}
+      >
         <div className="flex h-14 items-center justify-between border-b px-4">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <Building2 className="h-5 w-5" />
-            <span>Immo Manager</span>
-          </Link>
-          <NotificationBell />
+          {sidebarCollapsed ? (
+            <Link href="/" className="mx-auto">
+              <Building2 className="h-5 w-5" />
+            </Link>
+          ) : (
+            <>
+              <Link href="/" className="flex items-center gap-2 font-semibold">
+                <Building2 className="h-5 w-5 shrink-0" />
+                <span className="truncate">Immo Manager</span>
+              </Link>
+              <NotificationBell />
+            </>
+          )}
         </div>
         <nav className="flex-1 space-y-1 p-3">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                {t(item.labelKey)}
-              </Link>
-            );
-          })}
+          <TooltipProvider>
+            {NAV_ITEMS.map((item) => {
+              const isActive =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href);
+              const linkContent = (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    sidebarCollapsed && "justify-center px-2",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  {!sidebarCollapsed && t(item.labelKey)}
+                </Link>
+              );
+              if (sidebarCollapsed) {
+                return (
+                  <Tooltip key={item.href}>
+                    <TooltipTrigger render={<div />}>
+                      {linkContent}
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      {t(item.labelKey)}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              }
+              return linkContent;
+            })}
+          </TooltipProvider>
         </nav>
         <div className="border-t p-3">
-          {user && (
+          {user && !sidebarCollapsed && (
             <div className="mb-2 flex items-center gap-3 px-3 py-2">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
                 {user.avatarUrl ? (
@@ -109,13 +148,68 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="truncate text-sm font-medium">{user.name}</span>
             </div>
           )}
+          {user && sidebarCollapsed && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger render={<div />}>
+                  <div className="mb-2 flex justify-center px-2 py-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
+                      {user.avatarUrl ? (
+                        <img
+                          src={`/api/uploads/${user.avatarUrl}`}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {user.name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="right">{user.name}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger render={<div />}>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full gap-3 text-muted-foreground",
+                    sidebarCollapsed ? "justify-center px-2" : "justify-start",
+                  )}
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4 shrink-0" />
+                  {!sidebarCollapsed && t("logout" as "dashboard")}
+                </Button>
+              </TooltipTrigger>
+              {sidebarCollapsed && (
+                <TooltipContent side="right">
+                  {t("logout" as "dashboard")}
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-muted-foreground"
-            onClick={handleLogout}
+            className={cn(
+              "mt-2 w-full gap-3 text-muted-foreground",
+              sidebarCollapsed ? "justify-center px-2" : "justify-start",
+            )}
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           >
-            <LogOut className="h-4 w-4" />
-            {t("logout" as "dashboard")}
+            {sidebarCollapsed ? (
+              <PanelLeft className="h-4 w-4 shrink-0" />
+            ) : (
+              <>
+                <PanelLeftClose className="h-4 w-4 shrink-0" />
+                <span className="text-sm">Collapse</span>
+              </>
+            )}
           </Button>
         </div>
       </aside>
