@@ -1049,7 +1049,8 @@
       "rent_payment": "Rent Payment",
       "rent_adjustment": "Rent Adjustment",
       "document": "Document",
-      "email_account": "Email Account"
+      "email_account": "Email Account",
+      "user": "User"
     }
   }
 }

@@ -44,7 +44,8 @@ export function BentoWidget({ widget, isEditing, onRemove }: BentoWidgetProps) {
       <div
         className={cn(
           "flex h-full w-full flex-col overflow-hidden",
-          widget.type === "action_center" && "overflow-y-auto",
+          ["action_center", "amortization_progress", "upcoming_deadlines"].includes(widget.type) &&
+            "overflow-y-auto",
           isEditing && "pointer-events-none opacity-95",
         )}
       >

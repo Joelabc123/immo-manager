@@ -1049,7 +1049,8 @@
       "rent_payment": "Mietzahlung",
       "rent_adjustment": "Mietanpassung",
       "document": "Dokument",
-      "email_account": "E-Mail-Konto"
+      "email_account": "E-Mail-Konto",
+      "user": "Benutzer"
     }
   }
 }

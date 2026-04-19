@@ -37,21 +37,21 @@ export function QuickActionsWidget(_props: {
 
   return (
     <>
-      <CardHeader>
+      <CardHeader className="px-0 pt-0 pb-1.5">
         <p className="text-sm font-medium">{t("name")}</p>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <CardContent className="flex-1 px-0 pb-0">
+        <div className="grid h-full grid-cols-2 gap-1.5">
           {actions.map((action) => (
             <Button
               key={action.label}
               variant="outline"
               size="sm"
-              className="h-auto flex-col gap-1.5 py-3"
+              className="h-auto flex-col gap-1 py-2"
               onClick={action.onClick}
             >
-              <action.icon className="h-5 w-5" />
-              <span className="text-xs">{action.label}</span>
+              <action.icon className="h-4 w-4" />
+              <span className="text-[10px] leading-tight">{action.label}</span>
             </Button>
           ))}
         </div>

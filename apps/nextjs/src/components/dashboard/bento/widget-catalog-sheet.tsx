@@ -164,6 +164,7 @@ export function WidgetCatalogSheet({
         side="bottom"
         className="gap-0 rounded-t-2xl p-0"
         showOverlay={false}
+        showCloseButton={false}
         style={{ maxHeight: `${sheetHeight}vh` }}
       >
         {/* Drag handle */}

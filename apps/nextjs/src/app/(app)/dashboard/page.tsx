@@ -124,7 +124,7 @@ export default function DashboardPage() {
       saveTimerRef.current = setTimeout(() => {
         const layout: DashboardLayout = {
           widgets: nextWidgets,
-          version: 5,
+          version: 6,
         };
         updateMutation.mutate({ id: active.id, layout });
       }, AUTOSAVE_DELAY_MS);
@@ -220,7 +220,7 @@ export default function DashboardPage() {
         if (a && w.length > 0) {
           updateMutation.mutate({
             id: a.id,
-            layout: { widgets: w, version: 5 },
+            layout: { widgets: w, version: 6 },
           });
         }
         setCatalogOpen(false);
@@ -247,7 +247,7 @@ export default function DashboardPage() {
             onCreate={(name) =>
               createMutation.mutate({
                 name,
-                layout: { widgets: widgetsRef.current, version: 5 },
+                layout: { widgets: widgetsRef.current, version: 6 },
               })
             }
             onRename={(id, name) => renameMutation.mutate({ id, name })}
@@ -331,8 +331,8 @@ export default function DashboardPage() {
 
       <WidgetCatalogSheet
         open={isEditing && catalogOpen}
-        onOpenChange={(open) => {
-          if (!open) setCatalogOpen(false);
+        onOpenChange={() => {
+          // Only close via the "+" toggle button or exiting edit mode
         }}
         onDragStartEntry={handleCatalogDragStart}
         onDragEndEntry={handleCatalogDragEnd}
