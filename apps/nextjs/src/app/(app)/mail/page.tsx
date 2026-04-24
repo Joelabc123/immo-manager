@@ -150,11 +150,20 @@ export default function MailPage() {
               onValueChange={handleAccountChange}
             >
               <SelectTrigger className="h-8 w-48">
-                <SelectValue />
+                <SelectValue>
+                  {(value: string) => {
+                    const acc = accounts.find((item) => item.id === value);
+                    return acc ? acc.label || acc.fromAddress : value;
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {accounts.map((acc) => (
-                  <SelectItem key={acc.id} value={acc.id}>
+                  <SelectItem
+                    key={acc.id}
+                    value={acc.id}
+                    label={acc.label || acc.fromAddress}
+                  >
                     {acc.label || acc.fromAddress}
                   </SelectItem>
                 ))}

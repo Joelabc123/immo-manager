@@ -14,6 +14,7 @@ import {
   LogOut,
   Mail,
   ClipboardList,
+  Shield,
   MoreHorizontal,
   PanelLeftClose,
   PanelLeft,
@@ -47,6 +48,12 @@ const NAV_ITEMS = [
   { href: "/documents", icon: FileText, labelKey: "documents" as const },
   { href: "/audit", icon: ClipboardList, labelKey: "audit" as const },
   { href: "/settings", icon: Settings, labelKey: "settings" as const },
+  {
+    href: "/admin/users",
+    icon: Shield,
+    labelKey: "admin" as const,
+    adminOnly: true,
+  },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -59,6 +66,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Establish WebSocket connection for real-time updates
   useWebSocket();
+
+  const visibleNavItems = NAV_ITEMS.filter(
+    (item) => !item.adminOnly || user?.role === "admin",
+  );
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
@@ -92,7 +103,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <nav className="flex-1 space-y-1 p-3">
           <TooltipProvider>
-            {NAV_ITEMS.map((item) => {
+            {visibleNavItems.map((item) => {
               const isActive =
                 item.href === "/"
                   ? pathname === "/"
@@ -221,7 +232,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
-        {NAV_ITEMS.slice(0, 4).map((item) => {
+        {visibleNavItems.slice(0, 4).map((item) => {
           const isActive =
             item.href === "/"
               ? pathname === "/"
@@ -244,11 +255,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <SheetTrigger
             className={cn(
               "flex flex-1 flex-col items-center gap-1 py-2 text-xs text-muted-foreground",
-              NAV_ITEMS.slice(4).some((item) =>
-                item.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(item.href),
-              ) && "text-primary",
+              visibleNavItems
+                .slice(4)
+                .some((item) =>
+                  item.href === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(item.href),
+                ) && "text-primary",
             )}
           >
             <MoreHorizontal className="h-5 w-5" />
@@ -259,7 +272,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <SheetTitle>{t("more" as "dashboard")}</SheetTitle>
             </SheetHeader>
             <div className="flex flex-col gap-1 pb-4">
-              {NAV_ITEMS.slice(4).map((item) => {
+              {visibleNavItems.slice(4).map((item) => {
                 const isActive =
                   item.href === "/"
                     ? pathname === "/"

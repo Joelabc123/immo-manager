@@ -15,6 +15,14 @@
     "db:migrate": "pnpm --filter @repo/shared db:migrate",
     "db:studio": "pnpm --filter @repo/shared db:studio"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core",
+      "argon2",
+      "esbuild"
+    ]
+  },
   "devDependencies": {
     "eslint": "^9",
     "prettier": "^3.8.1",

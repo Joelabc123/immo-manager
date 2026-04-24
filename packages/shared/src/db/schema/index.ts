@@ -1,5 +1,6 @@
 export * from "./users";
 export * from "./sessions";
+export * from "./verification-tokens";
 export * from "./properties";
 export * from "./tags";
 export * from "./rental-units";

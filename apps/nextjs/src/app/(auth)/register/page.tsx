@@ -19,16 +19,40 @@ import {
 export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [verificationSent, setVerificationSent] = useState(false);
 
   const register = trpc.auth.register.useMutation({
-    onSuccess: () => {
-      router.push("/");
-      router.refresh();
+    onSuccess: (data) => {
+      if (data.requiresVerification) {
+        setVerificationSent(true);
+      } else {
+        router.push("/");
+        router.refresh();
+      }
     },
     onError: (err) => {
       setError(err.message);
     },
   });
+
+  if (verificationSent) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">E-Mail bestaetigen</CardTitle>
+          <CardDescription>
+            Wir haben Ihnen eine E-Mail mit einem Verifizierungslink gesendet.
+            Bitte ueberpruefen Sie Ihren Posteingang.
+          </CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <Link href="/login" className="text-primary underline text-sm">
+            Zurueck zur Anmeldung
+          </Link>
+        </CardFooter>
+      </Card>
+    );
+  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -94,7 +118,7 @@ export default function RegisterPage() {
               type="password"
               required
               autoComplete="new-password"
-              minLength={8}
+              minLength={10}
             />
           </div>
           <div className="space-y-2">
@@ -105,7 +129,7 @@ export default function RegisterPage() {
               type="password"
               required
               autoComplete="new-password"
-              minLength={8}
+              minLength={10}
             />
           </div>
         </CardContent>

@@ -1,5 +1,7 @@
 import { router } from "../trpc";
 import { authRouter } from "./auth";
+import { sessionsRouter } from "./sessions";
+import { adminRouter } from "./admin";
 import { propertiesRouter } from "./properties";
 import { tagsRouter } from "./tags";
 import { loansRouter } from "./loans";
@@ -23,6 +25,8 @@ import { userSettingsRouter } from "./user-settings";
 
 export const appRouter = router({
   auth: authRouter,
+  sessions: sessionsRouter,
+  admin: adminRouter,
   properties: propertiesRouter,
   tags: tagsRouter,
   loans: loansRouter,

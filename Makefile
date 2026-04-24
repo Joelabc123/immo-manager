@@ -8,7 +8,7 @@
 # Application code runs on the host machine with hot-reload.
 # =============================================================================
 
-.PHONY: help install dev up down logs db-generate db-push db-migrate db-studio db-reset db-seed clean type-check lint lint-fix format format-check check build prod-up prod-down prod-logs prod-ps prod-restart prod-reset setup email-dev
+.PHONY: help install dev up down logs db-generate db-push db-migrate db-studio studio db-reset db-seed clean type-check lint lint-fix format format-check check build prod-up prod-down prod-logs prod-ps prod-restart prod-reset setup email-dev
 
 # Default shell
 SHELL := bash
@@ -47,13 +47,14 @@ install: ## Install all dependencies
 # INFRASTRUCTURE (Docker)
 # =============================================================================
 
-up: ## Start infrastructure (Postgres + Redis) in Docker
+up: ## Start infrastructure (Postgres + Redis + Mailpit) in Docker
 	@echo "$(CYAN)Starting infrastructure services...$(NC)"
 	docker compose -f docker-compose.dev.yml up -d
 	@echo "$(GREEN)Infrastructure started$(NC)"
 	@echo ""
 	@echo "  PostgreSQL: localhost:5432"
 	@echo "  Redis:      localhost:6379"
+	@echo "  Mailpit:    http://localhost:8025  (SMTP: localhost:1025)"
 	@echo ""
 
 down: ## Stop infrastructure
@@ -110,6 +111,8 @@ db-studio: ## Open Drizzle Studio (database GUI)
 	@echo "$(CYAN)Opening Drizzle Studio...$(NC)"
 	@echo "   Visit: https://local.drizzle.studio"
 	pnpm --filter @repo/shared db:studio
+
+studio: db-studio ## Alias for db-studio
 
 db-reset: down ## Reset database (WARNING: destroys all data)
 	@echo "$(RED)Resetting database...$(NC)"

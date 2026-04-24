@@ -40,6 +40,7 @@
     "documents": "Documents",
     "audit": "Audit Log",
     "settings": "Settings",
+    "admin": "Administration",
     "logout": "Sign out",
     "more": "More"
   },
@@ -1051,6 +1052,64 @@
       "document": "Document",
       "email_account": "Email Account",
       "user": "User"
+    }
+  },
+  "admin": {
+    "users": {
+      "title": "User Management",
+      "description": "Manage all users, change roles and ban accounts.",
+      "searchPlaceholder": "Search users...",
+      "noResults": "No users found.",
+      "notFound": "User not found.",
+      "active": "Active",
+      "banned": "Banned",
+      "verified": "Verified",
+      "unverified": "Unverified",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "emailVerified": "Email Verified",
+        "createdAt": "Created At"
+      },
+      "roles": {
+        "admin": "Administrator",
+        "member": "Member"
+      },
+      "detail": {
+        "profile": "Profile",
+        "roleManagement": "Role Management",
+        "accountStatus": "Account Status",
+        "activeSessions": "Active Sessions",
+        "language": "Language",
+        "currency": "Currency",
+        "properties": "Properties",
+        "sessions": "Sessions",
+        "save": "Save",
+        "cancel": "Cancel",
+        "cannotChangeOwnRole": "You cannot change your own role.",
+        "accountBanned": "Account Banned",
+        "accountActive": "Account Active",
+        "bannedDescription": "This user is banned and cannot log in.",
+        "activeDescription": "This user can log in normally.",
+        "ban": "Ban",
+        "unban": "Unban",
+        "cannotBanAdmin": "Administrators cannot be banned.",
+        "banTitle": "Ban User",
+        "unbanTitle": "Unban User",
+        "banConfirm": "Are you sure you want to ban {name}? All active sessions will be terminated.",
+        "unbanConfirm": "Are you sure you want to unban {name}?",
+        "device": "Device",
+        "ipAddress": "IP Address",
+        "lastActive": "Last Active",
+        "createdAt": "Created At",
+        "unknownDevice": "Unknown Device",
+        "noSessions": "No active sessions.",
+        "revokeAll": "Revoke All",
+        "revokeAllTitle": "Revoke All Sessions",
+        "revokeAllConfirm": "Are you sure you want to revoke all sessions for {name}?"
+      }
     }
   }
 }

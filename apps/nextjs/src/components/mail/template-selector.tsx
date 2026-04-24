@@ -34,11 +34,16 @@ export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
         }}
       >
         <SelectTrigger className="h-8 w-48">
-          <SelectValue placeholder={t("templates.select")} />
+          <SelectValue placeholder={t("templates.select")}>
+            {(value: string) => {
+              const tmpl = templates.find((item) => item.id === value);
+              return tmpl ? tmpl.name : value;
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {templates.map((tmpl) => (
-            <SelectItem key={tmpl.id} value={tmpl.id}>
+            <SelectItem key={tmpl.id} value={tmpl.id} label={tmpl.name}>
               {tmpl.name}
             </SelectItem>
           ))}

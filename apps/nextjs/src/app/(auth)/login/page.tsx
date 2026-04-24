@@ -20,13 +20,29 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
+  const [showResend, setShowResend] = useState(false);
+  const [resendEmail, setResendEmail] = useState("");
+
   const login = trpc.auth.login.useMutation({
     onSuccess: () => {
       router.push("/");
       router.refresh();
     },
     onError: (err) => {
-      setError(err.message);
+      if (err.message === "email_not_verified") {
+        setError("Ihre E-Mail-Adresse wurde noch nicht verifiziert.");
+        setShowResend(true);
+      } else {
+        setError(err.message);
+        setShowResend(false);
+      }
+    },
+  });
+
+  const resend = trpc.auth.resendVerification.useMutation({
+    onSuccess: () => {
+      setError("Verifizierungslink wurde erneut gesendet.");
+      setShowResend(false);
     },
   });
 
@@ -34,8 +50,10 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    setResendEmail(email);
     login.mutate({
-      email: formData.get("email") as string,
+      email,
       password: formData.get("password") as string,
     });
   }
@@ -53,6 +71,16 @@ export default function LoginPage() {
           {error && (
             <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
               {error}
+              {showResend && (
+                <button
+                  type="button"
+                  className="ml-2 underline"
+                  onClick={() => resend.mutate({ email: resendEmail })}
+                  disabled={resend.isPending}
+                >
+                  Erneut senden
+                </button>
+              )}
             </div>
           )}
           <div className="space-y-2">
@@ -74,8 +102,16 @@ export default function LoginPage() {
               type="password"
               required
               autoComplete="current-password"
-              minLength={8}
+              minLength={10}
             />
+          </div>
+          <div className="text-right">
+            <Link
+              href="/forgot-password"
+              className="text-sm text-muted-foreground hover:text-primary underline"
+            >
+              Passwort vergessen?
+            </Link>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4 pt-2">

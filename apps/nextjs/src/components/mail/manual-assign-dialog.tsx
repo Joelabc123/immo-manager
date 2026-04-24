@@ -82,11 +82,22 @@ export function ManualAssignDialog({
               onValueChange={(val) => setPropertyId(val ?? "")}
             >
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(value: string) => {
+                    const p = propertiesData?.items?.find(
+                      (item) => item.id === value,
+                    );
+                    return p ? `${p.street}, ${p.city}` : value;
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {propertiesData?.items?.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
+                  <SelectItem
+                    key={p.id}
+                    value={p.id}
+                    label={`${p.street}, ${p.city}`}
+                  >
                     {p.street}, {p.city}
                   </SelectItem>
                 ))}
@@ -101,11 +112,24 @@ export function ManualAssignDialog({
               onValueChange={(val) => setTenantId(val ?? "")}
             >
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(value: string) => {
+                    const tenant = tenantsData?.items?.find(
+                      (item) => item.id === value,
+                    );
+                    return tenant
+                      ? `${tenant.firstName} ${tenant.lastName}`
+                      : value;
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {tenantsData?.items?.map((tenant) => (
-                  <SelectItem key={tenant.id} value={tenant.id}>
+                  <SelectItem
+                    key={tenant.id}
+                    value={tenant.id}
+                    label={`${tenant.firstName} ${tenant.lastName}`}
+                  >
                     {tenant.firstName} {tenant.lastName}
                   </SelectItem>
                 ))}

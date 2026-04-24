@@ -1,9 +1,7 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { createServer } from "http";
 import { parse as parseCookie } from "cookie";
-import { eq, gt } from "drizzle-orm";
-import { db } from "@repo/shared/db";
-import { sessions, users } from "@repo/shared/db/schema";
+import { jwtVerify } from "jose";
 
 const PORT = Number(process.env.WS_PORT) || 3002;
 
@@ -13,57 +11,47 @@ const userConnections = new Map<string, Set<WebSocket>>();
 const server = createServer();
 const wss = new WebSocketServer({ server });
 
-async function validateSessionToken(
+function getAccessSecret(): Uint8Array {
+  const secret = process.env.JWT_ACCESS_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("JWT_ACCESS_SECRET must be at least 32 characters");
+  }
+  return new TextEncoder().encode(secret);
+}
+
+async function validateAccessToken(
   token: string,
 ): Promise<{ userId: string; name: string; email: string } | null> {
-  const result = await db
-    .select({
-      userId: users.id,
-      name: users.name,
-      email: users.email,
-    })
-    .from(sessions)
-    .innerJoin(users, eq(sessions.userId, users.id))
-    .where(eq(sessions.token, token))
-    .limit(1);
-
-  if (result.length === 0) return null;
-
-  // Check expiry
-  const sessionRow = await db
-    .select({ expiresAt: sessions.expiresAt })
-    .from(sessions)
-    .where(eq(sessions.token, token))
-    .limit(1);
-
-  if (
-    sessionRow.length === 0 ||
-    new Date(sessionRow[0].expiresAt) < new Date()
-  ) {
+  try {
+    const { payload } = await jwtVerify(token, getAccessSecret());
+    return {
+      userId: payload.sub as string,
+      name: payload.name as string,
+      email: payload.email as string,
+    };
+  } catch {
     return null;
   }
-
-  return result[0];
 }
 
 wss.on("connection", async (ws, req) => {
-  // Extract session token from cookie
+  // Extract access token from cookie
   const cookieHeader = req.headers.cookie;
   if (!cookieHeader) {
-    ws.close(4001, "No session cookie");
+    ws.close(4001, "No cookie");
     return;
   }
 
   const cookies = parseCookie(cookieHeader);
-  const token = cookies.session_token;
+  const token = cookies.access_token;
   if (!token) {
-    ws.close(4001, "No session token");
+    ws.close(4001, "No access token");
     return;
   }
 
-  const user = await validateSessionToken(token);
+  const user = await validateAccessToken(token);
   if (!user) {
-    ws.close(4003, "Invalid session");
+    ws.close(4003, "Invalid token");
     return;
   }
 

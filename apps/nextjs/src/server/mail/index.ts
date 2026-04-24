@@ -7,14 +7,14 @@ import type Mail from "nodemailer/lib/mailer";
  * Uses SMTP configuration from environment variables.
  */
 export function createMailTransporter(): nodemailer.Transporter {
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT ?? 587),
     secure: process.env.SMTP_SECURE === "true",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
+    ...(user && pass ? { auth: { user, pass } } : {}),
   });
 }
 

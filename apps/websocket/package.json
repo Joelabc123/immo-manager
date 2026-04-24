@@ -10,6 +10,7 @@
     "@repo/shared": "workspace:*",
     "cookie": "^1.1.1",
     "drizzle-orm": "^0.45.2",
+    "jose": "^6.2.2",
     "ws": "^8.20.0"
   },
   "devDependencies": {

@@ -147,11 +147,22 @@ function TransferAttachmentDialog({
               onValueChange={(val) => setPropertyId(val ?? "")}
             >
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(value: string) => {
+                    const p = propertiesData?.items?.find(
+                      (item) => item.id === value,
+                    );
+                    return p ? `${p.street}, ${p.city}` : value;
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {propertiesData?.items?.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
+                  <SelectItem
+                    key={p.id}
+                    value={p.id}
+                    label={`${p.street}, ${p.city}`}
+                  >
                     {p.street}, {p.city}
                   </SelectItem>
                 ))}

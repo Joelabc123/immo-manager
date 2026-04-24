@@ -242,15 +242,29 @@ export function EditTenantDialog({
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder={t("selectProperty")} />
+                <SelectValue placeholder={t("selectProperty")}>
+                  {(value: string) => {
+                    const p = propertiesData?.items.find(
+                      (item) => item.id === value,
+                    );
+                    return p
+                      ? [p.street, p.city].filter(Boolean).join(", ") ||
+                          p.id.slice(0, 8)
+                      : value;
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {propertiesData?.items.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {[p.street, p.city].filter(Boolean).join(", ") ||
-                      p.id.slice(0, 8)}
-                  </SelectItem>
-                ))}
+                {propertiesData?.items.map((p) => {
+                  const displayName =
+                    [p.street, p.city].filter(Boolean).join(", ") ||
+                    p.id.slice(0, 8);
+                  return (
+                    <SelectItem key={p.id} value={p.id} label={displayName}>
+                      {displayName}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -265,15 +279,24 @@ export function EditTenantDialog({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t("selectUnit")} />
+                  <SelectValue placeholder={t("selectUnit")}>
+                    {(value: string) => {
+                      const u = unitsData.find((item) => item.id === value);
+                      return u
+                        ? `${u.name}${u.floor ? ` (${u.floor})` : ""}`
+                        : value;
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {unitsData.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name}
-                      {u.floor ? ` (${u.floor})` : ""}
-                    </SelectItem>
-                  ))}
+                  {unitsData.map((u) => {
+                    const unitLabel = `${u.name}${u.floor ? ` (${u.floor})` : ""}`;
+                    return (
+                      <SelectItem key={u.id} value={u.id} label={unitLabel}>
+                        {unitLabel}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>

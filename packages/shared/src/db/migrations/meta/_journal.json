@@ -36,6 +36,20 @@
       "when": 1776458593832,
       "tag": "0004_lonely_luke_cage",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776700597486,
+      "tag": "0005_melted_power_pack",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776703765976,
+      "tag": "0006_daily_maddog",
+      "breakpoints": true
     }
   ]
 }

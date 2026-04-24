@@ -8,11 +8,17 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 
+export const USER_ROLES = ["member", "admin"] as const;
+export type UserRole = (typeof USER_ROLES)[number];
+
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
+  role: text("role").notNull().default("member").$type<UserRole>(),
+  banned: boolean("banned").notNull().default(false),
+  emailVerified: boolean("email_verified").notNull().default(false),
   avatarUrl: text("avatar_url"),
   language: text("language").notNull().default("de"),
   currency: text("currency").notNull().default("EUR"),

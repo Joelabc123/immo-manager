@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { passwordSchema } from "./auth";
 
 export const SUPPORTED_CURRENCIES = ["EUR", "USD", "CHF"] as const;
 export const SUPPORTED_LANGUAGES = ["de", "en"] as const;
@@ -18,8 +19,8 @@ export const updateProfileInput = z.object({
 
 export const changePasswordInput = z.object({
   currentPassword: z.string().min(1),
-  newPassword: z.string().min(8).max(128),
-  confirmPassword: z.string().min(8).max(128),
+  newPassword: passwordSchema,
+  confirmPassword: passwordSchema,
 });
 
 export const updatePreferencesInput = z.object({

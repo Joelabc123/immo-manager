@@ -40,6 +40,7 @@
     "documents": "Dokumente",
     "audit": "Audit-Log",
     "settings": "Einstellungen",
+    "admin": "Administration",
     "logout": "Abmelden",
     "more": "Mehr"
   },
@@ -1051,6 +1052,64 @@
       "document": "Dokument",
       "email_account": "E-Mail-Konto",
       "user": "Benutzer"
+    }
+  },
+  "admin": {
+    "users": {
+      "title": "Benutzerverwaltung",
+      "description": "Alle Benutzer verwalten, Rollen aendern und Konten sperren.",
+      "searchPlaceholder": "Benutzer suchen...",
+      "noResults": "Keine Benutzer gefunden.",
+      "notFound": "Benutzer nicht gefunden.",
+      "active": "Aktiv",
+      "banned": "Gesperrt",
+      "verified": "Verifiziert",
+      "unverified": "Nicht verifiziert",
+      "columns": {
+        "name": "Name",
+        "email": "E-Mail",
+        "role": "Rolle",
+        "status": "Status",
+        "emailVerified": "E-Mail verifiziert",
+        "createdAt": "Erstellt am"
+      },
+      "roles": {
+        "admin": "Administrator",
+        "member": "Mitglied"
+      },
+      "detail": {
+        "profile": "Profil",
+        "roleManagement": "Rollenverwaltung",
+        "accountStatus": "Kontostatus",
+        "activeSessions": "Aktive Sitzungen",
+        "language": "Sprache",
+        "currency": "Waehrung",
+        "properties": "Immobilien",
+        "sessions": "Sitzungen",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "cannotChangeOwnRole": "Sie koennen Ihre eigene Rolle nicht aendern.",
+        "accountBanned": "Konto gesperrt",
+        "accountActive": "Konto aktiv",
+        "bannedDescription": "Dieser Benutzer ist gesperrt und kann sich nicht anmelden.",
+        "activeDescription": "Dieser Benutzer kann sich normal anmelden.",
+        "ban": "Sperren",
+        "unban": "Entsperren",
+        "cannotBanAdmin": "Administratoren koennen nicht gesperrt werden.",
+        "banTitle": "Benutzer sperren",
+        "unbanTitle": "Benutzer entsperren",
+        "banConfirm": "Moechten Sie {name} wirklich sperren? Alle aktiven Sitzungen werden beendet.",
+        "unbanConfirm": "Moechten Sie {name} wirklich entsperren?",
+        "device": "Geraet",
+        "ipAddress": "IP-Adresse",
+        "lastActive": "Zuletzt aktiv",
+        "createdAt": "Erstellt am",
+        "unknownDevice": "Unbekanntes Geraet",
+        "noSessions": "Keine aktiven Sitzungen.",
+        "revokeAll": "Alle beenden",
+        "revokeAllTitle": "Alle Sitzungen beenden",
+        "revokeAllConfirm": "Moechten Sie wirklich alle Sitzungen von {name} beenden?"
+      }
     }
   }
 }

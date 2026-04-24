@@ -2,11 +2,13 @@ packages:
   - "apps/*"
   - "packages/*"
 
-onlyBuiltDependencies:
-  - argon2
-  - esbuild
-
 ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
   - msw
   - sharp
   - unrs-resolver
+
+onlyBuiltDependencies:
+  - argon2
+  - esbuild

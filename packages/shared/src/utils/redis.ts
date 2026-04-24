@@ -64,6 +64,10 @@ export const REDIS_CHANNELS = {
   EMAIL_ACCOUNT_UPDATED: "email:account-updated",
   /** Published when sync encounters an error. Payload: { accountId, userId, error } */
   EMAIL_SYNC_ERROR: "email:sync-error",
+  /** Published when a user registers and needs email verification. */
+  AUTH_VERIFY_EMAIL: "auth:verify-email",
+  /** Published when a user requests a password reset. */
+  AUTH_PASSWORD_RESET: "auth:password-reset",
 } as const;
 
 export type RedisChannel = (typeof REDIS_CHANNELS)[keyof typeof REDIS_CHANNELS];
@@ -100,12 +104,28 @@ interface EmailSyncErrorPayload {
   error: string;
 }
 
+interface AuthVerifyEmailPayload {
+  userId: string;
+  email: string;
+  name: string;
+  token: string;
+}
+
+interface AuthPasswordResetPayload {
+  userId: string;
+  email: string;
+  name: string;
+  token: string;
+}
+
 type ChannelPayloadMap = {
   [REDIS_CHANNELS.EMAIL_NEW]: EmailNewPayload;
   [REDIS_CHANNELS.EMAIL_SYNC_COMPLETE]: EmailSyncCompletePayload;
   [REDIS_CHANNELS.EMAIL_SYNC_REQUEST]: EmailSyncRequestPayload;
   [REDIS_CHANNELS.EMAIL_ACCOUNT_UPDATED]: EmailAccountUpdatedPayload;
   [REDIS_CHANNELS.EMAIL_SYNC_ERROR]: EmailSyncErrorPayload;
+  [REDIS_CHANNELS.AUTH_VERIFY_EMAIL]: AuthVerifyEmailPayload;
+  [REDIS_CHANNELS.AUTH_PASSWORD_RESET]: AuthPasswordResetPayload;
 };
 
 /**

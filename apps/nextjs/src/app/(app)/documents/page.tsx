@@ -167,16 +167,31 @@ export default function DocumentsPage() {
           }}
         >
           <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder={t("filterByProperty")} />
+            <SelectValue placeholder={t("filterByProperty")}>
+              {(value: string) => {
+                if (value === "__all__") return t("allProperties");
+                const prop = propertiesList?.items.find(
+                  (item) => item.id === value,
+                );
+                return prop
+                  ? [prop.street, prop.city].filter(Boolean).join(", ") ||
+                      prop.id.slice(0, 8)
+                  : value;
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="__all__">{t("allProperties")}</SelectItem>
-            {propertiesList?.items.map((prop) => (
-              <SelectItem key={prop.id} value={prop.id}>
-                {[prop.street, prop.city].filter(Boolean).join(", ") ||
-                  prop.id.slice(0, 8)}
-              </SelectItem>
-            ))}
+            {propertiesList?.items.map((prop) => {
+              const displayName =
+                [prop.street, prop.city].filter(Boolean).join(", ") ||
+                prop.id.slice(0, 8);
+              return (
+                <SelectItem key={prop.id} value={prop.id} label={displayName}>
+                  {displayName}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
         <Select
