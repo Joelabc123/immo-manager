@@ -76,6 +76,7 @@ export function AddPropertyWizard({
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- RHF watch() cannot be memoized; accepted trade-off (see React Compiler docs)
   const propertyType = watch("type") as PropertyType;
   const showUnitCount = MULTI_UNIT_TYPES.has(propertyType);
 

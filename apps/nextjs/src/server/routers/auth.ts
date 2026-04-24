@@ -170,6 +170,7 @@ export const authRouter = router({
       user.name,
       userAgent ?? undefined,
       ipAddress ?? undefined,
+      input.rememberMe,
     );
 
     return {

@@ -4,24 +4,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-
   const [showResend, setShowResend] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
 
   const login = trpc.auth.login.useMutation({
     onSuccess: () => {
@@ -55,77 +49,102 @@ export default function LoginPage() {
     login.mutate({
       email,
       password: formData.get("password") as string,
+      rememberMe,
     });
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-2xl">Anmelden</CardTitle>
-        <CardDescription>
+    <AuthShell
+      footer={
+        <span>
+          Noch kein Konto?{" "}
+          <Link
+            href="/register"
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Registrieren
+          </Link>
+        </span>
+      }
+    >
+      <div className="mb-8 space-y-3">
+        <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
+          Willkommen zurück
+        </h1>
+        <p className="text-muted-foreground">
           Melden Sie sich mit Ihrer E-Mail und Ihrem Passwort an.
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-              {showResend && (
-                <button
-                  type="button"
-                  className="ml-2 underline"
-                  onClick={() => resend.mutate({ email: resendEmail })}
-                  disabled={resend.isPending}
-                >
-                  Erneut senden
-                </button>
-              )}
-            </div>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="email">E-Mail</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="name@beispiel.de"
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+            {showResend && (
+              <button
+                type="button"
+                className="ml-2 underline"
+                onClick={() => resend.mutate({ email: resendEmail })}
+                disabled={resend.isPending}
+              >
+                Erneut senden
+              </button>
+            )}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="email">E-Mail</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="name@beispiel.de"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password">Passwort</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            minLength={10}
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <label
+            htmlFor="rememberMe"
+            className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground"
+          >
+            <Checkbox
+              id="rememberMe"
+              checked={rememberMe}
+              onCheckedChange={(checked) => setRememberMe(checked === true)}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Passwort</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              minLength={10}
-            />
-          </div>
-          <div className="text-right">
-            <Link
-              href="/forgot-password"
-              className="text-sm text-muted-foreground hover:text-primary underline"
-            >
-              Passwort vergessen?
-            </Link>
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4 pt-2">
-          <Button type="submit" className="w-full" disabled={login.isPending}>
-            {login.isPending ? "Wird angemeldet..." : "Anmelden"}
-          </Button>
-          <p className="text-center text-sm text-muted-foreground">
-            Noch kein Konto?{" "}
-            <Link href="/register" className="text-primary underline">
-              Registrieren
-            </Link>
-          </p>
-        </CardFooter>
+            Angemeldet bleiben
+          </label>
+          <Link
+            href="/forgot-password"
+            className="text-sm text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+          >
+            Passwort vergessen?
+          </Link>
+        </div>
+
+        <Button
+          type="submit"
+          className="w-auto px-10"
+          disabled={login.isPending}
+        >
+          {login.isPending ? "Wird angemeldet..." : "Anmelden"}
+        </Button>
       </form>
-    </Card>
+    </AuthShell>
   );
 }

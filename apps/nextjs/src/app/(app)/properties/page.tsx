@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
@@ -128,6 +127,7 @@ export default function PropertiesPage() {
             ? `/api/uploads/${row.thumbnailPath}`
             : null;
           return thumbnailUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- dynamic user-uploaded thumbnail served via internal API route
             <img
               src={thumbnailUrl}
               alt=""

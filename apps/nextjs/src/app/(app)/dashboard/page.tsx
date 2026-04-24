@@ -139,6 +139,7 @@ export default function DashboardPage() {
   }, []);
 
   const commitWidgets = useCallback(
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Uses stable refs (widgetsRef) + stable setter; scheduleSave must be a dep to capture latest active/updateMutation closure.
     (updater: (prev: WidgetInstance[]) => WidgetInstance[]) => {
       const next = updater(widgetsRef.current);
       setDraftWidgets(next);
@@ -206,6 +207,7 @@ export default function DashboardPage() {
     [commitWidgets],
   );
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Uses stable refs (activeRef, widgetsRef) for flush-on-close; updateMutation is the only reactive dep.
   const handleToggleEdit = useCallback(() => {
     setIsEditing((prev) => {
       const next = !prev;

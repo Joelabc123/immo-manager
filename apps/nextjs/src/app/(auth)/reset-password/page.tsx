@@ -4,17 +4,10 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -33,41 +26,6 @@ export default function ResetPasswordPage() {
     },
   });
 
-  if (!token) {
-    return (
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">Ungueltiger Link</CardTitle>
-          <CardDescription>
-            Dieser Link zum Zuruecksetzen des Passworts ist ungueltig.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Link
-            href="/forgot-password"
-            className="text-primary underline text-sm"
-          >
-            Neuen Link anfordern
-          </Link>
-        </CardFooter>
-      </Card>
-    );
-  }
-
-  if (success) {
-    return (
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">Passwort zurueckgesetzt</CardTitle>
-          <CardDescription>
-            Ihr Passwort wurde erfolgreich zurueckgesetzt. Sie werden zur
-            Anmeldung weitergeleitet...
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -80,69 +38,118 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    if (!token) return;
+
     resetPassword.mutate({
-      token: token!,
+      token,
       password,
     });
   }
 
-  return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-2xl">Neues Passwort setzen</CardTitle>
-        <CardDescription>
-          Geben Sie Ihr neues Passwort ein. Mindestens 10 Zeichen, 1
-          Grossbuchstabe, 1 Zahl und 1 Sonderzeichen.
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="password">Neues Passwort</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="new-password"
-              minLength={10}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Passwort bestaetigen</Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              required
-              autoComplete="new-password"
-              minLength={10}
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4">
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={resetPassword.isPending}
-          >
-            {resetPassword.isPending
-              ? "Wird zurueckgesetzt..."
-              : "Passwort zuruecksetzen"}
-          </Button>
+  const loginFooter = (
+    <span>
+      <Link
+        href="/login"
+        className="font-medium text-primary underline-offset-4 hover:underline"
+      >
+        Zurück zur Anmeldung
+      </Link>
+    </span>
+  );
+
+  if (!token) {
+    return (
+      <AuthShell
+        footer={
           <Link
-            href="/login"
-            className="text-center text-sm text-muted-foreground underline"
+            href="/forgot-password"
+            className="font-medium text-primary underline-offset-4 hover:underline"
           >
-            Zurueck zur Anmeldung
+            Neuen Link anfordern
           </Link>
-        </CardFooter>
+        }
+      >
+        <div className="mb-8 space-y-3">
+          <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
+            Ungültiger Link
+          </h1>
+          <p className="text-muted-foreground">
+            Dieser Link zum Zurücksetzen des Passworts ist ungültig.
+          </p>
+        </div>
+      </AuthShell>
+    );
+  }
+
+  if (success) {
+    return (
+      <AuthShell footer={loginFooter}>
+        <div className="mb-8 space-y-3">
+          <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
+            Passwort zurückgesetzt
+          </h1>
+          <p className="text-muted-foreground">
+            Ihr Passwort wurde erfolgreich zurückgesetzt. Sie werden zur
+            Anmeldung weitergeleitet...
+          </p>
+        </div>
+      </AuthShell>
+    );
+  }
+
+  return (
+    <AuthShell footer={loginFooter}>
+      <div className="mb-8 space-y-3">
+        <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
+          Neues Passwort setzen
+        </h1>
+        <p className="text-muted-foreground">
+          Geben Sie Ihr neues Passwort ein. Mindestens 10 Zeichen, 1
+          Großbuchstabe, 1 Zahl und 1 Sonderzeichen.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="password">Neues Passwort</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="new-password"
+            minLength={10}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Passwort bestätigen</Label>
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            required
+            autoComplete="new-password"
+            minLength={10}
+          />
+        </div>
+
+        <Button
+          type="submit"
+          className="w-auto px-10"
+          disabled={resetPassword.isPending}
+        >
+          {resetPassword.isPending
+            ? "Wird zurückgesetzt..."
+            : "Passwort zurücksetzen"}
+        </Button>
       </form>
-    </Card>
+    </AuthShell>
   );
 }

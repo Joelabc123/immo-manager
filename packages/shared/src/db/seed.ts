@@ -15,7 +15,7 @@ async function seed() {
   console.log("Seeding database...");
 
   // 1. Create demo user
-  const passwordHash = await argon2.hash("demo1234", {
+  const passwordHash = await argon2.hash("Demo12345!", {
     type: argon2.argon2id,
     memoryCost: 65536,
     timeCost: 3,
@@ -28,6 +28,7 @@ async function seed() {
       name: "Max Mustermann",
       email: "demo@immo-manager.de",
       passwordHash,
+      emailVerified: true,
       language: "de",
       currency: "EUR",
       taxRate: 4200,

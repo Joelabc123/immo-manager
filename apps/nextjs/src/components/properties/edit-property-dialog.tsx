@@ -103,6 +103,7 @@ export function EditPropertyDialog({
             <div className="space-y-2">
               <Label>{t("type")}</Label>
               <Select
+                // eslint-disable-next-line react-hooks/incompatible-library -- RHF watch() cannot be memoized; accepted trade-off (see React Compiler docs)
                 value={watch("type")}
                 onValueChange={(val) => val && setValue("type", val)}
               >

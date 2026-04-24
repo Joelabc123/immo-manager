@@ -125,6 +125,7 @@ export default function SharePage({ params }: SharePageProps) {
       {/* Thumbnail */}
       {property.thumbnailPath && (
         <Card className="mb-6 overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element -- dynamic share-token image served via internal API route */}
           <img
             src={`/api/share/${token}`}
             alt={address}

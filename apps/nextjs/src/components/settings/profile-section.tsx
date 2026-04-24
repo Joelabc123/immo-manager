@@ -109,6 +109,7 @@ export function ProfileSection() {
           <div className="flex items-center gap-4">
             <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
               {profile.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- dynamic user-uploaded avatar served via internal API route
                 <img
                   src={`/api/uploads/${profile.avatarUrl}`}
                   alt="Avatar"

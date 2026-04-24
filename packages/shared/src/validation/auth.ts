@@ -27,6 +27,7 @@ export const registerInput = z.object({
 export const loginInput = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+  rememberMe: z.boolean().optional().default(true),
 });
 
 export const verifyEmailInput = z.object({

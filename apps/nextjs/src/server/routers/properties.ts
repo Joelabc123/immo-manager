@@ -434,10 +434,10 @@ export const propertiesRouter = router({
 
       // Remove fields that should not be duplicated
       const {
-        id: _id, // eslint-disable-line @typescript-eslint/no-unused-vars
-        createdAt: _ca, // eslint-disable-line @typescript-eslint/no-unused-vars
-        updatedAt: _ua, // eslint-disable-line @typescript-eslint/no-unused-vars
-        thumbnailPath: _tp, // eslint-disable-line @typescript-eslint/no-unused-vars
+        id: _id,
+        createdAt: _ca,
+        updatedAt: _ua,
+        thumbnailPath: _tp,
         ...propertyData
       } = original;
 

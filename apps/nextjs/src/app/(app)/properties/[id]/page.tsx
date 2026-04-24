@@ -52,7 +52,6 @@ export default function PropertyDetailPage({
   const router = useRouter();
   const t = useTranslations("properties");
   const { formatCurrency } = useCurrency();
-  const utils = trpc.useUtils();
 
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -61,12 +60,6 @@ export default function PropertyDetailPage({
 
   const { data: property, isLoading } = trpc.properties.getById.useQuery({
     id,
-  });
-
-  const updateMutation = trpc.properties.update.useMutation({
-    onSuccess: () => {
-      utils.properties.getById.invalidate({ id });
-    },
   });
 
   if (isLoading) {

@@ -37,7 +37,7 @@ interface CookieOptions {
   secure: boolean;
   sameSite: "strict" | "lax" | "none";
   path: string;
-  maxAge: number;
+  maxAge?: number;
 }
 
 function accessCookieOptions(): CookieOptions {
@@ -50,24 +50,24 @@ function accessCookieOptions(): CookieOptions {
   };
 }
 
-function refreshCookieOptions(): CookieOptions {
-  return {
+function refreshCookieOptions(persistent: boolean = true): CookieOptions {
+  const base: CookieOptions = {
     httpOnly: true,
     secure: isProduction(),
     sameSite: "strict",
     path: "/",
-    maxAge: REFRESH_MAX_AGE,
   };
+  return persistent ? { ...base, maxAge: REFRESH_MAX_AGE } : base;
 }
 
-function csrfCookieOptions(): CookieOptions {
-  return {
+function csrfCookieOptions(persistent: boolean = true): CookieOptions {
+  const base: CookieOptions = {
     httpOnly: false, // Must be readable by JS for double-submit
     secure: isProduction(),
     sameSite: "strict",
     path: "/",
-    maxAge: REFRESH_MAX_AGE,
   };
+  return persistent ? { ...base, maxAge: REFRESH_MAX_AGE } : base;
 }
 
 export async function createSessionTokens(
@@ -77,6 +77,7 @@ export async function createSessionTokens(
   name: string,
   userAgent?: string,
   ipAddress?: string,
+  rememberMe: boolean = true,
 ): Promise<{ accessToken: string; sessionId: string }> {
   const familyId = randomUUID();
   const sessionId = randomUUID();
@@ -115,8 +116,12 @@ export async function createSessionTokens(
   // Set all cookies
   const cookieStore = await cookies();
   cookieStore.set(ACCESS_COOKIE, accessToken, accessCookieOptions());
-  cookieStore.set(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
-  cookieStore.set(CSRF_COOKIE, csrfToken, csrfCookieOptions());
+  cookieStore.set(
+    REFRESH_COOKIE,
+    refreshToken,
+    refreshCookieOptions(rememberMe),
+  );
+  cookieStore.set(CSRF_COOKIE, csrfToken, csrfCookieOptions(rememberMe));
 
   return { accessToken, sessionId };
 }

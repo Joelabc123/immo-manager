@@ -1,12 +1,12 @@
 # Immo Manager
 
-Immobilien Management System — gebaut mit Next.js, tRPC, Drizzle ORM, PostgreSQL, Nodemailer und node-cron.
+Immobilien-Management-System — gebaut mit Next.js 16, tRPC v11, Drizzle ORM, PostgreSQL 17, Nodemailer und node-cron. Monorepo mit pnpm Workspaces.
 
 ## Voraussetzungen
 
 - [Node.js](https://nodejs.org/) >= 22
 - [pnpm](https://pnpm.io/) >= 10
-- [Docker](https://www.docker.com/) (fuer PostgreSQL)
+- [Docker](https://www.docker.com/) (für PostgreSQL)
 
 ## Schnellstart
 
@@ -38,14 +38,18 @@ Die Applikation ist dann erreichbar unter: [http://localhost:3000](http://localh
 
 ## Demo-Login
 
+Nach `db:seed` steht folgender Demo-User zur Verfügung:
+
 | Feld     | Wert                   |
 | -------- | ---------------------- |
 | E-Mail   | `demo@immo-manager.de` |
-| Passwort | `demo1234`             |
+| Passwort | `Demo12345!`           |
 
-Der Demo-User "Max Mustermann" wird mit dem Seed erstellt und enthaelt:
+Das Passwort erfüllt die Passwort-Policy (mindestens 10 Zeichen, 1 Großbuchstabe, 1 Zahl, 1 Sonderzeichen).
 
-- 4 Immobilien (Berlin, Muenchen, Hamburg, Frankfurt)
+Der Demo-User "Max Mustermann" wird mit dem Seed erstellt und enthält:
+
+- 4 Immobilien (Berlin, München, Hamburg, Frankfurt)
 - 4 Kredite bei verschiedenen Banken
 - 8 Mieteinheiten
 - 7 Mieter mit Kontaktdaten
@@ -54,7 +58,7 @@ Der Demo-User "Max Mustermann" wird mit dem Seed erstellt und enthaelt:
 
 ## Windows-Hinweis
 
-Das `Makefile` nutzt `/bin/zsh` und funktioniert nur auf Linux/macOS. Unter Windows die Befehle direkt mit `pnpm` ausfuehren:
+Das `Makefile` nutzt `/bin/zsh` und funktioniert nur auf Linux/macOS. Unter Windows die Befehle direkt mit `pnpm` ausführen:
 
 ```powershell
 # Statt "make dev":
@@ -80,12 +84,12 @@ pnpm --filter @repo/shared db:seed
 pnpm --filter @repo/shared db:studio
 ```
 
-## Datenbank zuruecksetzen
+## Datenbank zurücksetzen
 
-Um die Datenbank komplett zurueckzusetzen und neu zu seeden:
+Um die Datenbank komplett zurückzusetzen und neu zu seeden:
 
 ```bash
-# Container stoppen und Volume loeschen
+# Container stoppen und Volume löschen
 docker compose -f docker-compose.dev.yml down -v
 
 # Neu starten
@@ -104,34 +108,38 @@ immo-manager/
 │   ├── nextjs/                 # Next.js 16 Frontend + API
 │   │   ├── src/
 │   │   │   ├── app/            # App Router (Pages)
+│   │   │   │   ├── (admin)/    # Admin-Bereich
 │   │   │   │   ├── (app)/      # Authentifizierte Seiten
-│   │   │   │   ├── (auth)/     # Login / Register
+│   │   │   │   ├── (auth)/     # Login / Register / Password-Flows
 │   │   │   │   └── api/        # tRPC + Upload API Routes
 │   │   │   ├── components/     # React-Komponenten
 │   │   │   │   ├── ui/         # shadcn/ui Basis-Komponenten
+│   │   │   │   ├── auth/       # Auth-Shell & Illustration
 │   │   │   │   ├── properties/ # Immobilien-Komponenten
 │   │   │   │   ├── tenants/    # Mieter-Komponenten
 │   │   │   │   ├── dashboard/  # Dashboard-Widgets
 │   │   │   │   ├── analysis/   # Analyse-Tools
 │   │   │   │   ├── documents/  # Dokumentenverwaltung
 │   │   │   │   ├── mail/       # E-Mail Client
+│   │   │   │   ├── notifications/
 │   │   │   │   ├── settings/   # Einstellungen
 │   │   │   │   └── audit/      # Audit-Trail
 │   │   │   ├── server/         # Server-seitiger Code
-│   │   │   │   ├── routers/    # tRPC Router (21 Dateien)
+│   │   │   │   ├── routers/    # tRPC Router
 │   │   │   │   ├── services/   # Business-Logik
-│   │   │   │   ├── auth/       # Authentifizierung
+│   │   │   │   ├── auth/       # Authentifizierung (JWT, Sessions)
 │   │   │   │   ├── cron/       # Cron-Jobs
 │   │   │   │   └── mail/       # Nodemailer Konfiguration
 │   │   │   ├── lib/            # Client Utilities
 │   │   │   └── i18n/           # Internationalisierung (DE/EN)
-│   │   └── messages/           # Uebersetzungsdateien
+│   │   └── messages/           # Übersetzungsdateien
+│   ├── email/                  # IMAP-E-Mail-Sync-Service
 │   └── websocket/              # WebSocket-Server
 ├── packages/
 │   └── shared/                 # Geteilte Logik
 │       └── src/
 │           ├── db/             # Drizzle ORM Schema + Migrationen
-│           │   └── schema/     # 24 Tabellen-Definitionen
+│           │   └── schema/     # Tabellen-Definitionen
 │           ├── calculations/   # Finanzberechnungen
 │           ├── types/          # Geteilte TypeScript-Typen
 │           ├── validation/     # Zod-Schemas
@@ -158,9 +166,9 @@ immo-manager/
 | `make db-generate`  | Drizzle Migrationen generieren                   |
 | `make db-push`      | Schema direkt auf DB anwenden (nur Dev)          |
 | `make db-migrate`   | Ausstehende Migrationen ausführen                |
-| `make db-studio`    | Drizzle Studio oeffnen (Datenbank-GUI)           |
-| `make db-reset`     | Datenbank zuruecksetzen (loescht alle Daten!)    |
-| `make db-seed`      | Datenbank mit Demodaten befuellen                |
+| `make db-studio`    | Drizzle Studio öffnen (Datenbank-GUI)            |
+| `make db-reset`     | Datenbank zurücksetzen (löscht alle Daten!)      |
+| `make db-seed`      | Datenbank mit Demodaten befüllen                 |
 | **Code-Qualität**   |                                                  |
 | `make type-check`   | TypeScript Type Checking                         |
 | `make lint`         | ESLint ausführen                                 |
@@ -185,16 +193,29 @@ immo-manager/
 
 Siehe [.env.example](.env.example) für alle verfügbaren Variablen:
 
-| Variable              | Beschreibung                    | Standard                                                     |
-| --------------------- | ------------------------------- | ------------------------------------------------------------ |
-| `DATABASE_URL`        | PostgreSQL Connection String    | `postgresql://postgres:postgres@localhost:5432/immo_manager` |
-| `NEXT_PUBLIC_APP_URL` | Öffentliche URL der Applikation | `http://localhost:3000`                                      |
-| `SMTP_HOST`           | SMTP Server Host                | —                                                            |
-| `SMTP_PORT`           | SMTP Server Port                | `587`                                                        |
-| `SMTP_SECURE`         | TLS verwenden                   | `false`                                                      |
-| `SMTP_USER`           | SMTP Benutzername               | —                                                            |
-| `SMTP_PASS`           | SMTP Passwort                   | —                                                            |
-| `SMTP_FROM`           | Absender-Adresse                | Wert von `SMTP_USER`                                         |
+| Variable              | Beschreibung                           | Standard                                                     |
+| --------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| `DATABASE_URL`        | PostgreSQL Connection String           | `postgresql://postgres:postgres@localhost:5432/immo_manager` |
+| `NEXT_PUBLIC_APP_URL` | Öffentliche URL der Applikation        | `http://localhost:3000`                                      |
+| `ADMIN_EMAIL`         | E-Mail, die automatisch Admin-Rechte erhält | `admin@example.com`                                     |
+| `JWT_ACCESS_SECRET`   | Secret für Access-Tokens               | —                                                            |
+| `JWT_REFRESH_SECRET`  | Secret für Refresh-Tokens              | —                                                            |
+| `SMTP_HOST`           | SMTP Server Host                       | —                                                            |
+| `SMTP_PORT`           | SMTP Server Port                       | `587`                                                        |
+| `SMTP_SECURE`         | TLS verwenden                          | `false`                                                      |
+| `SMTP_USER`           | SMTP Benutzername                      | —                                                            |
+| `SMTP_PASS`           | SMTP Passwort                          | —                                                            |
+| `SMTP_FROM`           | Absender-Adresse                       | Wert von `SMTP_USER`                                         |
+| `VAPID_SUBJECT`       | Kontakt-URI für Web-Push               | `mailto:admin@immo-manager.local`                            |
+
+## Authentifizierung
+
+- JWT-basierte Session mit Access- (15 min) und Refresh-Token (30 Tage).
+- Refresh-Token-Rotation mit Reuse-Detection (kompromittierter Token → alle Sessions gelöscht).
+- CSRF-Schutz via Double-Submit-Cookie.
+- E-Mail-Verifizierung beim Signup (außer für die in `ADMIN_EMAIL` hinterlegte Adresse).
+- Passwort-Policy: min. 10 Zeichen, 1 Großbuchstabe, 1 Zahl, 1 Sonderzeichen.
+- "Angemeldet bleiben" auf `/login` steuert, ob das Refresh-Cookie persistent (30 Tage) oder als Session-Cookie gesetzt wird.
 
 ## Tech-Stack
 
@@ -203,6 +224,9 @@ Siehe [.env.example](.env.example) für alle verfügbaren Variablen:
 - **Datenbank:** [PostgreSQL](https://www.postgresql.org/) 17 + [Drizzle ORM](https://orm.drizzle.team/)
 - **Validierung:** [Zod](https://zod.dev/)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/) v4 + [shadcn/ui](https://ui.shadcn.com/)
-- **E-Mail:** [Nodemailer](https://nodemailer.com/)
+- **E-Mail:** [Nodemailer](https://nodemailer.com/) (Outbound) + IMAP-Sync (Inbound)
 - **Cron-Jobs:** [node-cron](https://github.com/node-cron/node-cron)
 - **State Management:** [TanStack React Query](https://tanstack.com/query)
+- **Realtime:** WebSocket-Service
+- **Auth:** Argon2id Passwort-Hashing, JWT via `jose`
+

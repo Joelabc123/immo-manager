@@ -145,6 +145,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="mb-2 flex items-center gap-3 px-3 py-2">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
                 {user.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- dynamic user-uploaded avatar served via internal API route
                   <img
                     src={`/api/uploads/${user.avatarUrl}`}
                     alt=""
@@ -166,6 +167,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <div className="mb-2 flex justify-center px-2 py-2">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
                       {user.avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- dynamic user-uploaded avatar served via internal API route
                         <img
                           src={`/api/uploads/${user.avatarUrl}`}
                           alt=""

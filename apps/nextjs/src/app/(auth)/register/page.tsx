@@ -4,17 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -35,25 +28,6 @@ export default function RegisterPage() {
     },
   });
 
-  if (verificationSent) {
-    return (
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">E-Mail bestaetigen</CardTitle>
-          <CardDescription>
-            Wir haben Ihnen eine E-Mail mit einem Verifizierungslink gesendet.
-            Bitte ueberpruefen Sie Ihren Posteingang.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Link href="/login" className="text-primary underline text-sm">
-            Zurueck zur Anmeldung
-          </Link>
-        </CardFooter>
-      </Card>
-    );
-  }
-
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -73,82 +47,120 @@ export default function RegisterPage() {
     });
   }
 
-  return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-2xl">Registrieren</CardTitle>
-        <CardDescription>
-          Erstellen Sie ein neues Konto fuer den Immo Manager.
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              required
-              autoComplete="name"
-              placeholder="Max Mustermann"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">E-Mail</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="name@beispiel.de"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Passwort</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="new-password"
-              minLength={10}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Passwort bestaetigen</Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              required
-              autoComplete="new-password"
-              minLength={10}
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4">
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={register.isPending}
-          >
-            {register.isPending ? "Wird registriert..." : "Registrieren"}
-          </Button>
-          <p className="text-center text-sm text-muted-foreground">
-            Bereits ein Konto?{" "}
-            <Link href="/login" className="text-primary underline">
+  if (verificationSent) {
+    return (
+      <AuthShell
+        footer={
+          <span>
+            Bereits bestätigt?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
               Anmelden
             </Link>
+          </span>
+        }
+      >
+        <div className="mb-8 space-y-3">
+          <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
+            E-Mail bestätigen
+          </h1>
+          <p className="text-muted-foreground">
+            Wir haben Ihnen eine E-Mail mit einem Verifizierungslink gesendet.
+            Bitte überprüfen Sie Ihren Posteingang.
           </p>
-        </CardFooter>
+        </div>
+      </AuthShell>
+    );
+  }
+
+  return (
+    <AuthShell
+      footer={
+        <span>
+          Bereits ein Konto?{" "}
+          <Link
+            href="/login"
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Anmelden
+          </Link>
+        </span>
+      }
+    >
+      <div className="mb-8 space-y-3">
+        <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
+          Konto erstellen
+        </h1>
+        <p className="text-muted-foreground">
+          Erstellen Sie ein neues Konto für den Immo Manager.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            required
+            autoComplete="name"
+            placeholder="Max Mustermann"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email">E-Mail</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="name@beispiel.de"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password">Passwort</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="new-password"
+            minLength={10}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Passwort bestätigen</Label>
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            required
+            autoComplete="new-password"
+            minLength={10}
+          />
+        </div>
+
+        <Button
+          type="submit"
+          className="w-auto px-10"
+          disabled={register.isPending}
+        >
+          {register.isPending ? "Wird registriert..." : "Registrieren"}
+        </Button>
       </form>
-    </Card>
+    </AuthShell>
   );
 }

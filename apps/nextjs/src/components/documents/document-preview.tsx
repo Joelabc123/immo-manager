@@ -92,6 +92,7 @@ export function DocumentPreview({
         <div className="flex-1 overflow-auto min-h-0">
           {isImage && (
             <div className="flex items-center justify-center overflow-auto">
+              {/* eslint-disable-next-line @next/next/no-img-element -- dynamic document preview with runtime zoom; next/image unsuitable */}
               <img
                 src={fileUrl}
                 alt={fileName}

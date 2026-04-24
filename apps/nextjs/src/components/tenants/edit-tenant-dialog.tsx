@@ -161,6 +161,7 @@ export function EditTenantDialog({
           <div className="space-y-1">
             <Label>{t("gender")}</Label>
             <Select
+              // eslint-disable-next-line react-hooks/incompatible-library -- RHF watch() cannot be memoized; accepted trade-off (see React Compiler docs)
               value={form.watch("gender") ?? ""}
               onValueChange={(v) =>
                 v !== null && form.setValue("gender", v || undefined)

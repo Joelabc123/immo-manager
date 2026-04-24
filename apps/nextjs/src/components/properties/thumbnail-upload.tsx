@@ -104,6 +104,7 @@ export function ThumbnailUpload({
     <div className="space-y-2">
       {preview ? (
         <div className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element -- local blob-URL preview before upload */}
           <img
             src={preview}
             alt="Thumbnail"

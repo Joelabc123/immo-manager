@@ -73,6 +73,7 @@ export function PropertyCard({
       {/* Thumbnail */}
       <div className="relative h-40 w-full overflow-hidden rounded-t-xl bg-muted">
         {thumbnailUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- dynamic user-uploaded property thumbnail
           <img
             src={thumbnailUrl}
             alt={address || t("property")}

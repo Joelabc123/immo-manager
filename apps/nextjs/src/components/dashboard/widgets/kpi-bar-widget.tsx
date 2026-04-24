@@ -9,7 +9,6 @@ import {
   Lightbulb,
   Info,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,

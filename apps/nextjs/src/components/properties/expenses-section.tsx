@@ -184,6 +184,7 @@ export function ExpensesSection({ propertyId }: ExpensesSectionProps) {
               <div className="space-y-1">
                 <Label>{t("category")}</Label>
                 <Select
+                  // eslint-disable-next-line react-hooks/incompatible-library -- RHF watch() cannot be memoized; accepted trade-off (see React Compiler docs)
                   value={form.watch("category")}
                   onValueChange={(v) => {
                     if (v !== null) form.setValue("category", v);

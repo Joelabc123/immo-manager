@@ -3,17 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export default function ForgotPasswordPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -32,64 +25,66 @@ export default function ForgotPasswordPage() {
     });
   }
 
+  const footer = (
+    <span>
+      <Link
+        href="/login"
+        className="font-medium text-primary underline-offset-4 hover:underline"
+      >
+        Zurück zur Anmeldung
+      </Link>
+    </span>
+  );
+
   if (submitted) {
     return (
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">E-Mail gesendet</CardTitle>
-          <CardDescription>
+      <AuthShell footer={footer}>
+        <div className="mb-8 space-y-3">
+          <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
+            E-Mail gesendet
+          </h1>
+          <p className="text-muted-foreground">
             Falls ein Konto mit dieser E-Mail-Adresse existiert, haben wir Ihnen
-            einen Link zum Zuruecksetzen des Passworts gesendet.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Link href="/login" className="text-primary underline text-sm">
-            Zurueck zur Anmeldung
-          </Link>
-        </CardFooter>
-      </Card>
+            einen Link zum Zurücksetzen des Passworts gesendet.
+          </p>
+        </div>
+      </AuthShell>
     );
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-2xl">Passwort vergessen</CardTitle>
-        <CardDescription>
-          Geben Sie Ihre E-Mail-Adresse ein, um einen Link zum Zuruecksetzen zu
+    <AuthShell footer={footer}>
+      <div className="mb-8 space-y-3">
+        <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
+          Passwort vergessen
+        </h1>
+        <p className="text-muted-foreground">
+          Geben Sie Ihre E-Mail-Adresse ein, um einen Link zum Zurücksetzen zu
           erhalten.
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">E-Mail</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="name@beispiel.de"
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4">
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={forgotPassword.isPending}
-          >
-            {forgotPassword.isPending ? "Wird gesendet..." : "Link senden"}
-          </Button>
-          <Link
-            href="/login"
-            className="text-center text-sm text-muted-foreground underline"
-          >
-            Zurueck zur Anmeldung
-          </Link>
-        </CardFooter>
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email">E-Mail</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="name@beispiel.de"
+          />
+        </div>
+
+        <Button
+          type="submit"
+          className="w-auto px-10"
+          disabled={forgotPassword.isPending}
+        >
+          {forgotPassword.isPending ? "Wird gesendet..." : "Link senden"}
+        </Button>
       </form>
-    </Card>
+    </AuthShell>
   );
 }
