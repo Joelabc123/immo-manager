@@ -2,7 +2,6 @@ import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { db } from "@repo/shared/db";
 import { users } from "@repo/shared/db/schema";
-import { publishEvent, REDIS_CHANNELS } from "@repo/shared/utils/redis";
 import {
   registerInput,
   loginInput,
@@ -23,8 +22,47 @@ import {
   validateVerificationToken,
   deleteVerificationToken,
 } from "../auth/verification";
+import { logger } from "@/lib/logger";
+import { sendMail } from "../mail";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import type { UserRole } from "@repo/shared/db/schema";
+
+interface AuthEmailRecipient {
+  email: string;
+  name: string;
+}
+
+function getAppUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+}
+
+async function sendVerificationEmail(
+  recipient: AuthEmailRecipient,
+  token: string,
+): Promise<void> {
+  const verifyUrl = `${getAppUrl()}/verify-email?token=${encodeURIComponent(token)}`;
+
+  await sendMail({
+    to: recipient.email,
+    subject: "Verify your Immo Manager account",
+    text: `Hello ${recipient.name},\n\nplease verify your email address by opening this link:\n${verifyUrl}\n\nIf you did not create this account, you can ignore this email.`,
+    html: `<p>Hello ${recipient.name},</p><p>Please verify your email address by opening this link:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p><p>If you did not create this account, you can ignore this email.</p>`,
+  });
+}
+
+async function sendPasswordResetEmail(
+  recipient: AuthEmailRecipient,
+  token: string,
+): Promise<void> {
+  const resetUrl = `${getAppUrl()}/reset-password?token=${encodeURIComponent(token)}`;
+
+  await sendMail({
+    to: recipient.email,
+    subject: "Reset your Immo Manager password",
+    text: `Hello ${recipient.name},\n\nuse this link to reset your password:\n${resetUrl}\n\nIf you did not request a password reset, you can ignore this email.`,
+    html: `<p>Hello ${recipient.name},</p><p>Use this link to reset your password:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>If you did not request a password reset, you can ignore this email.</p>`,
+  });
+}
 
 export const authRouter = router({
   register: publicProcedure.input(registerInput).mutation(async ({ input }) => {
@@ -63,12 +101,13 @@ export const authRouter = router({
       // Create email verification token
       const token = await createVerificationToken(user.id, "email_verify");
 
-      void publishEvent(REDIS_CHANNELS.AUTH_VERIFY_EMAIL, {
-        userId: user.id,
-        email: input.email,
-        name: input.name,
+      await sendVerificationEmail(
+        {
+          email: input.email,
+          name: input.name,
+        },
         token,
-      });
+      );
     }
 
     return {
@@ -199,12 +238,25 @@ export const authRouter = router({
 
       if (user) {
         const token = await createVerificationToken(user.id, "password_reset");
-        void publishEvent(REDIS_CHANNELS.AUTH_PASSWORD_RESET, {
-          userId: user.id,
-          email: input.email,
-          name: user.name,
-          token,
-        });
+
+        try {
+          await sendPasswordResetEmail(
+            {
+              email: input.email,
+              name: user.name,
+            },
+            token,
+          );
+        } catch (error) {
+          logger.error(
+            {
+              err: error,
+              userId: user.id,
+              email: input.email,
+            },
+            "Failed to send password reset email",
+          );
+        }
       }
 
       // Always return success to prevent email enumeration
@@ -257,12 +309,14 @@ export const authRouter = router({
 
       if (user && !user.emailVerified) {
         const token = await createVerificationToken(user.id, "email_verify");
-        void publishEvent(REDIS_CHANNELS.AUTH_VERIFY_EMAIL, {
-          userId: user.id,
-          email: input.email,
-          name: user.name,
+
+        await sendVerificationEmail(
+          {
+            email: input.email,
+            name: user.name,
+          },
           token,
-        });
+        );
       }
 
       // Always return success to prevent email enumeration

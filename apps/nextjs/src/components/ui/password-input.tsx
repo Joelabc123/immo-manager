@@ -26,11 +26,7 @@ function PasswordInput({
         tabIndex={-1}
         aria-label={visible ? "Hide password" : "Show password"}
       >
-        {visible ? (
-          <EyeOff className="size-4" />
-        ) : (
-          <Eye className="size-4" />
-        )}
+        {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
       </button>
     </div>
   );
