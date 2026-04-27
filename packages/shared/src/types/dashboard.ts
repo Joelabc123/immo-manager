@@ -13,6 +13,7 @@
   market_comparison: "market_comparison",
   amortization_progress: "amortization_progress",
   quick_actions: "quick_actions",
+  tasks: "tasks",
 } as const;
 
 export type WidgetType = (typeof WIDGET_TYPES)[keyof typeof WIDGET_TYPES];
@@ -195,6 +196,14 @@ export const WIDGET_DEFINITIONS: Record<WidgetType, WidgetDefinition> = {
     category: WIDGET_CATEGORIES.actions,
     defaultVariant: "xs",
     availableVariants: ["xs"],
+  },
+  tasks: {
+    type: WIDGET_TYPES.tasks,
+    i18nKey: "tasks",
+    icon: "ClipboardList",
+    category: WIDGET_CATEGORIES.actions,
+    defaultVariant: "hero",
+    availableVariants: ["xl", "hero"],
   },
 };
 

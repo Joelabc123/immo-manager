@@ -29,7 +29,9 @@
     "registering": "Wird registriert...",
     "passwordMismatch": "Passwoerter stimmen nicht ueberein.",
     "emailPlaceholder": "name@beispiel.de",
-    "namePlaceholder": "Max Mustermann"
+    "namePlaceholder": "Max Mustermann",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -37,6 +39,7 @@
     "tenants": "Mieter",
     "analysis": "Analyse",
     "mail": "E-Mail",
+    "tasks": "Aufgaben",
     "documents": "Dokumente",
     "audit": "Audit-Log",
     "settings": "Einstellungen",
@@ -512,6 +515,12 @@
         }
       }
     },
+    "tasks": {
+      "title": "Offene Aufgaben",
+      "noOpenTasks": "Keine offenen Aufgaben",
+      "withoutTenant": "Ohne Mieter",
+      "confirmDelete": "Aufgabe wirklich loeschen?"
+    },
     "toolbar": {
       "edit": "Bearbeiten",
       "done": "Fertig",
@@ -579,6 +588,10 @@
         "name": "Schnellaktionen",
         "description": "Haeufig genutzte Aktionen auf einen Klick"
       },
+      "tasks": {
+        "name": "Offene Aufgaben",
+        "description": "Nach Mietern gruppierte offene Aufgaben"
+      },
       "shrink": "Verkleinern",
       "grow": "Vergroessern",
       "resize": "Groesse aendern"
@@ -619,7 +632,8 @@
         "ltvOverview": "LTV-Uebersicht",
         "marketComparison": "Marktvergleich",
         "amortizationProgress": "Tilgungsfortschritt",
-        "quickActions": "Schnellaktionen"
+        "quickActions": "Schnellaktionen",
+        "tasks": "Offene Aufgaben"
       },
       "presets": {
         "none": "Kein Preset",
@@ -770,6 +784,8 @@
     "tenants": "Mieter",
     "opened": "Geoeffnet",
     "reply": "Antworten",
+    "createTask": "Aufgabe erstellen",
+    "taskCreated": "{count, plural, one {# Aufgabe} other {# Aufgaben}}",
     "tabs": {
       "matched": "Zugeordnet",
       "unmatched": "Sonstiges"
@@ -803,6 +819,59 @@
       "transferDescription": "'{filename}' als Dokument speichern",
       "save": "Speichern",
       "saved": "Abgelegt"
+    }
+  },
+  "tasks": {
+    "pageTitle": "Aufgaben",
+    "pageSubtitle": "Alle Aufgaben verwalten",
+    "empty": "Keine Aufgaben gefunden",
+    "createTitle": "Aufgabe erstellen",
+    "editTitle": "Aufgabe bearbeiten",
+    "description": "Erstelle und verwalte Aufgaben",
+    "confirmDelete": "Aufgabe wirklich loeschen?",
+    "withoutTenant": "Ohne Mieter",
+    "fields": {
+      "title": "Titel",
+      "titlePlaceholder": "Was muss getan werden?",
+      "description": "Beschreibung",
+      "descriptionPlaceholder": "Optional: Details",
+      "status": "Status",
+      "priority": "Prioritaet",
+      "category": "Kategorie",
+      "dueDate": "Faellig am",
+      "tenant": "Mieter",
+      "noTenant": "Kein Mieter",
+      "select": "Auswaehlen"
+    },
+    "statuses": {
+      "new": "Neu",
+      "in_progress": "In Bearbeitung",
+      "done": "Erledigt",
+      "cancelled": "Abgebrochen"
+    },
+    "priorities": {
+      "low": "Niedrig",
+      "medium": "Mittel",
+      "high": "Hoch"
+    },
+    "categories": {
+      "maintenance": "Instandhaltung",
+      "complaint": "Beschwerde",
+      "request": "Anfrage",
+      "other": "Sonstiges"
+    },
+    "actions": {
+      "create": "Erstellen",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "delete": "Loeschen",
+      "openEmail": "E-Mail oeffnen"
+    },
+    "filters": {
+      "searchPlaceholder": "Aufgaben suchen...",
+      "openOnly": "Nur offene",
+      "all": "Alle Status",
+      "allPriorities": "Alle Prioritaeten"
     }
   },
   "notifications": {

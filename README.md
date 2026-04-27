@@ -193,20 +193,20 @@ immo-manager/
 
 Siehe [.env.example](.env.example) für alle verfügbaren Variablen:
 
-| Variable              | Beschreibung                           | Standard                                                     |
-| --------------------- | -------------------------------------- | ------------------------------------------------------------ |
-| `DATABASE_URL`        | PostgreSQL Connection String           | `postgresql://postgres:postgres@localhost:5432/immo_manager` |
-| `NEXT_PUBLIC_APP_URL` | Öffentliche URL der Applikation        | `http://localhost:3000`                                      |
-| `ADMIN_EMAIL`         | E-Mail, die automatisch Admin-Rechte erhält | `admin@example.com`                                     |
-| `JWT_ACCESS_SECRET`   | Secret für Access-Tokens               | —                                                            |
-| `JWT_REFRESH_SECRET`  | Secret für Refresh-Tokens              | —                                                            |
-| `SMTP_HOST`           | SMTP Server Host                       | —                                                            |
-| `SMTP_PORT`           | SMTP Server Port                       | `587`                                                        |
-| `SMTP_SECURE`         | TLS verwenden                          | `false`                                                      |
-| `SMTP_USER`           | SMTP Benutzername                      | —                                                            |
-| `SMTP_PASS`           | SMTP Passwort                          | —                                                            |
-| `SMTP_FROM`           | Absender-Adresse                       | Wert von `SMTP_USER`                                         |
-| `VAPID_SUBJECT`       | Kontakt-URI für Web-Push               | `mailto:admin@immo-manager.local`                            |
+| Variable              | Beschreibung                                | Standard                                                     |
+| --------------------- | ------------------------------------------- | ------------------------------------------------------------ |
+| `DATABASE_URL`        | PostgreSQL Connection String                | `postgresql://postgres:postgres@localhost:5432/immo_manager` |
+| `NEXT_PUBLIC_APP_URL` | Öffentliche URL der Applikation             | `http://localhost:3000`                                      |
+| `ADMIN_EMAIL`         | E-Mail, die automatisch Admin-Rechte erhält | `admin@example.com`                                          |
+| `JWT_ACCESS_SECRET`   | Secret für Access-Tokens                    | —                                                            |
+| `JWT_REFRESH_SECRET`  | Secret für Refresh-Tokens                   | —                                                            |
+| `SMTP_HOST`           | SMTP Server Host                            | —                                                            |
+| `SMTP_PORT`           | SMTP Server Port                            | `587`                                                        |
+| `SMTP_SECURE`         | TLS verwenden                               | `false`                                                      |
+| `SMTP_USER`           | SMTP Benutzername                           | —                                                            |
+| `SMTP_PASS`           | SMTP Passwort                               | —                                                            |
+| `SMTP_FROM`           | Absender-Adresse                            | Wert von `SMTP_USER`                                         |
+| `VAPID_SUBJECT`       | Kontakt-URI für Web-Push                    | `mailto:admin@immo-manager.local`                            |
 
 ## Authentifizierung
 
@@ -229,4 +229,3 @@ Siehe [.env.example](.env.example) für alle verfügbaren Variablen:
 - **State Management:** [TanStack React Query](https://tanstack.com/query)
 - **Realtime:** WebSocket-Service
 - **Auth:** Argon2id Passwort-Hashing, JWT via `jose`
-

@@ -7,7 +7,7 @@ import { simpleParser } from "mailparser";
 import { withImapClient } from "../transport/imap-client";
 import { syncFolders } from "./folder-sync";
 import { resolveThreadId } from "./thread-resolver";
-import { matchSenderToTenant } from "./tenant-matcher";
+import { matchSenderToTenant, rematchAccountEmails } from "./tenant-matcher";
 import {
   publishNewEmails,
   publishSyncComplete,
@@ -18,6 +18,7 @@ import { config, logger } from "../config";
 interface SyncResult {
   newEmails: number;
   matched: number;
+  rematched: number;
   errors: number;
 }
 
@@ -52,7 +53,12 @@ async function syncFolder(
   folderId: string,
   folderPath: string,
 ): Promise<SyncResult> {
-  const result: SyncResult = { newEmails: 0, matched: 0, errors: 0 };
+  const result: SyncResult = {
+    newEmails: 0,
+    matched: 0,
+    rematched: 0,
+    errors: 0,
+  };
 
   // Get folder metadata from DB
   const [folder] = await db
@@ -245,7 +251,12 @@ async function syncFolder(
 export async function syncEmailAccount(
   account: EmailAccountRow,
 ): Promise<SyncResult> {
-  const totalResult: SyncResult = { newEmails: 0, matched: 0, errors: 0 };
+  const totalResult: SyncResult = {
+    newEmails: 0,
+    matched: 0,
+    rematched: 0,
+    errors: 0,
+  };
 
   // Mark account as syncing
   await db
@@ -322,6 +333,25 @@ export async function syncEmailAccount(
       },
     );
 
+    // Step 3: Re-match all stored inbound inbox emails against current tenant
+    // addresses. Ensures historical emails get categorized (e.g. right after
+    // account creation, or after a tenant email is added later).
+    try {
+      const rematch = await rematchAccountEmails(account.id, account.userId);
+      totalResult.rematched = rematch.updated + rematch.cleared;
+      logger.info(
+        {
+          accountId: account.id,
+          updated: rematch.updated,
+          cleared: rematch.cleared,
+        },
+        "Tenant rematch completed",
+      );
+    } catch (err) {
+      logger.warn({ err, accountId: account.id }, "Tenant rematch failed");
+      totalResult.errors++;
+    }
+
     // Mark account as idle
     await db
       .update(emailAccounts)
@@ -342,6 +372,7 @@ export async function syncEmailAccount(
       totalResult.newEmails,
       totalResult.matched,
       totalResult.errors,
+      totalResult.rematched,
     );
   } catch (error) {
     const errorMsg =
@@ -360,6 +391,7 @@ export async function syncEmailAccount(
       accountId: account.id,
       newEmails: totalResult.newEmails,
       matched: totalResult.matched,
+      rematched: totalResult.rematched,
       errors: totalResult.errors,
     },
     "Email account sync completed",

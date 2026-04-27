@@ -22,3 +22,4 @@ export * from "./push-subscriptions";
 export * from "./action-center";
 export * from "./maintenance-reserves";
 export * from "./dashboard-presets";
+export * from "./tasks";

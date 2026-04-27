@@ -3,7 +3,14 @@
 import { cn } from "@/lib/utils";
 import { formatDate } from "@repo/shared/utils";
 import { Badge } from "@/components/ui/badge";
-import { Mail, MailOpen, Send, Eye, Paperclip } from "lucide-react";
+import {
+  Mail,
+  MailOpen,
+  Send,
+  Eye,
+  Paperclip,
+  ClipboardCheck,
+} from "lucide-react";
 
 interface Email {
   id: string;
@@ -25,6 +32,7 @@ interface EmailListItemProps {
   isSelected: boolean;
   onSelect: () => void;
   tenantName?: string;
+  taskCount?: number;
 }
 
 export function EmailListItem({
@@ -32,6 +40,7 @@ export function EmailListItem({
   isSelected,
   onSelect,
   tenantName,
+  taskCount = 0,
 }: EmailListItemProps) {
   const date = new Date(email.receivedAt);
 
@@ -64,6 +73,9 @@ export function EmailListItem({
         <div className="flex items-center gap-1.5 shrink-0">
           {email.hasAttachments && (
             <Paperclip className="h-3 w-3 text-muted-foreground" />
+          )}
+          {taskCount > 0 && (
+            <ClipboardCheck className="h-3 w-3 text-blue-600" />
           )}
           {email.openedAt && <Eye className="h-3 w-3 text-green-500" />}
           <span className="text-xs text-muted-foreground">

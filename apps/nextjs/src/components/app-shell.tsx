@@ -14,6 +14,7 @@ import {
   LogOut,
   Mail,
   ClipboardList,
+  CheckSquare,
   Shield,
   MoreHorizontal,
   PanelLeftClose,
@@ -45,6 +46,7 @@ const NAV_ITEMS = [
   { href: "/tenants", icon: Users, labelKey: "tenants" as const },
   { href: "/analysis", icon: BarChart3, labelKey: "analysis" as const },
   { href: "/mail", icon: Mail, labelKey: "mail" as const },
+  { href: "/tasks", icon: CheckSquare, labelKey: "tasks" as const },
   { href: "/documents", icon: FileText, labelKey: "documents" as const },
   { href: "/audit", icon: ClipboardList, labelKey: "audit" as const },
   { href: "/settings", icon: Settings, labelKey: "settings" as const },
@@ -83,6 +85,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside
         className={cn(
           "hidden md:flex flex-col border-r bg-card transition-all duration-300",
+          "sticky top-0 h-screen self-start",
           sidebarCollapsed ? "w-16" : "w-64",
         )}
       >
@@ -101,7 +104,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </>
           )}
         </div>
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 min-h-0 space-y-1 overflow-y-auto p-3">
           <TooltipProvider>
             {visibleNavItems.map((item) => {
               const isActive =

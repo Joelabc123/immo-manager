@@ -54,6 +54,7 @@ export function BentoWidget({ widget, isEditing, onRemove }: BentoWidgetProps) {
       >
         {createElement(getWidgetComponent(widget.type), {
           config: widget.config,
+          variant: widget.variant,
         })}
       </div>
     </Card>

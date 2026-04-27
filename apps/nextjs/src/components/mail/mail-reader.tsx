@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ManualAssignDialog } from "./manual-assign-dialog";
+import { TaskDialog } from "@/components/tasks/task-dialog";
 import {
   ArrowLeft,
   Reply,
@@ -17,6 +18,8 @@ import {
   Eye,
   Send,
   Mail as MailIcon,
+  ClipboardCheck,
+  CheckSquare,
 } from "lucide-react";
 
 const ReplyEditor = dynamic(
@@ -33,6 +36,7 @@ interface MailReaderProps {
 export function MailReader({ emailId, accountId, onBack }: MailReaderProps) {
   const t = useTranslations("email");
   const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [showReplyEditor, setShowReplyEditor] = useState(false);
 
   const utils = trpc.useUtils();
@@ -45,6 +49,12 @@ export function MailReader({ emailId, accountId, onBack }: MailReaderProps) {
     { threadId: body?.email?.threadId ?? "", accountId },
     { enabled: !!body?.email?.threadId },
   );
+
+  const { data: taskCounts } = trpc.tasks.countsByEmailIds.useQuery(
+    { emailIds: [emailId] },
+    { enabled: !!emailId },
+  );
+  const taskCount = taskCounts?.[emailId] ?? 0;
 
   const markReadMutation = trpc.email.markRead.useMutation({
     onSuccess: () => {
@@ -115,6 +125,20 @@ export function MailReader({ emailId, accountId, onBack }: MailReaderProps) {
               {t("opened")}
             </Badge>
           )}
+          {taskCount > 0 && (
+            <Badge variant="secondary" className="gap-1">
+              <ClipboardCheck className="h-3 w-3" />
+              {t("taskCreated", { count: taskCount })}
+            </Badge>
+          )}
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setShowTaskDialog(true)}
+            title={t("createTask")}
+          >
+            <CheckSquare className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -185,6 +209,18 @@ export function MailReader({ emailId, accountId, onBack }: MailReaderProps) {
         open={showAssignDialog}
         onOpenChange={setShowAssignDialog}
         emailId={emailId}
+      />
+
+      <TaskDialog
+        open={showTaskDialog}
+        onOpenChange={setShowTaskDialog}
+        fromEmail={{
+          emailId,
+          subject: email.subject ?? null,
+          textBody: email.textBody ?? null,
+          tenantId: email.tenantId ?? null,
+          propertyId: email.propertyId ?? null,
+        }}
       />
     </div>
   );

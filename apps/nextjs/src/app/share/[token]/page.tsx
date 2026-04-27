@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PasswordInput } from "@/components/ui/password-input";
 
 interface SharePageProps {
   params: Promise<{ token: string }>;
@@ -78,8 +79,7 @@ export default function SharePage({ params }: SharePageProps) {
             {passwordError && (
               <p className="text-sm text-destructive">{t("invalidPassword")}</p>
             )}
-            <Input
-              type="password"
+            <PasswordInput
               placeholder={t("enterPassword")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}

@@ -2,10 +2,11 @@
 
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
-import type { WidgetType } from "@repo/shared/types";
+import type { WidgetSizeVariant, WidgetType } from "@repo/shared/types";
 
 interface WidgetComponentProps {
   config?: Record<string, unknown>;
+  variant?: WidgetSizeVariant;
 }
 
 const widgetComponents: Record<
@@ -78,6 +79,11 @@ const widgetComponents: Record<
   quick_actions: dynamic(() =>
     import("./quick-actions-widget").then((m) => ({
       default: m.QuickActionsWidget,
+    })),
+  ),
+  tasks: dynamic(() =>
+    import("./tasks-widget").then((m) => ({
+      default: m.TasksWidget,
     })),
   ),
 };

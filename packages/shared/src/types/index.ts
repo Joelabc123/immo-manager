@@ -11,3 +11,4 @@ export * from "./email";
 export * from "./audit";
 export * from "./market";
 export * from "./dashboard";
+export * from "./tasks";

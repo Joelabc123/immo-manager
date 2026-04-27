@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Loader2 } from "lucide-react";
 
 export function PasswordSection() {
@@ -60,9 +61,8 @@ export function PasswordSection() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="current-password">{t("currentPassword")}</Label>
-            <Input
+            <PasswordInput
               id="current-password"
-              type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               autoComplete="current-password"
@@ -71,9 +71,8 @@ export function PasswordSection() {
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="new-password">{t("newPassword")}</Label>
-            <Input
+            <PasswordInput
               id="new-password"
-              type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               autoComplete="new-password"
@@ -82,9 +81,8 @@ export function PasswordSection() {
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="confirm-password">{t("confirmPassword")}</Label>
-            <Input
+            <PasswordInput
               id="confirm-password"
-              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"

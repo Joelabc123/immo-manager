@@ -1,10 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmailListItem } from "./email-list-item";
 import { Mail } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 interface Email {
   id: string;
@@ -47,6 +49,12 @@ export function EmailList({
   const t = useTranslations("email");
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
+  const emailIds = useMemo(() => emails.map((e) => e.id), [emails]);
+  const { data: taskCounts } = trpc.tasks.countsByEmailIds.useQuery(
+    { emailIds },
+    { enabled: emailIds.length > 0 },
+  );
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-1 p-2">
@@ -84,6 +92,7 @@ export function EmailList({
             tenantName={
               email.tenantId ? tenantNames?.get(email.tenantId) : undefined
             }
+            taskCount={taskCounts?.[email.id] ?? 0}
           />
         ))}
       </div>

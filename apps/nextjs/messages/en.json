@@ -29,7 +29,9 @@
     "registering": "Signing up...",
     "passwordMismatch": "Passwords do not match.",
     "emailPlaceholder": "name@example.com",
-    "namePlaceholder": "John Doe"
+    "namePlaceholder": "John Doe",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -37,6 +39,7 @@
     "tenants": "Tenants",
     "analysis": "Analysis",
     "mail": "Mail",
+    "tasks": "Tasks",
     "documents": "Documents",
     "audit": "Audit Log",
     "settings": "Settings",
@@ -512,6 +515,12 @@
         }
       }
     },
+    "tasks": {
+      "title": "Open Tasks",
+      "noOpenTasks": "No open tasks",
+      "withoutTenant": "Without tenant",
+      "confirmDelete": "Really delete this task?"
+    },
     "toolbar": {
       "edit": "Edit",
       "done": "Done",
@@ -579,6 +588,10 @@
         "name": "Quick Actions",
         "description": "Frequently used actions in one click"
       },
+      "tasks": {
+        "name": "Open Tasks",
+        "description": "Open tasks grouped by tenant"
+      },
       "shrink": "Shrink",
       "grow": "Grow",
       "resize": "Resize"
@@ -619,7 +632,8 @@
         "ltvOverview": "LTV Overview",
         "marketComparison": "Market Comparison",
         "amortizationProgress": "Amortization Progress",
-        "quickActions": "Quick Actions"
+        "quickActions": "Quick Actions",
+        "tasks": "Open Tasks"
       },
       "presets": {
         "none": "No preset",
@@ -770,6 +784,8 @@
     "tenants": "Tenants",
     "opened": "Opened",
     "reply": "Reply",
+    "createTask": "Create task",
+    "taskCreated": "{count, plural, one {# task} other {# tasks}}",
     "tabs": {
       "matched": "Matched",
       "unmatched": "Other"
@@ -803,6 +819,59 @@
       "transferDescription": "Save '{filename}' as document",
       "save": "Save",
       "saved": "Saved"
+    }
+  },
+  "tasks": {
+    "pageTitle": "Tasks",
+    "pageSubtitle": "Manage all tasks",
+    "empty": "No tasks found",
+    "createTitle": "Create Task",
+    "editTitle": "Edit Task",
+    "description": "Create and manage tasks",
+    "confirmDelete": "Really delete this task?",
+    "withoutTenant": "Without tenant",
+    "fields": {
+      "title": "Title",
+      "titlePlaceholder": "What needs to be done?",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional: Details",
+      "status": "Status",
+      "priority": "Priority",
+      "category": "Category",
+      "dueDate": "Due date",
+      "tenant": "Tenant",
+      "noTenant": "No tenant",
+      "select": "Select"
+    },
+    "statuses": {
+      "new": "New",
+      "in_progress": "In progress",
+      "done": "Done",
+      "cancelled": "Cancelled"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "categories": {
+      "maintenance": "Maintenance",
+      "complaint": "Complaint",
+      "request": "Request",
+      "other": "Other"
+    },
+    "actions": {
+      "create": "Create",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "openEmail": "Open email"
+    },
+    "filters": {
+      "searchPlaceholder": "Search tasks...",
+      "openOnly": "Open only",
+      "all": "All statuses",
+      "allPriorities": "All priorities"
     }
   },
   "notifications": {

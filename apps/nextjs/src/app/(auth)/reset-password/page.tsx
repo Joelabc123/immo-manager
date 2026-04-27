@@ -8,6 +8,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -118,10 +119,9 @@ export default function ResetPasswordPage() {
 
         <div className="space-y-2">
           <Label htmlFor="password">Neues Passwort</Label>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             required
             autoComplete="new-password"
             minLength={10}
@@ -130,10 +130,9 @@ export default function ResetPasswordPage() {
 
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Passwort bestätigen</Label>
-          <Input
+          <PasswordInput
             id="confirmPassword"
             name="confirmPassword"
-            type="password"
             required
             autoComplete="new-password"
             minLength={10}

@@ -68,6 +68,8 @@ export const REDIS_CHANNELS = {
   AUTH_VERIFY_EMAIL: "auth:verify-email",
   /** Published when a user requests a password reset. */
   AUTH_PASSWORD_RESET: "auth:password-reset",
+  /** Published when a task is created/updated/deleted. Payload: { taskId, userId, action } */
+  TASK_UPDATED: "task:updated",
 } as const;
 
 export type RedisChannel = (typeof REDIS_CHANNELS)[keyof typeof REDIS_CHANNELS];
@@ -86,6 +88,7 @@ interface EmailSyncCompletePayload {
   newEmails: number;
   matched: number;
   errors: number;
+  rematched?: number;
 }
 
 interface EmailSyncRequestPayload {
@@ -118,6 +121,12 @@ interface AuthPasswordResetPayload {
   token: string;
 }
 
+interface TaskUpdatedPayload {
+  taskId: string;
+  userId: string;
+  action: "create" | "update" | "delete";
+}
+
 type ChannelPayloadMap = {
   [REDIS_CHANNELS.EMAIL_NEW]: EmailNewPayload;
   [REDIS_CHANNELS.EMAIL_SYNC_COMPLETE]: EmailSyncCompletePayload;
@@ -126,6 +135,7 @@ type ChannelPayloadMap = {
   [REDIS_CHANNELS.EMAIL_SYNC_ERROR]: EmailSyncErrorPayload;
   [REDIS_CHANNELS.AUTH_VERIFY_EMAIL]: AuthVerifyEmailPayload;
   [REDIS_CHANNELS.AUTH_PASSWORD_RESET]: AuthPasswordResetPayload;
+  [REDIS_CHANNELS.TASK_UPDATED]: TaskUpdatedPayload;
 };
 
 /**

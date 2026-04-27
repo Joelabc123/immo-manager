@@ -45,6 +45,7 @@ export async function publishSyncComplete(
   newEmails: number,
   matched: number,
   errors: number,
+  rematched: number = 0,
 ): Promise<void> {
   await publishEvent(REDIS_CHANNELS.EMAIL_SYNC_COMPLETE, {
     accountId,
@@ -52,6 +53,7 @@ export async function publishSyncComplete(
     newEmails,
     matched,
     errors,
+    rematched,
   });
 }
 

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Select,
   SelectContent,
@@ -112,8 +113,7 @@ export function ShareLinkDialog({
 
           <div className="space-y-2">
             <Label>{t("password")}</Label>
-            <Input
-              type="password"
+            <PasswordInput
               placeholder={t("passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}

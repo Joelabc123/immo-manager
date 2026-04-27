@@ -22,6 +22,7 @@ import { shareLinksRouter } from "./share-links";
 import { auditRouter } from "./audit";
 import { marketDataRouter } from "./market-data";
 import { userSettingsRouter } from "./user-settings";
+import { tasksRouter } from "./tasks";
 
 export const appRouter = router({
   auth: authRouter,
@@ -47,6 +48,7 @@ export const appRouter = router({
   audit: auditRouter,
   marketData: marketDataRouter,
   userSettings: userSettingsRouter,
+  tasks: tasksRouter,
 });
 
 export type AppRouter = typeof appRouter;

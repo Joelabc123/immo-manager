@@ -15,3 +15,4 @@ export * from "./document";
 export * from "./audit";
 export * from "./market";
 export * from "./user";
+export * from "./tasks";

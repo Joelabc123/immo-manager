@@ -8,6 +8,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -131,10 +132,9 @@ export default function RegisterPage() {
 
         <div className="space-y-2">
           <Label htmlFor="password">Passwort</Label>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             required
             autoComplete="new-password"
             minLength={10}
@@ -143,10 +143,9 @@ export default function RegisterPage() {
 
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Passwort bestätigen</Label>
-          <Input
+          <PasswordInput
             id="confirmPassword"
             name="confirmPassword"
-            type="password"
             required
             autoComplete="new-password"
             minLength={10}
