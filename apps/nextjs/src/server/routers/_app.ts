@@ -23,6 +23,7 @@ import { auditRouter } from "./audit";
 import { marketDataRouter } from "./market-data";
 import { userSettingsRouter } from "./user-settings";
 import { tasksRouter } from "./tasks";
+import { aiRouter } from "./ai";
 
 export const appRouter = router({
   auth: authRouter,
@@ -49,6 +50,7 @@ export const appRouter = router({
   marketData: marketDataRouter,
   userSettings: userSettingsRouter,
   tasks: tasksRouter,
+  ai: aiRouter,
 });
 
 export type AppRouter = typeof appRouter;

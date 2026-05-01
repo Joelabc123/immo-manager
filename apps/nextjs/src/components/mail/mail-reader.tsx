@@ -195,6 +195,7 @@ export function MailReader({ emailId, accountId, onBack }: MailReaderProps) {
           <ReplyEditor
             accountId={accountId}
             replyTo={email.messageId}
+            sourceEmailId={emailId}
             initialTo={
               email.isInbound ? email.fromAddress : (email.toAddresses ?? "")
             }

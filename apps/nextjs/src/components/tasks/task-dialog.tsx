@@ -30,6 +30,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { AiGenerateButton } from "@/components/ai/ai-generate-button";
+import { AiOverwritePopover } from "@/components/ai/ai-overwrite-popover";
 
 const STATUS_VALUES = Object.values(TASK_STATUSES) as TaskStatus[];
 const PRIORITY_VALUES = Object.values(TASK_PRIORITIES) as TaskPriority[];
@@ -172,6 +174,24 @@ export function TaskDialog({
 
   const tenantOptions = useMemo(() => tenantsData?.items ?? [], [tenantsData]);
 
+  const generateTaskMutation = trpc.ai.generateTaskFromEmail.useMutation();
+
+  const handleAiGenerate = async () => {
+    if (!fromEmail) return;
+    try {
+      const res = await generateTaskMutation.mutateAsync({
+        emailId: fromEmail.emailId,
+      });
+      setForm((prev) => ({
+        ...prev,
+        title: res.title,
+        description: res.description,
+      }));
+    } catch {
+      alert(t("ai.error"));
+    }
+  };
+
   const handleSubmit = () => {
     if (!form.title.trim()) return;
 
@@ -220,7 +240,31 @@ export function TaskDialog({
 
         <div className="flex flex-col gap-4 py-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="task-title">{t("fields.title")}</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="task-title">{t("fields.title")}</Label>
+              {!isEdit && fromEmail && (
+                <AiOverwritePopover
+                  hasContent={
+                    form.title.trim() !== "" || form.description.trim() !== ""
+                  }
+                  onConfirm={() => {
+                    void handleAiGenerate();
+                  }}
+                  title={t("ai.overwriteTitle")}
+                  description={t("ai.confirmOverwrite")}
+                  confirmLabel={t("ai.overwriteAction")}
+                  cancelLabel={t("ai.cancel")}
+                >
+                  {({ onClick }) => (
+                    <AiGenerateButton
+                      onClick={onClick}
+                      loading={generateTaskMutation.isPending}
+                      title={t("ai.tooltip")}
+                    />
+                  )}
+                </AiOverwritePopover>
+              )}
+            </div>
             <Input
               id="task-title"
               value={form.title}

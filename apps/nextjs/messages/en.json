@@ -809,6 +809,19 @@
       "send": "Send",
       "cancel": "Cancel"
     },
+    "ai": {
+      "tooltip": "Generate with AI",
+      "error": "AI generation failed. Please try again.",
+      "overwriteTitle": "Overwrite draft?",
+      "confirmOverwrite": "The existing draft will be replaced with the AI suggestion.",
+      "overwriteAction": "Overwrite",
+      "cancel": "Cancel",
+      "tone": {
+        "formal": "Formal",
+        "friendly": "Friendly",
+        "short": "Short"
+      }
+    },
     "templates": {
       "select": "Select template"
     },
@@ -829,6 +842,14 @@
     "editTitle": "Edit Task",
     "description": "Create and manage tasks",
     "confirmDelete": "Really delete this task?",
+    "ai": {
+      "tooltip": "Generate from email with AI",
+      "overwriteTitle": "Overwrite content?",
+      "confirmOverwrite": "Existing content will be replaced with the AI suggestion.",
+      "overwriteAction": "Overwrite",
+      "cancel": "Cancel",
+      "error": "AI generation failed. Please try again."
+    },
     "withoutTenant": "Without tenant",
     "fields": {
       "title": "Title",

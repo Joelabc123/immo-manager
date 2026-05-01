@@ -3,12 +3,12 @@
     "loading": "Wird geladen...",
     "save": "Speichern",
     "cancel": "Abbrechen",
-    "delete": "Loeschen",
+    "delete": "Löschen",
     "edit": "Bearbeiten",
-    "back": "Zurueck",
+    "back": "Zurück",
     "search": "Suchen",
     "noResults": "Keine Ergebnisse gefunden",
-    "confirm": "Bestaetigen",
+    "confirm": "Bestätigen",
     "error": "Ein Fehler ist aufgetreten"
   },
   "auth": {
@@ -17,17 +17,17 @@
     "logout": "Abmelden",
     "email": "E-Mail",
     "password": "Passwort",
-    "confirmPassword": "Passwort bestaetigen",
+    "confirmPassword": "Passwort bestätigen",
     "name": "Name",
     "loginTitle": "Anmelden",
     "loginDescription": "Melden Sie sich mit Ihrer E-Mail und Ihrem Passwort an.",
     "registerTitle": "Registrieren",
-    "registerDescription": "Erstellen Sie ein neues Konto fuer den Immo Manager.",
+    "registerDescription": "Erstellen Sie ein neues Konto für den Immo Manager.",
     "noAccount": "Noch kein Konto?",
     "hasAccount": "Bereits ein Konto?",
     "loggingIn": "Wird angemeldet...",
     "registering": "Wird registriert...",
-    "passwordMismatch": "Passwoerter stimmen nicht ueberein.",
+    "passwordMismatch": "Passwörter stimmen nicht überein.",
     "emailPlaceholder": "name@beispiel.de",
     "namePlaceholder": "Max Mustermann",
     "showPassword": "Passwort anzeigen",
@@ -51,32 +51,32 @@
     "title": "Immobilien",
     "subtitle": "Verwalten Sie Ihr Immobilienportfolio",
     "property": "Immobilie",
-    "addProperty": "Immobilie hinzufuegen",
+    "addProperty": "Immobilie hinzufügen",
     "editProperty": "Immobilie bearbeiten",
-    "deleteProperty": "Immobilie loeschen",
+    "deleteProperty": "Immobilie löschen",
     "duplicateProperty": "Immobilie duplizieren",
     "noAddress": "Keine Adresse",
     "notFound": "Immobilie nicht gefunden",
-    "backToList": "Zurueck zur Uebersicht",
-    "searchPlaceholder": "Strasse, Stadt oder PLZ suchen...",
+    "backToList": "Zurück zur Übersicht",
+    "searchPlaceholder": "Straße, Stadt oder PLZ suchen...",
     "filterByStatus": "Nach Status filtern",
     "allStatuses": "Alle Status",
     "noProperties": "Noch keine Immobilien",
-    "noPropertiesDescription": "Fuegen Sie Ihre erste Immobilie hinzu, um zu beginnen.",
-    "previous": "Zurueck",
+    "noPropertiesDescription": "Fügen Sie Ihre erste Immobilie hinzu, um zu beginnen.",
+    "previous": "Zurück",
     "next": "Weiter",
     "edit": "Bearbeiten",
     "duplicate": "Duplizieren",
     "share": "Teilen",
-    "deleteAction": "Loeschen",
+    "deleteAction": "Löschen",
     "cancel": "Abbrechen",
     "save": "Speichern",
     "saving": "Wird gespeichert...",
-    "deleting": "Wird geloescht...",
+    "deleting": "Wird gelöscht...",
     "duplicating": "Wird dupliziert...",
-    "deleteWarning": "Sind Sie sicher, dass Sie diese Immobilie loeschen moechten? Diese Aktion kann nicht rueckgaengig gemacht werden.",
-    "willBeDeleted": "Folgende Daten werden ebenfalls geloescht",
-    "duplicateDescription": "Waehlen Sie aus, welche Daten mitkopiert werden sollen.",
+    "deleteWarning": "Sind Sie sicher, dass Sie diese Immobilie löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "willBeDeleted": "Folgende Daten werden ebenfalls gelöscht",
+    "duplicateDescription": "Wählen Sie aus, welche Daten mitkopiert werden sollen.",
     "includeUnits": "Mieteinheiten mitkopieren",
     "includeTags": "Tags mitkopieren",
     "rentalUnits": "Mieteinheiten",
@@ -87,33 +87,6 @@
     "notes": "Notizen",
     "floor": "Etage",
     "type": "Typ",
-    "status": "Status",
-    "statusLabel": "Status",
-    "street": "Strasse",
-    "city": "Stadt",
-    "zipCode": "PLZ",
-    "country": "Land",
-    "purchasePrice": "Kaufpreis",
-    "purchaseDate": "Kaufdatum",
-    "marketValue": "Marktwert",
-    "livingArea": "Wohnflaeche (m²)",
-    "landArea": "Grundstuecksflaeche (m²)",
-    "constructionYear": "Baujahr",
-    "roomCount": "Zimmeranzahl",
-    "unitCount": "Anzahl Einheiten",
-    "uploading": "Wird hochgeladen...",
-    "dropThumbnail": "Bild hierher ziehen oder klicken",
-    "types": {
-      "single_family": "Einfamilienhaus",
-      "semi_detached": "Doppelhaushaelfte",
-      "terraced": "Reihenhaus",
-      "apartment": "Wohnung",
-      "commercial": "Gewerbe",
-      "land": "Grundstueck",
-      "garage": "Garage",
-      "other": "Sonstige",
-      "multi_family": "Mehrfamilienhaus"
-    },
     "status": {
       "rented": "Vermietet",
       "vacant": "Leerstand",
@@ -121,6 +94,32 @@
       "fix_flip": "Fix & Flip",
       "renovation": "In Renovierung",
       "sale_planned": "Verkauf geplant"
+    },
+    "statusLabel": "Status",
+    "street": "Straße",
+    "city": "Stadt",
+    "zipCode": "PLZ",
+    "country": "Land",
+    "purchasePrice": "Kaufpreis",
+    "purchaseDate": "Kaufdatum",
+    "marketValue": "Marktwert",
+    "livingArea": "Wohnfläche (m²)",
+    "landArea": "Grundstücksfläche (m²)",
+    "constructionYear": "Baujahr",
+    "roomCount": "Zimmeranzahl",
+    "unitCount": "Anzahl Einheiten",
+    "uploading": "Wird hochgeladen...",
+    "dropThumbnail": "Bild hierher ziehen oder klicken",
+    "types": {
+      "single_family": "Einfamilienhaus",
+      "semi_detached": "Doppelhaushälfte",
+      "terraced": "Reihenhaus",
+      "apartment": "Wohnung",
+      "commercial": "Gewerbe",
+      "land": "Grundstück",
+      "garage": "Garage",
+      "other": "Sonstige",
+      "multi_family": "Mehrfamilienhaus"
     },
     "filterByType": "Nach Typ filtern",
     "allTypes": "Alle Typen",
@@ -130,28 +129,28 @@
       "address": "Adresse",
       "type": "Typ",
       "status": "Status",
-      "area": "Flaeche",
+      "area": "Fläche",
       "purchasePrice": "Kaufpreis",
       "marketValue": "Marktwert",
       "units": "Einheiten",
       "noResults": "Keine Immobilien gefunden.",
       "rowsPerPage": "Zeilen pro Seite",
       "of": "von",
-      "selected": "ausgewaehlt"
+      "selected": "ausgewählt"
     },
     "sort": {
       "newest": "Neueste zuerst",
       "purchasePrice": "Kaufpreis",
       "marketValue": "Marktwert",
       "city": "Stadt",
-      "area": "Wohnflaeche"
+      "area": "Wohnfläche"
     },
     "wizard": {
       "basicInfo": "Grunddaten",
       "address": "Adresse",
       "financial": "Finanzen",
       "details": "Details",
-      "back": "Zurueck",
+      "back": "Zurück",
       "next": "Weiter",
       "create": "Erstellen",
       "creating": "Wird erstellt..."
@@ -165,26 +164,26 @@
     "poi": {
       "title": "Mikrolage & POIs",
       "manual": "Manuell",
-      "noPois": "Keine POIs in der Naehe gefunden",
+      "noPois": "Keine POIs in der Nähe gefunden",
       "categories": {
         "restaurant": "Gastronomie",
-        "supermarket": "Supermaerkte",
-        "doctor": "Aerzte",
-        "kindergarten": "Kindergaerten",
+        "supermarket": "Supermärkte",
+        "doctor": "Ärzte",
+        "kindergarten": "Kindergärten",
         "pharmacy": "Apotheken",
         "school": "Schulen",
-        "public_transport": "OEPNV"
+        "public_transport": "ÖPNV"
       }
     }
   },
   "tenants": {
     "title": "Mieter",
     "subtitle": "Verwalten Sie Ihre Mieter",
-    "addTenant": "Mieter hinzufuegen",
+    "addTenant": "Mieter hinzufügen",
     "editTenant": "Mieter bearbeiten",
-    "deleteTenant": "Mieter loeschen",
+    "deleteTenant": "Mieter löschen",
     "noTenants": "Noch keine Mieter",
-    "noTenantsDescription": "Fuegen Sie Ihren ersten Mieter hinzu.",
+    "noTenantsDescription": "Fügen Sie Ihren ersten Mieter hinzu.",
     "searchPlaceholder": "Nach Name suchen...",
     "filterByProperty": "Nach Immobilie filtern",
     "allProperties": "Alle Immobilien",
@@ -192,44 +191,44 @@
     "allStatuses": "Alle",
     "statusActive": "Aktiv",
     "statusFormer": "Ehemalig",
-    "backToList": "Zurueck zur Uebersicht",
+    "backToList": "Zurück zur Übersicht",
     "notFound": "Mieter nicht gefunden",
     "save": "Speichern",
     "saving": "Wird gespeichert...",
     "creating": "Wird erstellt...",
-    "deleting": "Wird geloescht...",
+    "deleting": "Wird gelöscht...",
     "cancel": "Abbrechen",
-    "deleteWarning": "Sind Sie sicher, dass Sie diesen Mieter loeschen moechten? Diese Aktion kann nicht rueckgaengig gemacht werden.",
-    "willBeDeleted": "Folgende Daten werden ebenfalls geloescht",
-    "personalInfo": "Persoenliche Daten",
+    "deleteWarning": "Sind Sie sicher, dass Sie diesen Mieter löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "willBeDeleted": "Folgende Daten werden ebenfalls gelöscht",
+    "personalInfo": "Persönliche Daten",
     "contractDetails": "Vertragsdaten",
     "firstName": "Vorname",
     "lastName": "Nachname",
     "phone": "Telefon",
     "email": "E-Mail",
     "emails": "E-Mail-Adressen",
-    "addEmail": "E-Mail hinzufuegen",
-    "primaryEmail": "Primaere E-Mail",
+    "addEmail": "E-Mail hinzufügen",
+    "primaryEmail": "Primäre E-Mail",
     "gender": "Geschlecht",
     "iban": "IBAN",
     "previousAddress": "Vorherige Adresse",
-    "selectProperty": "Immobilie waehlen",
-    "selectUnit": "Einheit waehlen",
+    "selectProperty": "Immobilie wählen",
+    "selectUnit": "Einheit wählen",
     "coldRent": "Kaltmiete",
     "warmRent": "Warmmiete",
     "rentStart": "Mietbeginn",
     "rentEnd": "Mietende",
-    "noticePeriod": "Kuendigungsfrist (Monate)",
+    "noticePeriod": "Kündigungsfrist (Monate)",
     "rentType": "Mietart",
     "depositPaid": "Kaution bezahlt",
     "contact": "Kontakt",
     "contract": "Vertrag",
     "active": "Aktiv",
     "former": "Ehemalig",
-    "terminated": "Gekuendigt",
+    "terminated": "Gekündigt",
     "vacant": "Leerstehend",
     "genders": {
-      "male": "Maennlich",
+      "male": "Männlich",
       "female": "Weiblich",
       "other": "Divers"
     },
@@ -239,7 +238,7 @@
       "indexed": "Indexmiete"
     },
     "edit": "Bearbeiten",
-    "deleteAction": "Loeschen",
+    "deleteAction": "Löschen",
     "contractInfo": "Vertragsdaten",
     "months": "Monate",
     "yes": "Ja",
@@ -263,11 +262,11 @@
   },
   "loans": {
     "title": "Kredite",
-    "addLoan": "Kredit hinzufuegen",
+    "addLoan": "Kredit hinzufügen",
     "editLoan": "Kredit bearbeiten",
-    "deleteLoan": "Kredit loeschen",
+    "deleteLoan": "Kredit löschen",
     "noLoans": "Noch keine Kredite",
-    "noLoansDescription": "Fuegen Sie einen Kredit fuer diese Immobilie hinzu.",
+    "noLoansDescription": "Fügen Sie einen Kredit für diese Immobilie hinzu.",
     "bankName": "Bank",
     "loanAmount": "Darlehenssumme",
     "remainingBalance": "Restschuld",
@@ -277,14 +276,14 @@
     "interestFixedUntil": "Zinsbindung bis",
     "loanStart": "Darlehensbeginn",
     "loanTermMonths": "Laufzeit (Monate)",
-    "annualSpecialRepaymentLimit": "Jaehrl. Sondertilgungslimit",
+    "annualSpecialRepaymentLimit": "Jährl. Sondertilgungslimit",
     "optional": "optional",
     "save": "Speichern",
     "saving": "Wird gespeichert...",
     "creating": "Wird erstellt...",
-    "deleting": "Wird geloescht...",
+    "deleting": "Wird gelöscht...",
     "cancel": "Abbrechen",
-    "deleteWarning": "Sind Sie sicher, dass Sie diesen Kredit loeschen moechten?",
+    "deleteWarning": "Sind Sie sicher, dass Sie diesen Kredit löschen möchten?",
     "amortization": {
       "title": "Tilgungsplan",
       "year": "Jahr",
@@ -305,11 +304,11 @@
   },
   "expenses": {
     "title": "Ausgaben",
-    "addExpense": "Ausgabe hinzufuegen",
+    "addExpense": "Ausgabe hinzufügen",
     "editExpense": "Ausgabe bearbeiten",
-    "deleteExpense": "Ausgabe loeschen",
+    "deleteExpense": "Ausgabe löschen",
     "noExpenses": "Noch keine Ausgaben",
-    "noExpensesDescription": "Erfassen Sie Ausgaben fuer diese Immobilie.",
+    "noExpensesDescription": "Erfassen Sie Ausgaben für diese Immobilie.",
     "category": "Kategorie",
     "description": "Beschreibung",
     "amount": "Betrag",
@@ -317,21 +316,21 @@
     "isRecurring": "Wiederkehrend",
     "recurringInterval": "Intervall",
     "isApportionable": "Umlagefaehig",
-    "selectCategory": "Kategorie waehlen",
+    "selectCategory": "Kategorie wählen",
     "interval": "Intervall",
     "save": "Speichern",
     "saving": "Wird gespeichert...",
     "creating": "Wird erstellt...",
-    "deleting": "Wird geloescht...",
+    "deleting": "Wird gelöscht...",
     "cancel": "Abbrechen",
-    "deleteWarning": "Sind Sie sicher, dass Sie diese Ausgabe loeschen moechten?",
+    "deleteWarning": "Sind Sie sicher, dass Sie diese Ausgabe löschen möchten?",
     "summary": "Zusammenfassung",
     "apportionable": "Umlagefaehig",
-    "nonApportionable": "Nicht umlagefaehig",
+    "nonApportionable": "Nicht umlagefähig",
     "categories": {
       "heating": "Heizung",
       "water": "Wasser",
-      "waste": "Muellabfuhr",
+      "waste": "Müllabfuhr",
       "electricity": "Allgemeinstrom",
       "insurance": "Versicherung",
       "janitor": "Hausmeister",
@@ -340,8 +339,8 @@
     },
     "intervals": {
       "monthly": "Monatlich",
-      "quarterly": "Vierteljaehrlich",
-      "yearly": "Jaehrlich"
+      "quarterly": "Vierteljährlich",
+      "yearly": "Jährlich"
     }
   },
   "rentPayments": {
@@ -351,7 +350,7 @@
     "generatePayments": "Zahlungen generieren",
     "generating": "Wird generiert...",
     "generated": "{count} Zahlungen generiert",
-    "dueDate": "Faelligkeitsdatum",
+    "dueDate": "Fälligkeitsdatum",
     "expectedAmount": "Soll-Betrag",
     "paidAmount": "Ist-Betrag",
     "paidDate": "Zahlungsdatum",
@@ -362,11 +361,11 @@
     "summary": "Zusammenfassung",
     "totalExpected": "Gesamt Soll",
     "totalPaid": "Gesamt Ist",
-    "overdueCount": "Ueberfaellige Zahlungen",
+    "overdueCount": "Überfällige Zahlungen",
     "statuses": {
       "pending": "Ausstehend",
       "paid": "Bezahlt",
-      "overdue": "Ueberfaellig",
+      "overdue": "Überfällig",
       "partial": "Teilzahlung"
     }
   },
@@ -387,30 +386,30 @@
   },
   "rentAdjustments": {
     "title": "Mietanpassungen",
-    "addAdjustment": "Mietanpassung hinzufuegen",
+    "addAdjustment": "Mietanpassung hinzufügen",
     "noAdjustments": "Noch keine Mietanpassungen",
     "oldColdRent": "Alte Kaltmiete",
     "newColdRent": "Neue Kaltmiete",
-    "effectiveDate": "Gueltig ab",
+    "effectiveDate": "Gültig ab",
     "reason": "Grund",
     "creating": "Wird erstellt..."
   },
   "rentalUnits": {
     "title": "Mieteinheiten",
-    "addUnit": "Einheit hinzufuegen",
+    "addUnit": "Einheit hinzufügen",
     "editUnit": "Einheit bearbeiten",
-    "deleteUnit": "Einheit loeschen",
+    "deleteUnit": "Einheit löschen",
     "name": "Bezeichnung",
     "floor": "Etage",
-    "area": "Flaeche (m²)",
+    "area": "Fläche (m²)",
     "noTenant": "Kein Mieter",
     "save": "Speichern",
     "saving": "Wird gespeichert...",
     "creating": "Wird erstellt...",
-    "deleting": "Wird geloescht...",
+    "deleting": "Wird gelöscht...",
     "cancel": "Abbrechen",
-    "deleteWarning": "Sind Sie sicher, dass Sie diese Einheit loeschen moechten?",
-    "willBeDeleted": "Folgende Daten werden ebenfalls geloescht",
+    "deleteWarning": "Sind Sie sicher, dass Sie diese Einheit löschen möchten?",
+    "willBeDeleted": "Folgende Daten werden ebenfalls gelöscht",
     "tenantsAssigned": "Zugewiesene Mieter",
     "noUnits": "Keine Mieteinheiten vorhanden",
     "optional": "optional"
@@ -418,7 +417,7 @@
   "cashflow": {
     "title": "Cashflow",
     "grossRent": "Kaltmiete (Summe)",
-    "nonApportionableExpenses": "Nicht umlagefaehige NK",
+    "nonApportionableExpenses": "Nicht umlagefähige NK",
     "totalLoanPayments": "Bankraten",
     "propertyTax": "Grundsteuer (monatl.)",
     "maintenanceReserve": "Instandhaltungsruecklage",
@@ -426,12 +425,12 @@
     "taxAmount": "Steuerlast",
     "cashflowAfterTax": "Cashflow nach Steuern",
     "perMonth": "pro Monat",
-    "noCashflowData": "Keine Cashflow-Daten verfuegbar",
+    "noCashflowData": "Keine Cashflow-Daten verfügbar",
     "totalRent": "Kaltmiete",
     "loanPayments": "Bankraten",
     "expenses": "Nebenkosten",
     "cashflow": "Cashflow",
-    "annualCashflow": "Jaehrlicher Cashflow",
+    "annualCashflow": "Jährlicher Cashflow",
     "grossYield": "Bruttorendite"
   },
   "dashboard": {
@@ -439,16 +438,16 @@
     "loadError": "Dashboard konnte nicht geladen werden.",
     "retry": "Erneut versuchen",
     "kpi": {
-      "netWorth": "Nettovermoegen",
-      "netWorthTooltip": "Marktwert aller Immobilien abzueglich offener Kredite",
+      "netWorth": "Nettovermögen",
+      "netWorthTooltip": "Marktwert aller Immobilien abzüglich offener Kredite",
       "cashflow": "Monatlicher Cashflow",
-      "cashflowTooltip": "Mieteinnahmen abzueglich Kreditraten und nicht umlagefaehiger Kosten",
+      "cashflowTooltip": "Mieteinnahmen abzüglich Kreditraten und nicht umlagefähiger Kosten",
       "healthScore": "Gesundheitsscore",
       "healthScoreTooltip": "Gewichteter Score aus Cashflow, LTV und Rendite (0-100)",
       "portfolioValue": "Portfoliowert",
       "portfolioValueTooltip": "Gesamtmarktwert aller Immobilien",
       "optimizationPotential": "Optimierungspotenzial",
-      "optimizationPotentialTooltip": "Geschaetztes Verbesserungspotenzial basierend auf erkannten Massnahmen"
+      "optimizationPotentialTooltip": "Geschätztes Verbesserungspotenzial basierend auf erkannten Maßnahmen"
     },
     "healthScore": {
       "title": "Gesundheitsscore Details",
@@ -459,7 +458,7 @@
       "subMetrics": "Teilmetriken"
     },
     "forecast": {
-      "title": "Vermoegensprognose",
+      "title": "Vermögensprognose",
       "growthRate": "Wertsteigerung",
       "inflationRate": "Inflation",
       "inflation": "Inflation",
@@ -469,9 +468,9 @@
       "retirement": "Rente",
       "marketValue": "Marktwert",
       "remainingBalance": "Restschuld",
-      "netWealth": "Nettovermoegen",
-      "noData": "Keine Daten verfuegbar. Fuegen Sie zuerst Immobilien hinzu.",
-      "endNetWealth": "Endvermoegen",
+      "netWealth": "Nettovermögen",
+      "noData": "Keine Daten verfügbar. Fügen Sie zuerst Immobilien hinzu.",
+      "endNetWealth": "Endvermögen",
       "totalAppreciation": "Wertzuwachs",
       "equityGained": "Eigenkapitalaufbau"
     },
@@ -487,7 +486,7 @@
       "title": "Handlungscenter",
       "risks": "Risiken",
       "opportunities": "Chancen",
-      "noItems": "Keine Eintraege",
+      "noItems": "Keine Einträge",
       "noRisks": "Keine Risiken erkannt",
       "noOpportunities": "Keine Chancen erkannt",
       "dismiss": "Ausblenden",
@@ -502,10 +501,10 @@
           "title": "Offene Miete"
         },
         "interest_binding_expiry": {
-          "title": "Zinsbindung laeuft aus"
+          "title": "Zinsbindung läuft aus"
         },
         "contract_expiry": {
-          "title": "Vertrag laeuft aus"
+          "title": "Vertrag läuft aus"
         },
         "rent_potential": {
           "title": "Mietpotenzial"
@@ -519,14 +518,14 @@
       "title": "Offene Aufgaben",
       "noOpenTasks": "Keine offenen Aufgaben",
       "withoutTenant": "Ohne Mieter",
-      "confirmDelete": "Aufgabe wirklich loeschen?"
+      "confirmDelete": "Aufgabe wirklich löschen?"
     },
     "toolbar": {
       "edit": "Bearbeiten",
       "done": "Fertig",
-      "addWidget": "Widget hinzufuegen",
-      "reset": "Zuruecksetzen",
-      "confirmReset": "Wirklich zuruecksetzen?"
+      "addWidget": "Widget hinzufügen",
+      "reset": "Zurücksetzen",
+      "confirmReset": "Wirklich zurücksetzen?"
     },
     "catalog": {
       "title": "Widget-Katalog"
@@ -534,15 +533,15 @@
     "widgets": {
       "kpiBar": {
         "name": "Kennzahlen-Leiste",
-        "description": "Nettovermoegen, Cashflow, Gesundheitsscore und Portfoliowert"
+        "description": "Nettovermögen, Cashflow, Gesundheitsscore und Portfoliowert"
       },
       "healthScore": {
         "name": "Gesundheitsscore",
-        "description": "Detaillierte Aufschluesselung der Portfolio-Gesundheit"
+        "description": "Detaillierte Aufschlüsselung der Portfolio-Gesundheit"
       },
       "wealthForecast": {
-        "name": "Vermoegensprognose",
-        "description": "Langfristige Vermoegensprojektion mit Wertsteigerung"
+        "name": "Vermögensprognose",
+        "description": "Langfristige Vermögensprojektion mit Wertsteigerung"
       },
       "portfolioAllocation": {
         "name": "Portfolioverteilung",
@@ -561,11 +560,11 @@
         "description": "Anteil leerstehender Einheiten im Portfolio"
       },
       "upcomingDeadlines": {
-        "name": "Naechste Faelligkeiten",
-        "description": "Auslaufende Zinsbindungen und Vertraege"
+        "name": "Nächste Fälligkeiten",
+        "description": "Auslaufende Zinsbindungen und Verträge"
       },
       "rentArrears": {
-        "name": "Mietrueckstaende",
+        "name": "Mietrückstände",
         "description": "Offene Zahlungen nach Verzugsdauer"
       },
       "expensesByCategory": {
@@ -573,7 +572,7 @@
         "description": "Verteilung der Bewirtschaftungskosten"
       },
       "ltvOverview": {
-        "name": "LTV-Uebersicht",
+        "name": "LTV-Übersicht",
         "description": "Beleihungsauslauf je Immobilie"
       },
       "marketComparison": {
@@ -586,23 +585,23 @@
       },
       "quickActions": {
         "name": "Schnellaktionen",
-        "description": "Haeufig genutzte Aktionen auf einen Klick"
+        "description": "Häufig genutzte Aktionen auf einen Klick"
       },
       "tasks": {
         "name": "Offene Aufgaben",
         "description": "Nach Mietern gruppierte offene Aufgaben"
       },
       "shrink": "Verkleinern",
-      "grow": "Vergroessern",
-      "resize": "Groesse aendern"
+      "grow": "Vergrößern",
+      "resize": "Größe ändern"
     },
     "bento": {
       "edit": "Bearbeiten",
       "done": "Fertig",
-      "addWidget": "Widget hinzufuegen",
+      "addWidget": "Widget hinzufügen",
       "remove": "Entfernen",
-      "reset": "Zuruecksetzen",
-      "resetConfirm": "Alle Dashboard-Presets loeschen und das Standard-Layout wiederherstellen?",
+      "reset": "Zurücksetzen",
+      "resetConfirm": "Alle Dashboard-Presets löschen und das Standard-Layout wiederherstellen?",
       "catalog": {
         "title": "Widget-Katalog",
         "description": "Ziehe Widgets auf das Dashboard",
@@ -621,15 +620,15 @@
       "widget": {
         "kpiBar": "KPI-Leiste",
         "healthScore": "Health Score",
-        "wealthForecast": "Vermoegensprognose",
+        "wealthForecast": "Vermögensprognose",
         "portfolioAllocation": "Portfolio-Verteilung",
         "actionCenter": "Aktionszentrum",
         "rentIncomeTimeline": "Mieteinnahmen-Verlauf",
         "vacancyRate": "Leerstandsquote",
         "upcomingDeadlines": "Anstehende Fristen",
-        "rentArrears": "Mietrueckstaende",
+        "rentArrears": "Mietrückstände",
         "expensesByCategory": "Ausgaben nach Kategorie",
-        "ltvOverview": "LTV-Uebersicht",
+        "ltvOverview": "LTV-Übersicht",
         "marketComparison": "Marktvergleich",
         "amortizationProgress": "Tilgungsfortschritt",
         "quickActions": "Schnellaktionen",
@@ -643,16 +642,16 @@
         "rename": "Umbenennen",
         "duplicate": "Duplizieren",
         "setDefault": "Als Standard festlegen",
-        "delete": "Loeschen",
+        "delete": "Löschen",
         "createTitle": "Preset erstellen",
         "renameTitle": "Preset umbenennen",
         "duplicateTitle": "Preset duplizieren",
-        "deleteTitle": "Preset loeschen",
-        "namePrompt": "Waehle einen Namen (1-60 Zeichen).",
+        "deleteTitle": "Preset löschen",
+        "namePrompt": "Wähle einen Namen (1-60 Zeichen).",
         "nameLabel": "Name",
         "cancel": "Abbrechen",
         "confirm": "Speichern",
-        "deletePrompt": "Preset \"{name}\" loeschen? Dies kann nicht rueckgaengig gemacht werden."
+        "deletePrompt": "Preset \"{name}\" löschen? Dies kann nicht rückgängig gemacht werden."
       }
     }
   },
@@ -660,15 +659,15 @@
     "title": "Analyse-Cockpit",
     "pdfExport": "PDF Export",
     "nav": {
-      "vitality": "Portfolio-Vitalitaet",
+      "vitality": "Portfolio-Vitalität",
       "stressTest": "Zins-Stresstest",
       "specialRepayment": "Sondertilgung",
       "refinancing": "Umschuldung",
       "exitStrategy": "Exit-Strategie"
     },
     "vitality": {
-      "title": "Portfolio-Vitalitaet",
-      "noData": "Keine Immobilien vorhanden. Fuegen Sie zuerst eine Immobilie hinzu.",
+      "title": "Portfolio-Vitalität",
+      "noData": "Keine Immobilien vorhanden. Fügen Sie zuerst eine Immobilie hinzu.",
       "healthScore": "Gesundheitsscore",
       "outOf100": "von 100",
       "status": {
@@ -688,7 +687,7 @@
       "expiringVolume": "Auslaufendes Volumen",
       "expiringCount": "Auslaufende Darlehen",
       "shareOfTotal": "Anteil am Gesamtvolumen",
-      "breakEvenRates": "Break-Even-Zinssaetze",
+      "breakEvenRates": "Break-Even-Zinssätze",
       "breakEvenExplanation": "Maximaler Zinssatz bei dem der Cashflow noch positiv bleibt."
     },
     "stressTest": {
@@ -709,9 +708,9 @@
     },
     "specialRepayment": {
       "title": "Sondertilgung",
-      "selectLoan": "Darlehen auswaehlen",
-      "annualAmount": "Jaehrlicher Betrag",
-      "limitExceeded": "Betrag ueberschreitet das Sondertilgungslimit.",
+      "selectLoan": "Darlehen auswählen",
+      "annualAmount": "Jährlicher Betrag",
+      "limitExceeded": "Betrag überschreitet das Sondertilgungslimit.",
       "refinanceRate": "Anschluss-Zinssatz",
       "verdict": "Fazit",
       "verdictSpecialRepayment": "Sondertilgung ist vorteilhafter",
@@ -730,7 +729,7 @@
       "withSpecial": "Mit Sondertilgung",
       "etfSavings": "ETF-Anlage",
       "noLoans": "Keine Darlehen vorhanden.",
-      "selectLoanPrompt": "Bitte waehlen Sie ein Darlehen aus."
+      "selectLoanPrompt": "Bitte wählen Sie ein Darlehen aus."
     },
     "refinancing": {
       "title": "Umschuldung",
@@ -754,16 +753,16 @@
       "title": "Exit-Strategie",
       "saleInYears": "Verkauf in",
       "years": "Jahren",
-      "appreciation": "Jaehrl. Wertsteigerung",
-      "brokerFee": "Maklergebuehr",
-      "taxRate": "Persoenl. Steuersatz",
+      "appreciation": "Jährl. Wertsteigerung",
+      "brokerFee": "Maklergebühr",
+      "taxRate": "Persönl. Steuersatz",
       "taxFree": "Steuerfrei (Spekulationsfrist abgelaufen)",
       "taxable": "Steuerpflichtig (innerhalb Spekulationsfrist)",
       "speculationEnd": "Spekulationsfrist endet",
       "projectedPrice": "Progn. Verkaufspreis",
-      "brokerFeeAmount": "Maklergebuehr",
+      "brokerFeeAmount": "Maklergebühr",
       "speculationTax": "Spekulationssteuer",
-      "netProceeds": "Netto-Erloes",
+      "netProceeds": "Netto-Erlös",
       "year": "Jahr",
       "projectedValue": "Progn. Wert",
       "remainingBalance": "Restschuld",
@@ -775,14 +774,14 @@
     "title": "E-Mail",
     "sync": "Synchronisieren",
     "syncing": "Synchronisiere...",
-    "selectEmail": "Waehlen Sie eine E-Mail aus der Liste",
+    "selectEmail": "Wählen Sie eine E-Mail aus der Liste",
     "empty": "Keine E-Mails vorhanden",
     "notFound": "E-Mail nicht gefunden",
-    "noAccount": "Kein E-Mail-Konto eingerichtet. Fuegen Sie eines in den Einstellungen hinzu.",
+    "noAccount": "Kein E-Mail-Konto eingerichtet. Fügen Sie eines in den Einstellungen hinzu.",
     "allMail": "Alle Mails",
     "labels": "Labels",
     "tenants": "Mieter",
-    "opened": "Geoeffnet",
+    "opened": "Geöffnet",
     "reply": "Antworten",
     "createTask": "Aufgabe erstellen",
     "taskCreated": "{count, plural, one {# Aufgabe} other {# Aufgaben}}",
@@ -791,7 +790,7 @@
       "unmatched": "Sonstiges"
     },
     "pagination": {
-      "prev": "Zurueck",
+      "prev": "Zurück",
       "next": "Weiter"
     },
     "assign": {
@@ -809,13 +808,26 @@
       "send": "Senden",
       "cancel": "Abbrechen"
     },
+    "ai": {
+      "tooltip": "Mit KI generieren",
+      "error": "KI-Generierung fehlgeschlagen. Bitte erneut versuchen.",
+      "overwriteTitle": "Entwurf überschreiben?",
+      "confirmOverwrite": "Der bestehende Entwurf wird mit dem KI-Vorschlag ersetzt.",
+      "overwriteAction": "Überschreiben",
+      "cancel": "Abbrechen",
+      "tone": {
+        "formal": "Förmlich",
+        "friendly": "Freundlich",
+        "short": "Kurz"
+      }
+    },
     "templates": {
-      "select": "Vorlage waehlen"
+      "select": "Vorlage wählen"
     },
     "attachments": {
-      "title": "{count} Anhaenge",
-      "transfer": "In Dokumente uebertragen",
-      "transferTitle": "Anhang uebertragen",
+      "title": "{count} Anhänge",
+      "transfer": "In Dokumente übertragen",
+      "transferTitle": "Anhang übertragen",
       "transferDescription": "'{filename}' als Dokument speichern",
       "save": "Speichern",
       "saved": "Abgelegt"
@@ -828,20 +840,28 @@
     "createTitle": "Aufgabe erstellen",
     "editTitle": "Aufgabe bearbeiten",
     "description": "Erstelle und verwalte Aufgaben",
-    "confirmDelete": "Aufgabe wirklich loeschen?",
+    "confirmDelete": "Aufgabe wirklich löschen?",
     "withoutTenant": "Ohne Mieter",
+    "ai": {
+      "tooltip": "Mit KI aus E-Mail generieren",
+      "overwriteTitle": "Inhalte überschreiben?",
+      "confirmOverwrite": "Vorhandene Inhalte werden mit dem KI-Vorschlag ersetzt.",
+      "overwriteAction": "Überschreiben",
+      "cancel": "Abbrechen",
+      "error": "KI-Generierung fehlgeschlagen. Bitte erneut versuchen."
+    },
     "fields": {
       "title": "Titel",
       "titlePlaceholder": "Was muss getan werden?",
       "description": "Beschreibung",
       "descriptionPlaceholder": "Optional: Details",
       "status": "Status",
-      "priority": "Prioritaet",
+      "priority": "Priorität",
       "category": "Kategorie",
-      "dueDate": "Faellig am",
+      "dueDate": "Fällig am",
       "tenant": "Mieter",
       "noTenant": "Kein Mieter",
-      "select": "Auswaehlen"
+      "select": "Auswählen"
     },
     "statuses": {
       "new": "Neu",
@@ -864,14 +884,14 @@
       "create": "Erstellen",
       "save": "Speichern",
       "cancel": "Abbrechen",
-      "delete": "Loeschen",
-      "openEmail": "E-Mail oeffnen"
+      "delete": "Löschen",
+      "openEmail": "E-Mail öffnen"
     },
     "filters": {
       "searchPlaceholder": "Aufgaben suchen...",
       "openOnly": "Nur offene",
       "all": "Alle Status",
-      "allPriorities": "Alle Prioritaeten"
+      "allPriorities": "Alle Prioritäten"
     }
   },
   "notifications": {
@@ -899,18 +919,18 @@
       "save": "Speichern"
     },
     "password": {
-      "title": "Passwort aendern",
+      "title": "Passwort ändern",
       "currentPassword": "Aktuelles Passwort",
       "newPassword": "Neues Passwort",
-      "confirmPassword": "Passwort bestaetigen",
-      "changePassword": "Passwort aendern",
-      "mismatch": "Passwoerter stimmen nicht ueberein",
+      "confirmPassword": "Passwort bestätigen",
+      "changePassword": "Passwort ändern",
+      "mismatch": "Passwörter stimmen nicht überein",
       "tooShort": "Mindestens 8 Zeichen erforderlich",
-      "success": "Passwort erfolgreich geaendert"
+      "success": "Passwort erfolgreich geändert"
     },
     "preferences": {
-      "title": "Einstellungen & Praeferenzen",
-      "currency": "Waehrung",
+      "title": "Einstellungen & Präferenzen",
+      "currency": "Währung",
       "language": "Sprache",
       "taxRate": "Steuersatz",
       "retirementYear": "Renteneintritt",
@@ -925,11 +945,11 @@
       "currentYear": "Aktuelles Jahr",
       "lastYear": "Letztes Jahr",
       "dscrTarget": "DSCR-Ziel",
-      "brokerFee": "Maklergebuehr",
-      "annualAppreciation": "Jaehrliche Wertsteigerung",
+      "brokerFee": "Maklergebühr",
+      "annualAppreciation": "Jährliche Wertsteigerung",
       "capitalGainsTax": "Kapitalertragssteuer",
       "donutThreshold": "Donut-Schwellwert",
-      "shareLinkValidity": "Freigabelink Gueltigkeit",
+      "shareLinkValidity": "Freigabelink Gültigkeit",
       "days": "Tage",
       "save": "Speichern"
     },
@@ -941,29 +961,29 @@
       "smtpPort": "SMTP-Port",
       "username": "Benutzername",
       "password": "Passwort",
-      "passwordPlaceholder": "Unveraendert lassen",
+      "passwordPlaceholder": "Unverändert lassen",
       "fromAddress": "Absender-Adresse",
       "label": "Konto-Bezeichnung",
       "labelPlaceholder": "z.B. Arbeit, Privat",
       "syncInterval": "Sync-Intervall",
       "syncing": "Synchronisiert",
       "error": "Fehler",
-      "create": "Konto hinzufuegen",
-      "addAccount": "E-Mail-Konto hinzufuegen",
+      "create": "Konto hinzufügen",
+      "addAccount": "E-Mail-Konto hinzufügen",
       "update": "Aktualisieren",
-      "delete": "Loeschen",
+      "delete": "Löschen",
       "setDefault": "Als Standard setzen",
       "cancel": "Abbrechen",
       "test": "Verbindung testen",
       "testSuccess": "Verbindung erfolgreich hergestellt.",
-      "testFailed": "Verbindung fehlgeschlagen. Bitte Zugangsdaten pruefen.",
+      "testFailed": "Verbindung fehlgeschlagen. Bitte Zugangsdaten prüfen.",
       "saveFailed": "Konto konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
     },
     "notifications": {
       "title": "Benachrichtigungen",
       "newEmail": "Bei neuen E-Mails benachrichtigen",
-      "overdueRent": "Bei ueberfaelliger Miete benachrichtigen",
-      "contractExpiry": "Bei ablaufenden Vertraegen benachrichtigen",
+      "overdueRent": "Bei überfälliger Miete benachrichtigen",
+      "contractExpiry": "Bei ablaufenden Verträgen benachrichtigen",
       "pushEnabled": "Push-Benachrichtigungen aktivieren",
       "trackingPixel": "Lesebest. (Tracking-Pixel) aktivieren",
       "enablePush": "Push aktivieren",
@@ -971,16 +991,16 @@
     },
     "marketData": {
       "title": "Marktdaten",
-      "interestRates": "EZB-Zinssaetze",
+      "interestRates": "EZB-Zinssätze",
       "syncRates": "Aktualisieren",
       "noRates": "Keine Zinsdaten vorhanden. Klicken Sie auf Aktualisieren.",
       "rentBenchmarks": "Miet-Richtwerte",
-      "addBenchmark": "Richtwert hinzufuegen",
+      "addBenchmark": "Richtwert hinzufügen",
       "noBenchmarks": "Keine Richtwerte vorhanden.",
       "region": "Stadt / Region",
       "regionPlaceholder": "z.B. Berlin",
       "rentPerSqm": "Miete pro m²",
-      "validFrom": "Gueltig ab",
+      "validFrom": "Gültig ab",
       "source": "Quelle",
       "sourcePlaceholder": "z.B. Mietspiegel 2025",
       "cancel": "Abbrechen",
@@ -993,17 +1013,17 @@
     "uploadMultiple": "Dokumente hochladen",
     "uploading": "Wird hochgeladen...",
     "uploadSuccess": "Dokument erfolgreich hochgeladen",
-    "dragDrop": "Dateien hierher ziehen oder klicken zum Auswaehlen",
-    "maxSize": "Maximale Dateigroesse: 25 MB",
+    "dragDrop": "Dateien hierher ziehen oder klicken zum Auswählen",
+    "maxSize": "Maximale Dateigröße: 25 MB",
     "allowedTypes": "PDF, JPG, PNG, GIF, WEBP",
     "preview": "Vorschau",
     "rename": "Umbenennen",
-    "recategorize": "Kategorie aendern",
-    "deleteConfirm": "Moechten Sie dieses Dokument wirklich loeschen?",
-    "deleteSuccess": "Dokument geloescht",
+    "recategorize": "Kategorie ändern",
+    "deleteConfirm": "Möchten Sie dieses Dokument wirklich löschen?",
+    "deleteSuccess": "Dokument gelöscht",
     "noDocuments": "Keine Dokumente vorhanden",
     "fileName": "Dateiname",
-    "fileSize": "Dateigroesse",
+    "fileSize": "Dateigröße",
     "category": "Kategorie",
     "property": "Immobilie",
     "date": "Datum",
@@ -1020,7 +1040,7 @@
       "rental_contract": "Mietvertrag",
       "utility_bill": "Nebenkostenabrechnung",
       "image": "Bild",
-      "defect_report": "Maengelanzeige",
+      "defect_report": "Mängelanzeige",
       "other": "Sonstige"
     },
     "cancel": "Abbrechen"
@@ -1029,7 +1049,7 @@
     "title": "Teilen",
     "createLink": "Link erstellen",
     "shareProperty": "Immobilie teilen",
-    "expiry": "Gueltigkeitsdauer",
+    "expiry": "Gültigkeitsdauer",
     "expiryDays": {
       "1": "1 Tag",
       "7": "7 Tage",
@@ -1044,13 +1064,13 @@
     "copyLink": "Link kopieren",
     "copied": "Link kopiert!",
     "revoke": "Widerrufen",
-    "revokeConfirm": "Moechten Sie diesen Link wirklich widerrufen?",
+    "revokeConfirm": "Möchten Sie diesen Link wirklich widerrufen?",
     "activeLinks": "Aktive Links",
     "noLinks": "Keine aktiven Links",
     "expired": "Abgelaufen",
-    "invalidToken": "Dieser Link ist ungueltig oder abgelaufen.",
-    "hasPassword": "Passwortgeschuetzt",
-    "expiresAt": "Gueltig bis",
+    "invalidToken": "Dieser Link ist ungültig oder abgelaufen.",
+    "hasPassword": "Passwortgeschützt",
+    "expiresAt": "Gültig bis",
     "sharedView": "Geteilte Ansicht",
     "readOnly": "Nur-Lese-Zugriff"
   },
@@ -1069,7 +1089,7 @@
     "rentalUnits": "Mieteinheiten",
     "loansOverview": "Kreditübersicht",
     "expensesOverview": "Ausgabenübersicht",
-    "cashflowOverview": "Cashflow-Uebersicht",
+    "cashflowOverview": "Cashflow-Übersicht",
     "dunning": {
       "subject": "Mahnung",
       "dear": "Sehr geehrte/r",
@@ -1078,22 +1098,22 @@
       "bodySecond": "trotz wiederholter Aufforderung ist folgende Zahlung noch nicht eingegangen. Wir bitten Sie dringend um umgehende Begleichung:",
       "bodyThird": "letzte Mahnung: Sollte die folgende Zahlung nicht innerhalb von 7 Tagen eingehen, behalten wir uns rechtliche Schritte vor:",
       "amount": "Offener Betrag",
-      "dueDate": "Faellig seit",
+      "dueDate": "Fällig seit",
       "paymentDeadline": "Zahlungsfrist",
-      "regards": "Mit freundlichen Gruessen"
+      "regards": "Mit freundlichen Grüßen"
     }
   },
   "audit": {
     "title": "Audit-Log",
-    "subtitle": "Alle Aenderungen an Ihren Daten im Ueberblick",
-    "sectionTitle": "Aenderungsverlauf",
+    "subtitle": "Alle Änderungen an Ihren Daten im Überblick",
+    "sectionTitle": "Änderungsverlauf",
     "searchPlaceholder": "Suche in Feldern und Werten...",
     "filterByEntity": "Nach Typ filtern",
     "filterByAction": "Nach Aktion filtern",
     "allEntities": "Alle Typen",
     "allActions": "Alle Aktionen",
-    "noEntries": "Keine Audit-Eintraege vorhanden.",
-    "previous": "Zurueck",
+    "noEntries": "Keine Audit-Einträge vorhanden.",
+    "previous": "Zurück",
     "next": "Weiter",
     "table": {
       "date": "Datum",
@@ -1107,8 +1127,8 @@
     },
     "actions": {
       "create": "Erstellt",
-      "update": "Geaendert",
-      "delete": "Geloescht"
+      "update": "Geändert",
+      "delete": "Gelöscht"
     },
     "entityTypes": {
       "property": "Immobilie",
@@ -1126,7 +1146,7 @@
   "admin": {
     "users": {
       "title": "Benutzerverwaltung",
-      "description": "Alle Benutzer verwalten, Rollen aendern und Konten sperren.",
+      "description": "Alle Benutzer verwalten, Rollen ändern und Konten sperren.",
       "searchPlaceholder": "Benutzer suchen...",
       "noResults": "Keine Benutzer gefunden.",
       "notFound": "Benutzer nicht gefunden.",
@@ -1152,32 +1172,32 @@
         "accountStatus": "Kontostatus",
         "activeSessions": "Aktive Sitzungen",
         "language": "Sprache",
-        "currency": "Waehrung",
+        "currency": "Währung",
         "properties": "Immobilien",
         "sessions": "Sitzungen",
         "save": "Speichern",
         "cancel": "Abbrechen",
-        "cannotChangeOwnRole": "Sie koennen Ihre eigene Rolle nicht aendern.",
+        "cannotChangeOwnRole": "Sie können Ihre eigene Rolle nicht ändern.",
         "accountBanned": "Konto gesperrt",
         "accountActive": "Konto aktiv",
         "bannedDescription": "Dieser Benutzer ist gesperrt und kann sich nicht anmelden.",
         "activeDescription": "Dieser Benutzer kann sich normal anmelden.",
         "ban": "Sperren",
         "unban": "Entsperren",
-        "cannotBanAdmin": "Administratoren koennen nicht gesperrt werden.",
+        "cannotBanAdmin": "Administratoren können nicht gesperrt werden.",
         "banTitle": "Benutzer sperren",
         "unbanTitle": "Benutzer entsperren",
-        "banConfirm": "Moechten Sie {name} wirklich sperren? Alle aktiven Sitzungen werden beendet.",
-        "unbanConfirm": "Moechten Sie {name} wirklich entsperren?",
-        "device": "Geraet",
+        "banConfirm": "Möchten Sie {name} wirklich sperren? Alle aktiven Sitzungen werden beendet.",
+        "unbanConfirm": "Möchten Sie {name} wirklich entsperren?",
+        "device": "Gerät",
         "ipAddress": "IP-Adresse",
         "lastActive": "Zuletzt aktiv",
         "createdAt": "Erstellt am",
-        "unknownDevice": "Unbekanntes Geraet",
+        "unknownDevice": "Unbekanntes Gerät",
         "noSessions": "Keine aktiven Sitzungen.",
         "revokeAll": "Alle beenden",
         "revokeAllTitle": "Alle Sitzungen beenden",
-        "revokeAllConfirm": "Moechten Sie wirklich alle Sitzungen von {name} beenden?"
+        "revokeAllConfirm": "Möchten Sie wirklich alle Sitzungen von {name} beenden?"
       }
     }
   }

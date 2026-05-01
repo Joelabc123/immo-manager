@@ -403,6 +403,7 @@ function TaskRowItem({
       >
         <DropdownMenu>
           <DropdownMenuTrigger
+            nativeButton={false}
             render={
               <Badge
                 variant={

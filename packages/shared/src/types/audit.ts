@@ -8,6 +8,7 @@ export const AUDIT_ENTITY_TYPES = {
   rent_adjustment: "rent_adjustment",
   document: "document",
   email_account: "email_account",
+  email: "email",
   task: "task",
 } as const;
 

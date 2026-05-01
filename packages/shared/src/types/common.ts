@@ -2,6 +2,8 @@ export const AUDIT_ACTIONS = {
   create: "create",
   update: "update",
   delete: "delete",
+  ai_generate_task: "ai_generate_task",
+  ai_generate_reply: "ai_generate_reply",
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
