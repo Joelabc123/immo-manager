@@ -15,11 +15,14 @@ import {
   Ruler,
   Home,
   DollarSign,
+  Save,
+  X,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { formatDate } from "@repo/shared/utils";
 import { useCurrency } from "@/lib/hooks/use-currency";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -57,9 +60,20 @@ export default function PropertyDetailPage({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [duplicateOpen, setDuplicateOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [notesEditing, setNotesEditing] = useState(false);
+  const [notesDraft, setNotesDraft] = useState("");
+
+  const utils = trpc.useUtils();
 
   const { data: property, isLoading } = trpc.properties.getById.useQuery({
     id,
+  });
+
+  const updateNotesMutation = trpc.properties.update.useMutation({
+    onSuccess: async () => {
+      await utils.properties.getById.invalidate({ id });
+      setNotesEditing(false);
+    },
   });
 
   if (isLoading) {
@@ -280,16 +294,61 @@ export default function PropertyDetailPage({
       )}
 
       {/* Notes */}
-      {property.notes && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("notes")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm whitespace-pre-wrap">{property.notes}</p>
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <CardTitle>{t("notes")}</CardTitle>
+          {!notesEditing ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setNotesDraft(property.notes ?? "");
+                setNotesEditing(true);
+              }}
+            >
+              <Edit className="mr-1.5 h-3.5 w-3.5" />
+              {t("edit")}
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setNotesEditing(false)}
+              >
+                <X className="mr-1.5 h-3.5 w-3.5" />
+                {t("cancel")}
+              </Button>
+              <Button
+                size="sm"
+                onClick={() =>
+                  updateNotesMutation.mutate({
+                    id,
+                    data: { notes: notesDraft.trim() },
+                  })
+                }
+                disabled={updateNotesMutation.isPending}
+              >
+                <Save className="mr-1.5 h-3.5 w-3.5" />
+                {t("save")}
+              </Button>
+            </div>
+          )}
+        </CardHeader>
+        <CardContent>
+          {notesEditing ? (
+            <Textarea
+              value={notesDraft}
+              onChange={(event) => setNotesDraft(event.target.value)}
+              rows={6}
+            />
+          ) : property.notes ? (
+            <p className="whitespace-pre-wrap text-sm">{property.notes}</p>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t("noNotes")}</p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Dialogs */}
       <EditPropertyDialog

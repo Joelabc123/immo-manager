@@ -12,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import {
@@ -99,11 +98,17 @@ export function ShareLinkDialog({
               onValueChange={(v) => v && setExpiresInDays(Number(v))}
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue>
+                  {(value: string) => t(`expiryDays.${value}`)}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {EXPIRY_OPTIONS.map((days) => (
-                  <SelectItem key={days} value={days}>
+                  <SelectItem
+                    key={days}
+                    value={days}
+                    label={t(`expiryDays.${days}`)}
+                  >
                     {t(`expiryDays.${days}`)}
                   </SelectItem>
                 ))}

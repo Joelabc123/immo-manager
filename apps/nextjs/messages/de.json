@@ -85,6 +85,7 @@
     "location": "Standort",
     "tags": "Tags",
     "notes": "Notizen",
+    "noNotes": "Noch keine Notizen vorhanden.",
     "floor": "Etage",
     "type": "Typ",
     "status": {
@@ -315,7 +316,7 @@
     "date": "Datum",
     "isRecurring": "Wiederkehrend",
     "recurringInterval": "Intervall",
-    "isApportionable": "Umlagefaehig",
+    "isApportionable": "Umlagefähig",
     "selectCategory": "Kategorie wählen",
     "interval": "Intervall",
     "save": "Speichern",
@@ -325,7 +326,7 @@
     "cancel": "Abbrechen",
     "deleteWarning": "Sind Sie sicher, dass Sie diese Ausgabe löschen möchten?",
     "summary": "Zusammenfassung",
-    "apportionable": "Umlagefaehig",
+    "apportionable": "Umlagefähig",
     "nonApportionable": "Nicht umlagefähig",
     "categories": {
       "heating": "Heizung",
@@ -374,14 +375,43 @@
     "createDunning": "Mahnung erstellen",
     "noDunning": "Keine Mahnungen",
     "level": "Mahnstufe",
+    "documentType": "Dokumenttyp",
     "amount": "Betrag",
+    "totalAmount": "Gesamtbetrag",
     "dunningDate": "Mahndatum",
+    "paymentDeadline": "Zahlungsfrist",
     "creating": "Wird erstellt...",
+    "open": "Öffnen",
+    "backToTenant": "Zurück zum Mieter",
+    "downloadPdf": "PDF herunterladen",
+    "archivePdf": "PDF ablegen",
+    "openArchivedPdf": "Abgelegtes PDF öffnen",
+    "markResolved": "Als erledigt markieren",
+    "cancelDunning": "Stornieren",
+    "linkedClaims": "Verknüpfte Forderungen",
+    "claimSuggestions": "Forderungsvorschläge",
+    "noClaimSuggestions": "Keine überfälligen Mietzahlungen gefunden.",
+    "criticalWarning": "Kritischer Zahlungsverzug erreicht. Reguläre Mahnung stoppen und vor weiteren Schritten rechtliche Beratung einholen.",
+    "fallbackSubject": "Mahnschreiben",
     "levels": {
       "reminder": "Erinnerung",
       "first": "1. Mahnung",
       "second": "2. Mahnung",
       "third": "3. Mahnung"
+    },
+    "documentTypes": {
+      "rent": "Miete",
+      "utilities": "Nebenkosten",
+      "deposit": "Kaution",
+      "late_payment_warning": "Abmahnung Zahlungsverzug",
+      "termination_warning": "Kündigungswarnung"
+    },
+    "statuses": {
+      "draft": "Entwurf",
+      "created": "Erstellt",
+      "archived": "Archiviert",
+      "cancelled": "Storniert",
+      "resolved": "Erledigt"
     }
   },
   "rentAdjustments": {
@@ -420,7 +450,7 @@
     "nonApportionableExpenses": "Nicht umlagefähige NK",
     "totalLoanPayments": "Bankraten",
     "propertyTax": "Grundsteuer (monatl.)",
-    "maintenanceReserve": "Instandhaltungsruecklage",
+    "maintenanceReserve": "Instandhaltungsrücklage",
     "cashflowBeforeTax": "Cashflow vor Steuern",
     "taxAmount": "Steuerlast",
     "cashflowAfterTax": "Cashflow nach Steuern",
@@ -802,17 +832,32 @@
     },
     "threadCount": "{count} Nachrichten im Thread",
     "compose": {
+      "title": "Neue E-Mail",
+      "subtitle": "Schreiben und versenden Sie eine neue Nachricht.",
+      "newEmail": "Neue E-Mail",
+      "backToMail": "Zurück zu Mail",
+      "account": "Konto",
       "to": "An",
+      "cc": "CC",
+      "bcc": "BCC",
       "subject": "Betreff",
+      "recipientPlaceholder": "E-Mail-Adresse eingeben...",
+      "addRecipient": "Empfänger hinzufügen",
+      "selectTenantEmail": "Mieter-E-Mail auswählen",
+      "showCcBcc": "CC/BCC anzeigen",
+      "hideCcBcc": "CC/BCC ausblenden",
       "placeholder": "Nachricht verfassen...",
       "send": "Senden",
       "cancel": "Abbrechen"
     },
     "ai": {
       "tooltip": "Mit KI generieren",
+      "improveTooltip": "Mit KI verbessern",
       "error": "KI-Generierung fehlgeschlagen. Bitte erneut versuchen.",
       "overwriteTitle": "Entwurf überschreiben?",
       "confirmOverwrite": "Der bestehende Entwurf wird mit dem KI-Vorschlag ersetzt.",
+      "improveOverwriteTitle": "Inhalt verbessern?",
+      "improveConfirmOverwrite": "Der bestehende Inhalt wird mit einer verbesserten KI-Version überschrieben. Grammatik, Satzbau und Rechtschreibung werden optimiert.",
       "overwriteAction": "Überschreiben",
       "cancel": "Abbrechen",
       "tone": {
@@ -907,7 +952,8 @@
       "preferences": "Einstellungen",
       "email": "E-Mail",
       "notifications": "Benachrichtigungen",
-      "marketData": "Marktdaten"
+      "marketData": "Marktdaten",
+      "dunning": "Mahnwesen"
     },
     "profile": {
       "title": "Profil",
@@ -1005,6 +1051,47 @@
       "sourcePlaceholder": "z.B. Mietspiegel 2025",
       "cancel": "Abbrechen",
       "save": "Speichern"
+    },
+    "dunning": {
+      "settingsTitle": "Mahn-Einstellungen",
+      "templatesTitle": "Vorlagen",
+      "defaultFederalState": "Bundesland für Arbeitstage",
+      "latePaymentThresholdCount": "Schwellwert verspätete Zahlungen",
+      "latePaymentWindowMonths": "Zeitraum in Monaten",
+      "automationEnabled": "Automatisierung vorbereiten",
+      "saveSettings": "Einstellungen speichern",
+      "saveTemplate": "Vorlage speichern",
+      "locale": "Sprache",
+      "tone": "Ton",
+      "subjectTemplate": "Betreff-Vorlage",
+      "bodyTemplate": "Text-Vorlage",
+      "locales": {
+        "de": "Deutsch",
+        "en": "Englisch"
+      },
+      "tones": {
+        "friendly": "Freundlich",
+        "formal": "Förmlich",
+        "strict": "Streng"
+      },
+      "federalStates": {
+        "BW": "Baden-Württemberg",
+        "BY": "Bayern",
+        "BE": "Berlin",
+        "BB": "Brandenburg",
+        "HB": "Bremen",
+        "HH": "Hamburg",
+        "HE": "Hessen",
+        "MV": "Mecklenburg-Vorpommern",
+        "NI": "Niedersachsen",
+        "NW": "Nordrhein-Westfalen",
+        "RP": "Rheinland-Pfalz",
+        "SL": "Saarland",
+        "SN": "Sachsen",
+        "ST": "Sachsen-Anhalt",
+        "SH": "Schleswig-Holstein",
+        "TH": "Thüringen"
+      }
     }
   },
   "documents": {
@@ -1041,6 +1128,7 @@
       "utility_bill": "Nebenkostenabrechnung",
       "image": "Bild",
       "defect_report": "Mängelanzeige",
+      "dunning_letter": "Mahnschreiben",
       "other": "Sonstige"
     },
     "cancel": "Abbrechen"
@@ -1085,7 +1173,7 @@
     "page": "Seite",
     "generatedAt": "Erstellt am",
     "propertyDetails": "Objektdaten",
-    "financialOverview": "Finanzuebersicht",
+    "financialOverview": "Finanzübersicht",
     "rentalUnits": "Mieteinheiten",
     "loansOverview": "Kreditübersicht",
     "expensesOverview": "Ausgabenübersicht",
@@ -1128,7 +1216,20 @@
     "actions": {
       "create": "Erstellt",
       "update": "Geändert",
-      "delete": "Gelöscht"
+      "delete": "Gelöscht",
+      "ai_generate_task": "Aufgabe mit KI erstellt",
+      "ai_generate_reply": "Antwort mit KI erstellt",
+      "ai_improve_email": "E-Mail mit KI verbessert",
+      "create_dunning": "Mahnung erstellt",
+      "update_dunning": "Mahnung geändert",
+      "cancel_dunning": "Mahnung storniert",
+      "resolve_dunning": "Mahnung erledigt",
+      "archive_dunning_pdf": "Mahn-PDF archiviert",
+      "download_dunning_pdf": "Mahn-PDF heruntergeladen",
+      "create_claim": "Forderung erstellt",
+      "update_claim": "Forderung geändert",
+      "cancel_claim": "Forderung storniert",
+      "update_dunning_config": "Mahnkonfiguration geändert"
     },
     "entityTypes": {
       "property": "Immobilie",
@@ -1140,6 +1241,11 @@
       "rent_adjustment": "Mietanpassung",
       "document": "Dokument",
       "email_account": "E-Mail-Konto",
+      "email": "E-Mail",
+      "task": "Aufgabe",
+      "claim": "Forderung",
+      "dunning_record": "Mahnung",
+      "dunning_config": "Mahnkonfiguration",
       "user": "Benutzer"
     }
   },

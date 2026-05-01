@@ -8,6 +8,7 @@ import { PreferencesSection } from "@/components/settings/preferences-section";
 import { EmailAccountForm } from "@/components/settings/email-account-form";
 import { NotificationPreferences } from "@/components/settings/notification-preferences";
 import { MarketDataSection } from "@/components/settings/market-data-section";
+import { DunningConfigSection } from "@/components/settings/dunning-config-section";
 
 export default function SettingsPage() {
   const t = useTranslations("settings");
@@ -25,6 +26,7 @@ export default function SettingsPage() {
             {t("tabs.notifications")}
           </TabsTrigger>
           <TabsTrigger value="marketData">{t("tabs.marketData")}</TabsTrigger>
+          <TabsTrigger value="dunning">{t("tabs.dunning")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="flex flex-col gap-6">
@@ -46,6 +48,10 @@ export default function SettingsPage() {
 
         <TabsContent value="marketData">
           <MarketDataSection />
+        </TabsContent>
+
+        <TabsContent value="dunning">
+          <DunningConfigSection />
         </TabsContent>
       </Tabs>
     </div>

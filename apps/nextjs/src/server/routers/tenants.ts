@@ -45,6 +45,50 @@ const TENANT_TRACKED_FIELDS = [
 ] as const;
 
 export const tenantsRouter = router({
+  emailRecipients: protectedProcedure.query(async ({ ctx }) => {
+    const rows = await db
+      .select({
+        email: tenantEmails.email,
+        isPrimary: tenantEmails.isPrimary,
+        tenantId: tenants.id,
+        tenantFirstName: tenants.firstName,
+        tenantLastName: tenants.lastName,
+        rentalUnitId: rentalUnits.id,
+        unitName: rentalUnits.name,
+        propertyId: properties.id,
+        propertyStreet: properties.street,
+        propertyZipCode: properties.zipCode,
+        propertyCity: properties.city,
+      })
+      .from(tenantEmails)
+      .innerJoin(tenants, eq(tenants.id, tenantEmails.tenantId))
+      .leftJoin(rentalUnits, eq(rentalUnits.id, tenants.rentalUnitId))
+      .leftJoin(properties, eq(properties.id, rentalUnits.propertyId))
+      .where(eq(tenants.userId, ctx.user.id))
+      .orderBy(
+        asc(tenants.lastName),
+        asc(tenants.firstName),
+        desc(tenantEmails.isPrimary),
+      );
+
+    return rows.map((row) => ({
+      email: row.email,
+      isPrimary: row.isPrimary,
+      tenantId: row.tenantId,
+      tenantName: `${row.tenantFirstName} ${row.tenantLastName}`.trim(),
+      rentalUnitId: row.rentalUnitId,
+      unitName: row.unitName,
+      propertyId: row.propertyId,
+      propertyAddress: [
+        row.propertyStreet,
+        row.propertyZipCode,
+        row.propertyCity,
+      ]
+        .filter(Boolean)
+        .join(", "),
+    }));
+  }),
+
   create: protectedProcedure
     .input(createTenantInput)
     .mutation(async ({ ctx, input }) => {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { trpc } from "@/lib/trpc";
 import { zodResolver } from "@/lib/zod-resolver";
@@ -40,6 +40,7 @@ export function ExpensesSection({ propertyId }: ExpensesSectionProps) {
   const { formatCurrency } = useCurrency();
   const utils = trpc.useUtils();
   const [addOpen, setAddOpen] = useState(false);
+  const [editExpenseId, setEditExpenseId] = useState<string | null>(null);
 
   const { data } = trpc.expenses.list.useQuery({ propertyId, pageSize: 100 });
   const { data: summary } = trpc.expenses.getSummary.useQuery({ propertyId });
@@ -59,7 +60,8 @@ export function ExpensesSection({ propertyId }: ExpensesSectionProps) {
       description: "",
       amount: 0,
       date: new Date().toISOString().split("T")[0],
-      interval: "monthly" as string,
+      isRecurring: false,
+      recurringInterval: "monthly" as string,
       isApportionable: false,
     },
   });
@@ -69,22 +71,84 @@ export function ExpensesSection({ propertyId }: ExpensesSectionProps) {
       utils.expenses.list.invalidate();
       utils.expenses.getSummary.invalidate();
       setAddOpen(false);
+      setEditExpenseId(null);
+      form.reset();
+    },
+  });
+
+  const updateMutation = trpc.expenses.update.useMutation({
+    onSuccess: () => {
+      utils.expenses.list.invalidate();
+      utils.expenses.getSummary.invalidate();
+      setAddOpen(false);
+      setEditExpenseId(null);
       form.reset();
     },
   });
 
   const handleSubmit = form.handleSubmit((data) => {
-    createMutation.mutate({
+    const payload = {
       ...data,
       amount: Math.round(data.amount * 100),
-    });
+      description: data.description || undefined,
+      recurringInterval: data.isRecurring ? data.recurringInterval : undefined,
+    };
+
+    if (editExpenseId) {
+      updateMutation.mutate({
+        id: editExpenseId,
+        data: {
+          category: payload.category,
+          description: payload.description,
+          amount: payload.amount,
+          date: payload.date,
+          isRecurring: payload.isRecurring,
+          recurringInterval: payload.recurringInterval,
+          isApportionable: payload.isApportionable,
+        },
+      });
+    } else {
+      createMutation.mutate(payload);
+    }
   });
+
+  const openAddDialog = () => {
+    setEditExpenseId(null);
+    form.reset({
+      propertyId,
+      category: "",
+      description: "",
+      amount: 0,
+      date: new Date().toISOString().split("T")[0],
+      isRecurring: false,
+      recurringInterval: "monthly",
+      isApportionable: false,
+    });
+    setAddOpen(true);
+  };
+
+  const openEditDialog = (
+    expense: NonNullable<typeof data>["items"][number],
+  ) => {
+    setEditExpenseId(expense.id);
+    form.reset({
+      propertyId,
+      category: expense.category,
+      description: expense.description ?? "",
+      amount: expense.amount / 100,
+      date: expense.date,
+      isRecurring: expense.isRecurring,
+      recurringInterval: expense.recurringInterval ?? "monthly",
+      isApportionable: expense.isApportionable,
+    });
+    setAddOpen(true);
+  };
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-base">{t("title")}</CardTitle>
-        <Button size="sm" onClick={() => setAddOpen(true)}>
+        <Button size="sm" onClick={openAddDialog}>
           <Plus className="mr-1 h-3.5 w-3.5" />
           {t("addExpense")}
         </Button>
@@ -144,6 +208,13 @@ export function ExpensesSection({ propertyId }: ExpensesSectionProps) {
                   <Button
                     variant="ghost"
                     size="icon"
+                    onClick={() => openEditDialog(expense)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => deleteMutation.mutate({ id: expense.id })}
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />
@@ -155,11 +226,13 @@ export function ExpensesSection({ propertyId }: ExpensesSectionProps) {
         )}
       </CardContent>
 
-      {/* Add Expense Dialog */}
+      {/* Add/Edit Expense Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t("addExpense")}</DialogTitle>
+            <DialogTitle>
+              {editExpenseId ? t("editExpense") : t("addExpense")}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-1">
@@ -191,11 +264,19 @@ export function ExpensesSection({ propertyId }: ExpensesSectionProps) {
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={t("selectCategory")} />
+                    <SelectValue placeholder={t("selectCategory")}>
+                      {(value: string) =>
+                        value ? t(`categories.${value}`) : t("selectCategory")
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {Object.values(EXPENSE_CATEGORIES).map((cat) => (
-                      <SelectItem key={cat} value={cat}>
+                      <SelectItem
+                        key={cat}
+                        value={cat}
+                        label={t(`categories.${cat}`)}
+                      >
                         {t(`categories.${cat}`)}
                       </SelectItem>
                     ))}
@@ -205,23 +286,41 @@ export function ExpensesSection({ propertyId }: ExpensesSectionProps) {
               <div className="space-y-1">
                 <Label>{t("interval")}</Label>
                 <Select
-                  value={form.watch("interval")}
+                  value={form.watch("recurringInterval")}
                   onValueChange={(v) => {
-                    if (v !== null) form.setValue("interval", v);
+                    if (v !== null) form.setValue("recurringInterval", v);
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue>
+                      {(value: string) =>
+                        value ? t(`intervals.${value}`) : t("interval")
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {Object.values(RECURRING_INTERVALS).map((int) => (
-                      <SelectItem key={int} value={int}>
+                      <SelectItem
+                        key={int}
+                        value={int}
+                        label={t(`intervals.${int}`)}
+                      >
                         {t(`intervals.${int}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="isRecurring"
+                checked={form.watch("isRecurring")}
+                onCheckedChange={(checked: boolean) =>
+                  form.setValue("isRecurring", !!checked)
+                }
+              />
+              <Label htmlFor="isRecurring">{t("isRecurring")}</Label>
             </div>
             <div className="flex items-center gap-2">
               <Checkbox
@@ -241,8 +340,11 @@ export function ExpensesSection({ propertyId }: ExpensesSectionProps) {
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={createMutation.isPending}>
-                {t("addExpense")}
+              <Button
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                {editExpenseId ? t("save") : t("addExpense")}
               </Button>
             </DialogFooter>
           </form>

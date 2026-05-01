@@ -51,6 +51,15 @@ Add this to `eslint.config.mjs` to follow TypeScript convention:
 
 This fixes all `_props`-style intentionally-unused parameters and eliminates need for per-line disables.
 
+## React Compiler Form Initialization
+
+**Timestamp:** 2026-05-01 23:57
+
+- `react-hooks/set-state-in-effect` fires when forms copy query data into local state inside `useEffect`.
+- Prefer derived state from server data plus small user override states, or a keyed uncontrolled `<form>` with `defaultValue` and `FormData` submit handling.
+- Avoid broad disable comments: React Compiler often reports unused disables after a refactor.
+- `Date.now()` during component render is flagged as an impure call. Move default date logic into a lazy `useState` initializer helper, e.g. `useState(getDefaultDateString)`.
+
 ## `<img>` in Next.js App Router
 
 **Timestamp:** 2026-04-24 22:15

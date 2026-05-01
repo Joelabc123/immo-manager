@@ -4,6 +4,7 @@ export const DOCUMENT_CATEGORIES = {
   utility_bill: "utility_bill",
   image: "image",
   defect_report: "defect_report",
+  dunning_letter: "dunning_letter",
   other: "other",
 } as const;
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { trpc } from "@/lib/trpc";
 import { EmailList } from "@/components/mail/email-list";
@@ -23,6 +24,7 @@ import {
   Archive,
   FolderOpen,
   Users,
+  PenLine,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -172,6 +174,15 @@ export default function MailPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="default"
+            size="sm"
+            nativeButton={false}
+            render={<Link href="/mail/compose" />}
+          >
+            <PenLine className="mr-2 h-4 w-4" />
+            {t("compose.newEmail")}
+          </Button>
           {activeAccount?.syncStatus === "syncing" && (
             <span className="text-xs text-muted-foreground">
               {t("syncing")}

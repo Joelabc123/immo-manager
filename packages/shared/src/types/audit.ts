@@ -10,6 +10,9 @@ export const AUDIT_ENTITY_TYPES = {
   email_account: "email_account",
   email: "email",
   task: "task",
+  claim: "claim",
+  dunning_record: "dunning_record",
+  dunning_config: "dunning_config",
 } as const;
 
 export type AuditEntityType =

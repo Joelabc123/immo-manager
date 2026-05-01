@@ -280,3 +280,147 @@ export async function generateDunningPdf(
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+export interface DunningSnapshotPdfData {
+  subject: string;
+  body: string;
+  amount: number;
+  feeAmount: number;
+  totalAmount: number;
+  dunningDate: string;
+  paymentDeadline: string | null;
+  tenant: {
+    firstName: string;
+    lastName: string;
+  };
+  property: {
+    street: string | null;
+    zipCode: string | null;
+    city: string | null;
+  };
+  rentalUnit: {
+    name: string;
+  } | null;
+  senderName: string;
+  senderAddress: string;
+}
+
+function DunningSnapshotPdfDocument({
+  data,
+  currency,
+  locale,
+}: {
+  data: DunningSnapshotPdfData;
+  currency: string;
+  locale: string;
+}) {
+  const formatCurrency = (value: number) =>
+    formatCurrencyRaw(value, currency, locale);
+  const bodyLines = data.body.split("\n");
+
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.sender}>
+          {data.senderName} - {data.senderAddress}
+        </Text>
+
+        <View style={styles.recipient}>
+          <Text style={styles.recipientLine}>
+            {data.tenant.firstName} {data.tenant.lastName}
+          </Text>
+          {data.property.street && (
+            <Text style={styles.recipientLine}>{data.property.street}</Text>
+          )}
+          {(data.property.zipCode || data.property.city) && (
+            <Text style={styles.recipientLine}>
+              {data.property.zipCode} {data.property.city}
+            </Text>
+          )}
+        </View>
+
+        <Text style={styles.dateLine}>
+          {formatDate(new Date(data.dunningDate))}
+        </Text>
+        <Text style={styles.subject}>{data.subject}</Text>
+
+        {bodyLines.map((line, index) => (
+          <Text key={`${index}-${line}`} style={styles.body}>
+            {line || " "}
+          </Text>
+        ))}
+
+        <View style={styles.detailsBox}>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Betrag</Text>
+            <Text style={styles.detailValue}>
+              {formatCurrency(data.amount)}
+            </Text>
+          </View>
+          {data.feeAmount > 0 && (
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Gebuehr</Text>
+              <Text style={styles.detailValue}>
+                {formatCurrency(data.feeAmount)}
+              </Text>
+            </View>
+          )}
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Gesamtbetrag</Text>
+            <Text style={styles.detailValue}>
+              {formatCurrency(data.totalAmount)}
+            </Text>
+          </View>
+          {data.paymentDeadline && (
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Zahlungsfrist</Text>
+              <Text style={styles.detailValue}>
+                {formatDate(new Date(data.paymentDeadline))}
+              </Text>
+            </View>
+          )}
+          {data.rentalUnit && (
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Mieteinheit</Text>
+              <Text style={styles.detailValue}>{data.rentalUnit.name}</Text>
+            </View>
+          )}
+        </View>
+
+        <Text style={styles.footer} fixed>
+          {data.senderName} - {data.senderAddress}
+        </Text>
+      </Page>
+    </Document>
+  );
+}
+
+export async function generateDunningSnapshotPdfBlob(
+  data: DunningSnapshotPdfData,
+  currency = "EUR",
+  locale = "de-DE",
+): Promise<Blob> {
+  return pdf(
+    <DunningSnapshotPdfDocument
+      data={data}
+      currency={currency}
+      locale={locale}
+    />,
+  ).toBlob();
+}
+
+export async function downloadDunningSnapshotPdf(
+  data: DunningSnapshotPdfData,
+  currency = "EUR",
+  locale = "de-DE",
+): Promise<void> {
+  const blob = await generateDunningSnapshotPdfBlob(data, currency, locale);
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `mahnung-${data.tenant.lastName}-${Date.now()}.pdf`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+}

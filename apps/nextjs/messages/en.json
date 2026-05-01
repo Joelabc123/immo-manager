@@ -85,6 +85,7 @@
     "location": "Location",
     "tags": "Tags",
     "notes": "Notes",
+    "noNotes": "No notes yet.",
     "floor": "Floor",
     "type": "Type",
     "status": "Status",
@@ -375,14 +376,43 @@
     "createDunning": "Create Dunning Notice",
     "noDunning": "No dunning notices",
     "level": "Dunning Level",
+    "documentType": "Document Type",
     "amount": "Amount",
+    "totalAmount": "Total Amount",
     "dunningDate": "Dunning Date",
+    "paymentDeadline": "Payment Deadline",
     "creating": "Creating...",
+    "open": "Open",
+    "backToTenant": "Back to Tenant",
+    "downloadPdf": "Download PDF",
+    "archivePdf": "Archive PDF",
+    "openArchivedPdf": "Open Archived PDF",
+    "markResolved": "Mark Resolved",
+    "cancelDunning": "Cancel",
+    "linkedClaims": "Linked Claims",
+    "claimSuggestions": "Claim Suggestions",
+    "noClaimSuggestions": "No overdue rent payments found.",
+    "criticalWarning": "Critical rent arrears threshold reached. Stop regular dunning and seek legal advice before taking further steps.",
+    "fallbackSubject": "Dunning Notice",
     "levels": {
       "reminder": "Reminder",
       "first": "1st Notice",
       "second": "2nd Notice",
       "third": "3rd Notice"
+    },
+    "documentTypes": {
+      "rent": "Rent",
+      "utilities": "Utilities",
+      "deposit": "Deposit",
+      "late_payment_warning": "Late Payment Warning",
+      "termination_warning": "Termination Warning"
+    },
+    "statuses": {
+      "draft": "Draft",
+      "created": "Created",
+      "archived": "Archived",
+      "cancelled": "Cancelled",
+      "resolved": "Resolved"
     }
   },
   "rentAdjustments": {
@@ -803,17 +833,32 @@
     },
     "threadCount": "{count} messages in thread",
     "compose": {
+      "title": "New email",
+      "subtitle": "Write and send a new message.",
+      "newEmail": "New email",
+      "backToMail": "Back to mail",
+      "account": "Account",
       "to": "To",
+      "cc": "CC",
+      "bcc": "BCC",
       "subject": "Subject",
+      "recipientPlaceholder": "Enter email address...",
+      "addRecipient": "Add recipient",
+      "selectTenantEmail": "Select tenant email",
+      "showCcBcc": "Show CC/BCC",
+      "hideCcBcc": "Hide CC/BCC",
       "placeholder": "Write your message...",
       "send": "Send",
       "cancel": "Cancel"
     },
     "ai": {
       "tooltip": "Generate with AI",
+      "improveTooltip": "Improve with AI",
       "error": "AI generation failed. Please try again.",
       "overwriteTitle": "Overwrite draft?",
       "confirmOverwrite": "The existing draft will be replaced with the AI suggestion.",
+      "improveOverwriteTitle": "Improve content?",
+      "improveConfirmOverwrite": "The existing content will be overwritten with an improved AI version. Grammar, sentence structure, and spelling will be optimized.",
       "overwriteAction": "Overwrite",
       "cancel": "Cancel",
       "tone": {
@@ -908,7 +953,8 @@
       "preferences": "Preferences",
       "email": "Email",
       "notifications": "Notifications",
-      "marketData": "Market Data"
+      "marketData": "Market Data",
+      "dunning": "Dunning"
     },
     "profile": {
       "title": "Profile",
@@ -1006,6 +1052,47 @@
       "sourcePlaceholder": "e.g. Rent Index 2025",
       "cancel": "Cancel",
       "save": "Save"
+    },
+    "dunning": {
+      "settingsTitle": "Dunning Settings",
+      "templatesTitle": "Templates",
+      "defaultFederalState": "Federal State for Business Days",
+      "latePaymentThresholdCount": "Late Payment Threshold",
+      "latePaymentWindowMonths": "Window in Months",
+      "automationEnabled": "Prepare Automation",
+      "saveSettings": "Save Settings",
+      "saveTemplate": "Save Template",
+      "locale": "Language",
+      "tone": "Tone",
+      "subjectTemplate": "Subject Template",
+      "bodyTemplate": "Body Template",
+      "locales": {
+        "de": "German",
+        "en": "English"
+      },
+      "tones": {
+        "friendly": "Friendly",
+        "formal": "Formal",
+        "strict": "Strict"
+      },
+      "federalStates": {
+        "BW": "Baden-Wuerttemberg",
+        "BY": "Bavaria",
+        "BE": "Berlin",
+        "BB": "Brandenburg",
+        "HB": "Bremen",
+        "HH": "Hamburg",
+        "HE": "Hesse",
+        "MV": "Mecklenburg-Western Pomerania",
+        "NI": "Lower Saxony",
+        "NW": "North Rhine-Westphalia",
+        "RP": "Rhineland-Palatinate",
+        "SL": "Saarland",
+        "SN": "Saxony",
+        "ST": "Saxony-Anhalt",
+        "SH": "Schleswig-Holstein",
+        "TH": "Thuringia"
+      }
     }
   },
   "documents": {
@@ -1042,6 +1129,7 @@
       "utility_bill": "Utility Bill",
       "image": "Image",
       "defect_report": "Defect Report",
+      "dunning_letter": "Dunning Letter",
       "other": "Other"
     },
     "cancel": "Cancel"
@@ -1129,7 +1217,20 @@
     "actions": {
       "create": "Created",
       "update": "Updated",
-      "delete": "Deleted"
+      "delete": "Deleted",
+      "ai_generate_task": "Generated task with AI",
+      "ai_generate_reply": "Generated reply with AI",
+      "ai_improve_email": "Improved email with AI",
+      "create_dunning": "Created dunning notice",
+      "update_dunning": "Updated dunning notice",
+      "cancel_dunning": "Cancelled dunning notice",
+      "resolve_dunning": "Resolved dunning notice",
+      "archive_dunning_pdf": "Archived dunning PDF",
+      "download_dunning_pdf": "Downloaded dunning PDF",
+      "create_claim": "Created claim",
+      "update_claim": "Updated claim",
+      "cancel_claim": "Cancelled claim",
+      "update_dunning_config": "Updated dunning configuration"
     },
     "entityTypes": {
       "property": "Property",
@@ -1141,6 +1242,11 @@
       "rent_adjustment": "Rent Adjustment",
       "document": "Document",
       "email_account": "Email Account",
+      "email": "Email",
+      "task": "Task",
+      "claim": "Claim",
+      "dunning_record": "Dunning Notice",
+      "dunning_config": "Dunning Configuration",
       "user": "User"
     }
   },

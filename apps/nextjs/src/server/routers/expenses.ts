@@ -19,6 +19,7 @@ const EXPENSE_TRACKED_FIELDS = [
   "date",
   "isApportionable",
   "isRecurring",
+  "recurringInterval",
 ] as const;
 
 async function verifyPropertyOwnership(

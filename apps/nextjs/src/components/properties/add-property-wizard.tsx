@@ -108,11 +108,19 @@ export function AddPropertyWizard({
                   onValueChange={(val) => val && setValue("type", val)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue>
+                      {(value: string) =>
+                        value ? t(`types.${value}`) : t("type")
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {Object.values(PROPERTY_TYPES).map((type) => (
-                      <SelectItem key={type} value={type}>
+                      <SelectItem
+                        key={type}
+                        value={type}
+                        label={t(`types.${type}`)}
+                      >
                         {t(`types.${type}`)}
                       </SelectItem>
                     ))}
@@ -127,11 +135,19 @@ export function AddPropertyWizard({
                   onValueChange={(val) => val && setValue("status", val)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue>
+                      {(value: string) =>
+                        value ? t(`status.${value}`) : t("statusLabel")
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {Object.values(PROPERTY_STATUS).map((status) => (
-                      <SelectItem key={status} value={status}>
+                      <SelectItem
+                        key={status}
+                        value={status}
+                        label={t(`status.${status}`)}
+                      >
                         {t(`status.${status}`)}
                       </SelectItem>
                     ))}

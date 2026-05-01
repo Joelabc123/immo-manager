@@ -27,12 +27,14 @@ The Gemini SDK runs server-side inside the Next.js app — there is no separate 
 ## Files Changed
 
 ### New
+
 - `apps/nextjs/src/server/services/ai.ts` — Gemini client + `generateTaskFromEmail` / `generateReply` with JSON-schema config and Zod validation
 - `apps/nextjs/src/server/services/ai-rate-limit.ts` — Redis-based per-user daily counter
 - `apps/nextjs/src/server/routers/ai.ts` — tRPC router (`ai.generateTaskFromEmail`, `ai.generateReply`) with ownership check, rate-limit, audit
 - `apps/nextjs/src/components/ai/ai-generate-button.tsx` — reusable Bot button (spinner while loading)
 
 ### Modified
+
 - `apps/nextjs/package.json` — added `@google/genai` dependency
 - `apps/nextjs/src/server/routers/_app.ts` — registered `ai` router
 - `apps/nextjs/src/components/tasks/task-dialog.tsx` — Bot button next to title field; `confirm()` before overwriting filled fields
@@ -46,11 +48,13 @@ The Gemini SDK runs server-side inside the Next.js app — there is no separate 
 ## Configuration
 
 Required:
+
 ```
 GEMINI_API_KEY=...     # from https://aistudio.google.com/apikey
 ```
 
 Optional:
+
 ```
 AI_DAILY_LIMIT_PER_USER=50   # default 50
 REDIS_URL=redis://localhost:6379   # already configured

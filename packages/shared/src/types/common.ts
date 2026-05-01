@@ -4,6 +4,17 @@ export const AUDIT_ACTIONS = {
   delete: "delete",
   ai_generate_task: "ai_generate_task",
   ai_generate_reply: "ai_generate_reply",
+  ai_improve_email: "ai_improve_email",
+  create_dunning: "create_dunning",
+  update_dunning: "update_dunning",
+  cancel_dunning: "cancel_dunning",
+  resolve_dunning: "resolve_dunning",
+  archive_dunning_pdf: "archive_dunning_pdf",
+  download_dunning_pdf: "download_dunning_pdf",
+  create_claim: "create_claim",
+  update_claim: "update_claim",
+  cancel_claim: "cancel_claim",
+  update_dunning_config: "update_dunning_config",
 } as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];

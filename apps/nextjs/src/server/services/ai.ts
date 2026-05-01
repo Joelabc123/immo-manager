@@ -36,8 +36,17 @@ const replyOutputSchema = z.object({
   language: z.string().min(2).max(8),
 });
 
+const improvedDraftOutputSchema = z.object({
+  subject: z.string().min(1).max(998),
+  html: z.string().min(1),
+  language: z.string().min(2).max(8),
+});
+
 export type TaskGenerationResult = z.infer<typeof taskOutputSchema>;
 export type ReplyGenerationResult = z.infer<typeof replyOutputSchema>;
+export type ImprovedDraftGenerationResult = z.infer<
+  typeof improvedDraftOutputSchema
+>;
 
 export const REPLY_TONES = ["formal", "friendly", "short"] as const;
 export type ReplyTone = (typeof REPLY_TONES)[number];
@@ -177,6 +186,28 @@ const REPLY_RESPONSE_SCHEMA = {
   required: ["html", "language"],
 } as const;
 
+const IMPROVED_DRAFT_RESPONSE_SCHEMA = {
+  type: "object",
+  properties: {
+    subject: {
+      type: "string",
+      description:
+        "Improved subject line. Keep it concise and aligned with the existing intent.",
+    },
+    html: {
+      type: "string",
+      description:
+        "Improved email body as simple HTML. Use <p> for paragraphs and <ul>/<ol>/<li> for lists. No <html>/<body> wrapper, no inline styles, no images, no signature.",
+    },
+    language: {
+      type: "string",
+      description:
+        "ISO 639-1 language code of the generated draft (e.g. 'de', 'en').",
+    },
+  },
+  required: ["subject", "html", "language"],
+} as const;
+
 const TONE_INSTRUCTIONS: Record<ReplyTone, string> = {
   formal:
     "Use a formal, professional tone. Use formal salutations (e.g. 'Sehr geehrte/r ...' or 'Dear ...').",
@@ -269,6 +300,77 @@ export async function generateReply(
 
   const parsed = parseResponseText(response);
   const result = replyOutputSchema.parse(parsed);
+
+  return { result, usage: extractUsage(response) };
+}
+
+// ─── Draft improvement ──────────────────────────────────────────────────────
+
+interface ImproveEmailDraftInput {
+  subject: string;
+  htmlBody: string;
+  tone: ReplyTone;
+  recipients: string[];
+  tenant?: {
+    firstName: string;
+    lastName: string;
+    gender: string | null;
+  } | null;
+  property?: {
+    street: string | null;
+    zipCode: string | null;
+    city: string | null;
+  } | null;
+}
+
+export async function improveEmailDraft(
+  input: ImproveEmailDraftInput,
+): Promise<{ result: ImprovedDraftGenerationResult; usage: UsageMetadata }> {
+  const subject = input.subject.trim() || "(no subject)";
+  const body = truncate(input.htmlBody.trim(), 12000) || "<p></p>";
+  const recipientContext = input.recipients.length
+    ? input.recipients.join(", ")
+    : "(no recipients selected)";
+  const tenantContext = input.tenant
+    ? `${input.tenant.firstName} ${input.tenant.lastName}`.trim()
+    : "(no single tenant context)";
+  const propertyContext = input.property
+    ? [input.property.street, input.property.zipCode, input.property.city]
+        .filter(Boolean)
+        .join(", ") || "(property without address)"
+    : "(no single property context)";
+
+  const prompt = [
+    "You are an assistant that improves email drafts for a property manager.",
+    TONE_INSTRUCTIONS[input.tone],
+    "Task:",
+    "- Improve grammar, spelling, punctuation, sentence structure, clarity, and flow.",
+    "- Keep the user's intent and concrete facts. Do not invent facts, promises, amounts, dates, or legal statements.",
+    "- You may politely enhance wording and make the message more professional.",
+    "- Keep the same language as the draft. If the draft is ambiguous, default to German.",
+    "- Output simple HTML using <p> for paragraphs and <ul>/<ol>/<li> for lists.",
+    "- Do NOT include <html>, <head>, <body> tags, inline styles, images, or a signature. The application appends the user's signature when sending.",
+    "",
+    `Recipients: ${recipientContext}`,
+    `Tenant context: ${tenantContext}`,
+    `Property context: ${propertyContext}`,
+    `Current subject: ${subject}`,
+    "Current body HTML:",
+    body,
+  ].join("\n");
+
+  const response = await getClient().models.generateContent({
+    model: MODEL_ID,
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseJsonSchema: IMPROVED_DRAFT_RESPONSE_SCHEMA,
+      temperature: 0.45,
+    },
+  });
+
+  const parsed = parseResponseText(response);
+  const result = improvedDraftOutputSchema.parse(parsed);
 
   return { result, usage: extractUsage(response) };
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Pencil, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { trpc } from "@/lib/trpc";
 import { zodResolver } from "@/lib/zod-resolver";
@@ -39,6 +39,7 @@ export function LoansSection({ propertyId }: LoansSectionProps) {
   const { formatCurrency } = useCurrency();
   const utils = trpc.useUtils();
   const [addOpen, setAddOpen] = useState(false);
+  const [editLoanId, setEditLoanId] = useState<string | null>(null);
   const [scheduleOpen, setScheduleOpen] = useState<string | null>(null);
 
   const { data: loans } = trpc.loans.list.useQuery({ propertyId });
@@ -57,8 +58,10 @@ export function LoansSection({ propertyId }: LoansSectionProps) {
       interestRate: 0,
       repaymentRate: 0,
       monthlyPayment: 0,
+      interestFixedUntil: undefined as string | undefined,
       loanStart: new Date().toISOString().split("T")[0],
       loanTermMonths: undefined as number | undefined,
+      annualSpecialRepaymentLimit: undefined as number | undefined,
     },
   });
 
@@ -66,26 +69,105 @@ export function LoansSection({ propertyId }: LoansSectionProps) {
     onSuccess: () => {
       utils.loans.list.invalidate();
       setAddOpen(false);
+      setEditLoanId(null);
+      form.reset();
+    },
+  });
+
+  const updateMutation = trpc.loans.update.useMutation({
+    onSuccess: () => {
+      utils.loans.list.invalidate();
+      setAddOpen(false);
+      setEditLoanId(null);
       form.reset();
     },
   });
 
   const handleSubmit = form.handleSubmit((data) => {
-    createMutation.mutate({
+    const payload = {
       ...data,
       loanAmount: Math.round(data.loanAmount * 100),
       remainingBalance: Math.round(data.remainingBalance * 100),
       interestRate: Math.round(data.interestRate * 100),
       repaymentRate: Math.round(data.repaymentRate * 100),
       monthlyPayment: Math.round(data.monthlyPayment * 100),
-    });
+      annualSpecialRepaymentLimit:
+        data.annualSpecialRepaymentLimit === undefined ||
+        Number.isNaN(data.annualSpecialRepaymentLimit)
+          ? undefined
+          : Math.round(data.annualSpecialRepaymentLimit * 100),
+      loanTermMonths:
+        data.loanTermMonths === undefined || Number.isNaN(data.loanTermMonths)
+          ? undefined
+          : data.loanTermMonths,
+      interestFixedUntil: data.interestFixedUntil || undefined,
+    };
+
+    if (editLoanId) {
+      updateMutation.mutate({
+        id: editLoanId,
+        data: {
+          bankName: payload.bankName,
+          loanAmount: payload.loanAmount,
+          remainingBalance: payload.remainingBalance,
+          interestRate: payload.interestRate,
+          repaymentRate: payload.repaymentRate,
+          monthlyPayment: payload.monthlyPayment,
+          interestFixedUntil: payload.interestFixedUntil,
+          loanStart: payload.loanStart,
+          loanTermMonths: payload.loanTermMonths,
+          annualSpecialRepaymentLimit: payload.annualSpecialRepaymentLimit,
+        },
+      });
+    } else {
+      createMutation.mutate(payload);
+    }
   });
+
+  const openAddDialog = () => {
+    setEditLoanId(null);
+    form.reset({
+      propertyId,
+      bankName: "",
+      loanAmount: 0,
+      remainingBalance: 0,
+      interestRate: 0,
+      repaymentRate: 0,
+      monthlyPayment: 0,
+      loanStart: new Date().toISOString().split("T")[0],
+      loanTermMonths: undefined,
+      interestFixedUntil: undefined,
+      annualSpecialRepaymentLimit: undefined,
+    });
+    setAddOpen(true);
+  };
+
+  const openEditDialog = (loan: NonNullable<typeof loans>[number]) => {
+    setEditLoanId(loan.id);
+    form.reset({
+      propertyId,
+      bankName: loan.bankName,
+      loanAmount: loan.loanAmount / 100,
+      remainingBalance: loan.remainingBalance / 100,
+      interestRate: loan.interestRate / 100,
+      repaymentRate: loan.repaymentRate / 100,
+      monthlyPayment: loan.monthlyPayment / 100,
+      interestFixedUntil: loan.interestFixedUntil ?? undefined,
+      loanStart: loan.loanStart,
+      loanTermMonths: loan.loanTermMonths ?? undefined,
+      annualSpecialRepaymentLimit:
+        loan.annualSpecialRepaymentLimit !== null
+          ? loan.annualSpecialRepaymentLimit / 100
+          : undefined,
+    });
+    setAddOpen(true);
+  };
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-base">{t("title")}</CardTitle>
-        <Button size="sm" onClick={() => setAddOpen(true)}>
+        <Button size="sm" onClick={openAddDialog}>
           <Plus className="mr-1 h-3.5 w-3.5" />
           {t("addLoan")}
         </Button>
@@ -126,6 +208,13 @@ export function LoansSection({ propertyId }: LoansSectionProps) {
                     <Button
                       variant="ghost"
                       size="icon"
+                      onClick={() => openEditDialog(loan)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => deleteMutation.mutate({ id: loan.id })}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -142,11 +231,13 @@ export function LoansSection({ propertyId }: LoansSectionProps) {
         )}
       </CardContent>
 
-      {/* Add Loan Dialog */}
+      {/* Add/Edit Loan Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t("addLoan")}</DialogTitle>
+            <DialogTitle>
+              {editLoanId ? t("editLoan") : t("addLoan")}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-1">
@@ -214,6 +305,26 @@ export function LoansSection({ propertyId }: LoansSectionProps) {
                 {...form.register("loanTermMonths", { valueAsNumber: true })}
               />
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>
+                  {t("interestFixedUntil")} ({t("optional")})
+                </Label>
+                <Input type="date" {...form.register("interestFixedUntil")} />
+              </div>
+              <div className="space-y-1">
+                <Label>
+                  {t("annualSpecialRepaymentLimit")} (EUR, {t("optional")})
+                </Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  {...form.register("annualSpecialRepaymentLimit", {
+                    valueAsNumber: true,
+                  })}
+                />
+              </div>
+            </div>
             <DialogFooter>
               <Button
                 type="button"
@@ -222,8 +333,11 @@ export function LoansSection({ propertyId }: LoansSectionProps) {
               >
                 {t("cancel")}
               </Button>
-              <Button type="submit" disabled={createMutation.isPending}>
-                {t("addLoan")}
+              <Button
+                type="submit"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                {editLoanId ? t("save") : t("addLoan")}
               </Button>
             </DialogFooter>
           </form>

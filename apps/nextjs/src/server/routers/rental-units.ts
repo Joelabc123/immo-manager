@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@repo/shared/db";
 import { rentalUnits, properties, tenants } from "@repo/shared/db/schema";
@@ -78,7 +78,7 @@ export const rentalUnitsRouter = router({
               .where(
                 and(
                   eq(tenants.userId, ctx.user.id),
-                  // Only get tenants that are assigned to one of these units
+                  inArray(tenants.rentalUnitId, unitIds),
                 ),
               )
           : [];
